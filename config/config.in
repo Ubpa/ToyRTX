@@ -1,0 +1,30 @@
+#----------------------------------------------
+# Ubpa
+#----------------------------------------------
+# 这是配置文件，格式描述详见 Syntax
+#----------------------------------------------
+# [ Syntax ]
+# string strT = "(string)";
+# string intT = "(int)";
+# string floatT = "(float)";
+# string blank = "(?:[ \\t]*)";
+# string vName = "([_a-zA-Z][_0-9a-zA-Z]*)";
+# string strVal = "(?:\"([^\"]*)\")";
+# string strExp = "(?:" + strT + blank + vName + blank + "=" + blank + strVal + blank + ";)";
+# string intVal = "([1-9][0-9]*|0)";
+# string intExp = "(?:" + intT + blank + vName + blank + "=" + blank + intVal + blank + ";)";
+# string floatVal = "((?:[1-9][0-9]*|0)(?:\\.[0-9]*)?)";
+# string floatExp = "(?:" + floatT + blank + vName + blank + "=" + blank + floatVal + blank + ";)";
+# string allExp = "(?:" + strExp + "|" + intExp + "|" + floatExp + ")";
+# string note = "(?:#.*)";
+# string line = "(?:" + blank + allExp + "?" + blank + note + "?" + "\n?)";
+#----------------------------------------------
+
+# 根目录
+string RootPath = "${CMAKE_SOURCE_DIR}";
+
+# 相机移动速度, 参考值 10
+float CameraMoveSpeed = 20;
+
+# 相机旋转速度, 参考值 0.02
+float CameraRotateSensitivity = 0.02;
