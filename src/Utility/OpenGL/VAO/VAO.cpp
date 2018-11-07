@@ -106,10 +106,9 @@ bool VAO::Use() const {
 	return true;
 }
 
-bool VAO::Draw() const {
-	if (!Use())
+bool VAO::Draw(const Shader & shader) const {
+	if (!Use() || !shader.Use())
 		return false;
-
 	if (hasIndex)
 		glDrawElements(GL_TRIANGLES, pointNum, GL_UNSIGNED_INT, NULL);
 	else

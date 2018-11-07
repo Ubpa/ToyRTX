@@ -5,26 +5,31 @@ C++ 相关工具
 # 2. 内容
 
 ```
-/OpenGL
-  -Camera
-  -FBO
-  -gal
-  -Glfw
-  -Mesh
-  -Model
-  -Shader
-  -Texture
-  -VAO
-/Other
-  -ArgManager
-  -Config
-  -EventManager
-  -File
-  -Header: Slogleton, Storage, Pool, Vec, Array2D 
-  -Image
-  -Operation: Operation, LambdaOp, InfoLambdaOp, OpQueue
-  -Shape: Shape, Cube, Sphere
-  -Timer
+/01_in_One_Weekend
+  -01_Image
+/Utility
+  /OpenGL
+    -Camera
+    -FBO
+    -gal
+    -Glfw
+    -Mesh
+    -Model
+    -Shader
+    -Texture
+    -VAO
+  /Other
+    -ArgManager
+    -Config
+    -EventManager
+    -File
+    -Header: Slogleton, Storage, Pool, Vec, Array2D 
+    -Image
+    -Operation: Operation, LambdaOp, InfoLambdaOp, OpQueue
+    -Shape: Shape, Cube, Sphere
+    -Timer
+  /RayTracing
+    -ImgWindow
 ```
 
 # 2. 使用方法
@@ -33,12 +38,12 @@ C++ 相关工具
 
 - Visual Studio 2017（其他版本没有测试）
 - Git
-- CMake
+- CMake（版本2.8以上）
 
 ## 2.2 下载代码
 
 ```bash
-git clone https://github.com/Ubpa/LearnOpenGL
+git clone https://github.com/Ubpa/RayTracingToy
 ```
 
 ## 2.3 编译
@@ -52,6 +57,6 @@ cd build
 cmake ..
 ```
 
-2. 打开 `/build/LearnOpenGL.sln`
+2. 打开 `/build/RayTracingToy.sln`
 
 3. 在**解决方案中**的`CMakePredefinedTargets`中，右键`INSTALL`，点击生成

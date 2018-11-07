@@ -51,12 +51,14 @@ namespace CppUtility {
 			bool Load(const std::string & fileName, bool flip = false, int req_comp = 0);
 			void GenBuffer(int width, int height, int channel);
 			void Free();
-			bool SaveAsPNG(const std::string & fileName, bool flip = false);
+			bool SaveAsPNG(const std::string & fileName, bool flip = false) const;
 			//------------
 			static Pixel<uByte> Pixel_F2UB(const Pixel<float> & pixel);
 			static Pixel<uByte> Pixel_D2UB(const Pixel<double> & pixel);
 			static Pixel<float> Pixel_UB2F(const Pixel<uByte> & pixel);
 			static Pixel<double> Pixel_UB2D(const Pixel<uByte> & pixel);
+			//------------
+			Image & operator =(const Image & img) = delete;
 		private:
 			enum ENUM_SRC_TYPE
 			{

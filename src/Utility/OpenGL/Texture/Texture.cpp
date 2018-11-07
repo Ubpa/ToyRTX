@@ -9,11 +9,6 @@ using namespace std;
 
 const Texture Texture::InValid(0, ENUM_TYPE_NOT_VALID);
 
-Texture::Texture(size_t width, size_t height) {
-	glGenTextures(1, &ID);
-	glBindTexture(GL_TEXTURE_2D, ID);
-}
-
 Texture::Texture(size_t ID, ENUM_TYPE type)
 	: ID(ID), type(type) { }
 
@@ -24,6 +19,7 @@ Texture::Texture(size_t width, size_t height, float const * data, size_t dataTyp
 	glGenTextures(1, &ID);
 	glBindTexture(GL_TEXTURE_2D, ID);
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, srcFormat, dataType, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -78,6 +74,7 @@ bool Texture::Load(const std::vector<std::string> & skybox) {
 		}
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, img.GetWidth(), img.GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, img.GetConstData());
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
 	}
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -168,6 +165,7 @@ bool Texture::SetImg(const Image & img) {
 
 	glBindTexture(GL_TEXTURE_2D, ID);
 	glTexImage2D(GL_TEXTURE_2D, 0, format, img.GetWidth(), img.GetHeight(), 0, format, GL_UNSIGNED_BYTE, img.GetConstData());
+	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

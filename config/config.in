@@ -23,8 +23,10 @@
 # 根目录
 string RootPath = "${CMAKE_SOURCE_DIR}";
 
-# 相机移动速度, 参考值 10
-float CameraMoveSpeed = 20;
+# 默认输出图像大小
+int val_Default_ImgWidth = 1280;
+int val_Default_ImgHeight = 768;
 
-# 相机旋转速度, 参考值 0.02
-float CameraRotateSensitivity = 0.02;
+# 01_in_a_Weekend / 01_Image 输出图像大小
+int val_01_in_a_Weekend_01_Image_ImgWidth = 200;
+int val_01_in_a_Weekend_01_Image_ImgHeight = 100;

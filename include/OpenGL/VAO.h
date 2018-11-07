@@ -2,6 +2,7 @@
 #define _VAO_H_
 
 #include<vector>
+#include<OpenGL/Shader.h>
 
 namespace CppUtility {
 	namespace OpenGL {
@@ -22,7 +23,7 @@ namespace CppUtility {
 			size_t GetAttrNum() const;
 			bool IsValid() const;
 			bool Use() const;
-			bool Draw() const;
+			bool Draw(const Shader & shader) const;
 		private:
 			bool GenBindEBO(size_t const * index, size_t indexSize);
 			//------------

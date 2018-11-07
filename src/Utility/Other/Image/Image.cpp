@@ -185,7 +185,7 @@ void Image::Free() {
 	type = ENUM_SRC_TYPE_INVALID;
 }
 
-bool Image::SaveAsPNG(const string & fileName, bool flip) {
+bool Image::SaveAsPNG(const string & fileName, bool flip) const{
 	stbi_flip_vertically_on_write(flip);
 	return stbi_write_png(fileName.c_str(), width, height, channel, data, width * 3);
 }
