@@ -56,8 +56,6 @@ void Glfw::Init(size_t width, size_t height, const string & title){
 		mouseScroll_YOffset = yOffset;
 		EventManager::GetInstance()->Response(EventManager::MOUSE_SCROLL);
 	});
-	//------------
-	glEnable(GL_DEPTH_TEST);
 }
 
 void Glfw::LockCursor() {

@@ -113,4 +113,6 @@ bool VAO::Draw(const Shader & shader) const {
 		glDrawElements(GL_TRIANGLES, pointNum, GL_UNSIGNED_INT, NULL);
 	else
 		glDrawArrays(GL_TRIANGLES, 0, pointNum);
+
+	return true;
 }

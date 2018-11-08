@@ -31,7 +31,7 @@ namespace CppUtility {
 			bool PassTo(const FBO & fbo, ENUM_PASS_TYPE passType = ENUM_PASS_COLOR) const;
 			bool PassTo(size_t fboID, size_t width, size_t height, ENUM_PASS_TYPE passType = ENUM_PASS_COLOR) const;
 
-			bool Use();
+			bool Use() const;
 			static void UseDefault();
 			static size_t DefaultBuffer;
 			size_t GetID() const;

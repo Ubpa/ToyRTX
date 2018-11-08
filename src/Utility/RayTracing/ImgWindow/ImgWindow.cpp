@@ -72,7 +72,7 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	Glfw::GetInstance()->Init(val_windowWidth, val_windowHeight, title);
 
 	//------------ VAO
-	VAO VAO_FlipScreen(&(data_Flip_ScreenVertices[0]), sizeof(data_ScreenVertices), { 2,2 });
+	VAO VAO_FlipScreen(&(data_Flip_ScreenVertices[0]), sizeof(data_Flip_ScreenVertices), { 2,2 });
 	VAO VAO_Screen(&(data_ScreenVertices[0]), sizeof(data_ScreenVertices), { 2,2 });
 
 
@@ -109,10 +109,14 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	tex.SetImg(img);
 
 
-	//------------ »º³å
+	//------------ flip »º³å
+	FBO flipFBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_BASIC);
+
+
+	//------------ ppBlur »º³å
 	FBO ppBlurFBOs[2] = {
-		FBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_COLOR_FLOAT),
-		FBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_COLOR_FLOAT)
+		FBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_COLOR),
+		FBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_COLOR)
 	};
 
 
@@ -137,6 +141,7 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 		curFrame = mainTimer.GetWholeTime() / tps;
 	});
 
+	const Texture * curTex = &tex;
 	auto texUpdate = Operation::ToPtr(new LambdaOp([&]() {
 		static size_t lastFrame = 0;
 		if (curFrame <= lastFrame)
@@ -144,85 +149,77 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 
 		lastFrame = curFrame;
 		tex.SetImg(img);
+		curTex = &tex;
 	}));
 
 	auto updateOpQueue = new OpQueue;
 	(*updateOpQueue) << timeUpdate << imgUpdateOp << texUpdate;
 
 	// äÖÈ¾
+	const FBO * curFBO = NULL;
+
 	auto ppBlurOp = Operation::ToPtr(new LambdaOp([&]() {
-		GLint viewport[4];
-		glGetIntegerv(GL_VIEWPORT, viewport);
-		glViewport(0, 0, val_ImgWidth, val_ImgHeight);
 		bool horizontal = true;
-		bool first_iteration = true;
 		for (size_t i = 0; i < 4; i++) {
-			ppBlurFBOs[horizontal].Use();
+			curFBO = &ppBlurFBOs[horizontal];
+			curFBO->Use();
 			ppBlurShader.SetBool("horizontal", horizontal);
-			if (first_iteration)
-				tex.Use();
-			else
-				ppBlurFBOs[!horizontal].GetColorTexture().Use();
-
+			curTex->Use();
 			VAO_Screen.Draw(ppBlurShader);
-			if (first_iteration)
-				VAO_FlipScreen.Draw(ppBlurShader);
-			else
-				VAO_Screen.Draw(ppBlurShader);
-
+			curTex = &curFBO->GetColorTexture();
 			horizontal = !horizontal;
-			first_iteration = false;
 		}
-		FBO::UseDefault();
-		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 	}));
 
 	auto screenOp = Operation::ToPtr(new LambdaOp([&]() {
-		if ((option & ENUM_OPTION_BLUR) != 0)
-			ppBlurFBOs[0].GetColorTexture().Use();
+		FBO::UseDefault();
+		curTex->Use();
+		if ((option & ENUM_OPTION_POST_PROCESS_FLIP) != 0)
+			VAO_FlipScreen.Draw(screenShader);
 		else
-			tex.Use();
-
-		VAO_Screen.Draw(screenShader);
+			VAO_Screen.Draw(screenShader);
 	}));
 
-	auto defaultBufferOp = new OpNode([]() {//init
-		FBO::UseDefault();
-		glEnable(GL_DEPTH_TEST);
-		glClearColor(0, 0, 0, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}, []() {//end
+	auto finalOp = Operation::ToPtr(new LambdaOp([&]() {
 		glfwSwapBuffers(Glfw::GetInstance()->GetWindow());
 		glfwPollEvents();
+	}));
+
+	GLint viewport[4];
+	auto imgProcessOp = new OpNode([&]() {
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		glViewport(0, 0, val_ImgWidth, val_ImgHeight);
+	}, [&](){
+		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 	});
 
-	if ((option & ENUM_OPTION_BLUR) != 0)
-		(*defaultBufferOp) << ppBlurOp;
-	(*defaultBufferOp) << screenOp;
-
 	auto renderQueue = new OpQueue;
-	(*renderQueue) << defaultBufferOp;
+	if ((option & ENUM_OPTION_POST_PROCESS_BLUR) != 0)
+		(*imgProcessOp) << ppBlurOp;
+	(*renderQueue) << imgProcessOp << screenOp;
 
 	// Ö¡²Ù×÷
 
 	auto opQueue = new OpQueue;
-	(*opQueue) << updateOpQueue << renderQueue;
+	(*opQueue) << updateOpQueue << renderQueue << finalOp;
 
 	//------------
 	Glfw::GetInstance()->Run(opQueue);
 
 	//------------
-	ppBlurFBOs[1].Use();
-	Image blurImg(val_ImgWidth, val_ImgHeight, val_ImgChannel);
-	glReadPixels(0, 0, val_ImgWidth, val_ImgHeight, GL_RGB, GL_UNSIGNED_BYTE, blurImg.GetData());
+	if ((option & ENUM_OPTION_SAVE_SRC_IMG) != 0)
+		img.SaveAsPNG(rootPath + "/data/out/" + title + ".png");
+
+	if ((option & ENUM_OPTION_SAVE_POST_PROCESS_IMG) != 0 && (option & ENUM_OPTION_POST_PROCESS_ALL) != 0) {
+		curFBO->Use();
+		Image finalImg(val_ImgWidth, val_ImgHeight, val_ImgChannel);
+		glReadPixels(0, 0, val_ImgWidth, val_ImgHeight, GL_RGB, GL_UNSIGNED_BYTE, finalImg.GetData());
+		finalImg.SaveAsPNG(rootPath + "/data/out/" + title + "_blur.png");
+	}
 
 	Glfw::GetInstance()->Terminate();
 
-	if((option & ENUM_OPTION_SAVE_SRC_IMG) != 0 && (option & ENUM_OPTION_BLUR) != 0)
-		img.SaveAsPNG(rootPath + "/data/out/" + title + ".png", false);
 
-	if ((option & ENUM_OPTION_SAVE_POST_PROCESS_IMG) != 0)
-		blurImg.SaveAsPNG(rootPath + "/data/out/" + title + "_blur.png", true);
 
 	scale = 1.0;
 	return true;

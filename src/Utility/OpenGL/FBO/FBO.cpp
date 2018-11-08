@@ -424,7 +424,7 @@ const Texture & FBO::GetDepthTexture() const {
 	return depthTexture;
 }
 
-bool FBO::Use() {
+bool FBO::Use() const{
 	if (!isValid)
 		return false;
 

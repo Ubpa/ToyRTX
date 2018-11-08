@@ -8,6 +8,7 @@ set(STR_TARGET_SOURCES "${STR_TARGET_SOURCES} ${CMAKE_SOURCE_DIR}/include/OpenGL
 
 set (ALL_SOURCES ${ALL_SOURCES}
 	"${CMAKE_SOURCE_DIR}/data/shaders/common/basic_P2T2.vs"
+	"${CMAKE_SOURCE_DIR}/data/shaders/common/basic_T2.fs"
 	"${CMAKE_SOURCE_DIR}/data/shaders/common/ppBlur.fs"
 )
 foreach(SOURCE ${ALL_SOURCES})
