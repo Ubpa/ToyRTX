@@ -52,7 +52,7 @@ ImgWindow::ImgWindow(const string & title, size_t fps, ENUM_OPTION option)
 	}
 	int width = pWidth ? *pWidth : *pDefaultWidth;
 	
-	if (pHeight == NULL && pHeight == NULL) {
+	if (pHeight == NULL && pDefaultHeight == NULL) {
 		printf("ERROR: Config [int val_%s_ImgHeight] and [val_Default_ImgHeight] are not exist.\n", title.c_str());
 		isValid = false;
 		return;
@@ -208,7 +208,7 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 
 	//------------
 	if ((option & ENUM_OPTION_SAVE_SRC_IMG) != 0)
-		img.SaveAsPNG(rootPath + "/data/out/" + title + ".png");
+		img.SaveAsPNG(rootPath + "/data/out/" + title + ".png", true);
 
 	if ((option & ENUM_OPTION_SAVE_POST_PROCESS_IMG) != 0 && (option & ENUM_OPTION_POST_PROCESS_ALL) != 0) {
 		curFBO->Use();

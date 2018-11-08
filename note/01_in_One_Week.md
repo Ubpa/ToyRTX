@@ -67,3 +67,9 @@ int main(int argc, char ** argv) {
 图像的(0,0)在左上角，右为x轴，下为y轴
 
 OpenGL中，图像的(0,0)在左下角，右为x轴，上为y轴
+
+## 1.2 The vec3 class
+
+使用 glm::vec3 来替代
+
+## 1.3 Ray, Camera, Background

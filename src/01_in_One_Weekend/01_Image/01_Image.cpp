@@ -11,7 +11,12 @@ using namespace Define;
 using namespace std;
 
 int main(int argc, char ** argv) {
-	ImgWindow imgWindow(str_WindowTitle);
+	ImgWindow imgWindow(str_WindowTitle, val_fps, ImgWindow::ENUM_OPTION_SAVE_SRC_IMG);
+	if (!imgWindow.IsValid()) {
+		printf("ERROR: Image Window Create Fail.\n");
+		return 1;
+	}
+
 	Image & img = imgWindow.GetImg();
 	const size_t val_ImgWidth = img.GetWidth();
 	const size_t val_ImgHeight = img.GetHeight();
@@ -24,7 +29,7 @@ int main(int argc, char ** argv) {
 				float r = 0.5 * i / (float)img.GetWidth();
 				float g = 0.5 * j / (float)img.GetHeight();
 				float b = 0.2 + 0.2*sinf(0.01f*f);
-				img.SetPixel(i, j, Image::Pixel<float>(r, g, b));
+				img.SetPixel(img.GetWidth() - 1 - i, j, Image::Pixel<float>(r, g, b));
 			}
 		}
 		f++;

@@ -3,10 +3,12 @@
 
 namespace Define {
 	const std::string str_Chapter = "01_in_a_Weekend";
-	const std::string str_Subchapter = "01_Image";
+	const std::string str_Subchapter = "02_Camera";
 	const std::string str_WindowTitle = str_Chapter + "_" + str_Subchapter;
 
 	const size_t val_fps = 60;
 }
 
 #endif // !_DEFINES_H_
+
+
