@@ -34,3 +34,7 @@ int val_01_in_a_Weekend_01_Image_ImgHeight = 100;
 # 01_in_a_Weekend / 02_Camera 输出图像大小
 int val_01_in_a_Weekend_02_Camera_ImgWidth = 200;
 int val_01_in_a_Weekend_02_Camera_ImgHeight = 100;
+
+# 01_in_a_Weekend / 03_Sphere 输出图像大小
+int val_01_in_a_Weekend_03_Sphere_ImgWidth = 1920;
+int val_01_in_a_Weekend_03_Sphere_ImgHeight = 1080;

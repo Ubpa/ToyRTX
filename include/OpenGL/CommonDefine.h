@@ -4,8 +4,8 @@
 #include <string>
 
 namespace Define{
-	const size_t val_windowWidth = 1280;
-	const size_t val_windowHeight = 768;
+	const size_t val_windowWidth = 1920;
+	const size_t val_windowHeight = 1080;
 	const float val_RatioWH = (float)val_windowWidth / (float)val_windowHeight;
 	const float PI = 3.1415926f;
 	

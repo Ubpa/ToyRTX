@@ -68,7 +68,8 @@ ImgWindow::ImgWindow(const string & title, size_t fps, ENUM_OPTION option)
 	isValid = true;
 }
 
-bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
+bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
+	this->imgUpdateOp = imgUpdateOp;
 	Glfw::GetInstance()->Init(val_windowWidth, val_windowHeight, title);
 
 	//------------ VAO
@@ -137,19 +138,23 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	mainTimer.Start();
 	auto timeUpdate = new LambdaOp([&]() {
 		deltaTime = mainTimer.Log();
-		scale *= tps / deltaTime;
+		scale *= deltaTime < 10e-6 ? 2 * scale : tps / deltaTime;
 		curFrame = mainTimer.GetWholeTime() / tps;
 	});
 
 	const Texture * curTex = &tex;
-	auto texUpdate = Operation::ToPtr(new LambdaOp([&]() {
+	Ptr<Operation> texUpdate = Operation::ToPtr(new LambdaOp([&]() {
 		static size_t lastFrame = 0;
 		if (curFrame <= lastFrame)
 			return;
-
+		printf("Update Texture\n");
 		lastFrame = curFrame;
 		tex.SetImg(img);
 		curTex = &tex;
+		if (!imgUpdateOp->IsHold()) {
+			printf("Now the texture is no need to update.\n");
+			texUpdate->SetIsHold(false);
+		}
 	}));
 
 	auto updateOpQueue = new OpQueue;
@@ -178,6 +183,7 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 			VAO_FlipScreen.Draw(screenShader);
 		else
 			VAO_Screen.Draw(screenShader);
+		curTex = &tex;
 	}));
 
 	auto finalOp = Operation::ToPtr(new LambdaOp([&]() {
@@ -214,7 +220,7 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 		curFBO->Use();
 		Image finalImg(val_ImgWidth, val_ImgHeight, val_ImgChannel);
 		glReadPixels(0, 0, val_ImgWidth, val_ImgHeight, GL_RGB, GL_UNSIGNED_BYTE, finalImg.GetData());
-		finalImg.SaveAsPNG(rootPath + "/data/out/" + title + "_blur.png");
+		finalImg.SaveAsPNG(rootPath + "/data/out/" + title + "_post.png");
 	}
 
 	Glfw::GetInstance()->Terminate();
@@ -223,6 +229,14 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 
 	scale = 1.0;
 	return true;
+}
+
+
+void ImgWindow::SetImgUpdateOpDone() {
+	if (imgUpdateOp != NULL) {
+		printf("Image update finish\n");
+		imgUpdateOp->SetIsHold(false);
+	}
 }
 
 Config * DoConfig() {

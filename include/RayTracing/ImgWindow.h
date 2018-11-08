@@ -19,9 +19,10 @@ namespace RayTracing {
 			ENUM_OPTION_ALL = ENUM_OPTION_POST_PROCESS_ALL | ENUM_OPTION_SAVE_ALL_IMG,
 		};
 		ImgWindow(const std::string & title = "Image_Window", size_t fps = 60, ENUM_OPTION option = ENUM_OPTION_EMPTY);
-		bool Run(const CppUtility::Other::Ptr<CppUtility::Other::Operation> & imgUpdateOp);
+		bool Run(CppUtility::Other::Ptr<CppUtility::Other::Operation> imgUpdateOp);
 		double GetScale() const { return scale; };
 		CppUtility::Other::Image & GetImg() { return img; };
+		void SetImgUpdateOpDone();
 		bool IsValid() { return isValid; };
 	private:
 		const size_t fps;
@@ -30,6 +31,7 @@ namespace RayTracing {
 		const ENUM_OPTION option;
 		std::string rootPath;
 		bool isValid;
+		CppUtility::Other::Ptr<CppUtility::Other::Operation> imgUpdateOp;
 		CppUtility::Other::Image img;
 	};
 }
