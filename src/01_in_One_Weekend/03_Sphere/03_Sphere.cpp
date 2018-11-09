@@ -20,7 +20,7 @@ rgb Background(const Ray & ray);
 
 int main(int argc, char ** argv){
 	ImgWindow::ENUM_OPTION option = static_cast<ImgWindow::ENUM_OPTION>(
-		ImgWindow::ENUM_OPTION_SAVE_SRC_IMG
+		ImgWindow::ENUM_OPTION_SAVE_ALL_IMG
 		| ImgWindow::ENUM_OPTION_POST_PROCESS_BLUR
 	);
 	ImgWindow imgWindow(str_WindowTitle, val_fps, option);
@@ -44,7 +44,6 @@ int main(int argc, char ** argv){
 		static size_t i = 0, j = 0;
 		static double loopMax = 100;
 		loopMax = 100 * imgWindow.GetScale();
-		printf("loopMax: %.2f\n", loopMax);
 		int cnt = 0;
 		for (/*size_t i = 0*/; i < val_ImgWidth; i++) {
 			for (/*size_t j = 0*/; j < val_ImgHeight;/*j++*/) {
@@ -56,7 +55,7 @@ int main(int argc, char ** argv){
 				float r = color.r;
 				float g = color.g;
 				float b = color.b;
-				img.SetPixel(val_ImgWidth - 1 - i, j, Image::Pixel<float>(r, g, b));
+				img.SetPixel(i, val_ImgHeight - 1 - j, Image::Pixel<float>(r, g, b));
 				j++;
 				if (cnt > loopMax)
 					return;

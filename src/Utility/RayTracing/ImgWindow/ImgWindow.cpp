@@ -147,7 +147,7 @@ bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
 		static size_t lastFrame = 0;
 		if (curFrame <= lastFrame)
 			return;
-		printf("Update Texture\n");
+
 		lastFrame = curFrame;
 		tex.SetImg(img);
 		curTex = &tex;

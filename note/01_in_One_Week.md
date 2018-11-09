@@ -68,11 +68,7 @@ int main(int argc, char ** argv) {
 
 OpenGL中，图像的(0,0)在左下角，右为x轴，上为y轴
 
-## 1.2 The vec3 class
-
-使用 glm::vec3 来替代
-
-## 1.3 Ray, Camera, Background
+## 1.2 Ray, Camera, Background
 
 **相机**
 
@@ -82,9 +78,12 @@ OpenGL中，图像的(0,0)在左下角，右为x轴，上为y轴
 
 相机的右轴为像平面的横轴，相机的上轴为像平面的纵轴
 
-#### 1.4 Sphere
+## 1.3 Sphere
 
-
-
-
-
+**相交**
+$$
+|\mathbf{P}-\mathbf{C}|=R\\
+\mathbf{P}=\mathbf{A}+t\mathbf{B}\\
+(t\mathbf{B}+\mathbf{A}-\mathbf{C})^2=R^2\\
+|\mathbf{B}|^2t^2+2\ dot(\mathbf{B},\ \mathbf{A}-\mathbf{C})\ t+|\mathbf{A}-\mathbf{C}|^2-R^2=0
+$$
