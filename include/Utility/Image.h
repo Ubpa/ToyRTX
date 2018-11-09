@@ -2,6 +2,7 @@
 #define _IMAGE_H_
 
 #include <string>
+#include <glm/glm.hpp>
 
 namespace CppUtility {
 	namespace Other {
@@ -43,6 +44,7 @@ namespace CppUtility {
 			bool SetPixel(size_t x, size_t y, const Pixel<uByte> & pixel);
 			bool SetPixel(size_t x, size_t y, const Pixel<float> & pixel);
 			bool SetPixel(size_t x, size_t y, const Pixel<double> & pixel);
+			bool SetPixel(size_t x, size_t y, const glm::vec3 & pixel);
 			Pixel<uByte> GetPixel_UB(size_t x, size_t y);
 			Pixel<float> GetPixel_F(size_t x, size_t y);
 			Pixel<double> GetPixel_D(size_t x, size_t y);

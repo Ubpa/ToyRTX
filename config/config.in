@@ -27,6 +27,12 @@ string RootPath = "${CMAKE_SOURCE_DIR}";
 int val_Default_ImgWidth = 1280;
 int val_Default_ImgHeight = 768;
 
+# 采样率
+int sampleNum = 8;
+
+# 高斯模糊次数
+int blurNum = 0;
+
 # 01_in_a_Weekend / 01_Image 输出图像大小
 int val_01_in_a_Weekend_01_Image_ImgWidth = 200;
 int val_01_in_a_Weekend_01_Image_ImgHeight = 100;
@@ -38,3 +44,11 @@ int val_01_in_a_Weekend_02_Camera_ImgHeight = 100;
 # 01_in_a_Weekend / 03_Sphere 输出图像大小
 int val_01_in_a_Weekend_03_Sphere_ImgWidth = 1920;
 int val_01_in_a_Weekend_03_Sphere_ImgHeight = 1080;
+
+# 01_in_a_Weekend / 04_Group 输出图像大小
+int val_01_in_a_Weekend_04_Group_ImgWidth = 1920;
+int val_01_in_a_Weekend_04_Group_ImgHeight = 1080;
+
+# 01_in_a_Weekend / 05_Material 输出图像大小
+int val_01_in_a_Weekend_05_Material_ImgWidth = 1920;
+int val_01_in_a_Weekend_05_Material_ImgHeight = 1080;

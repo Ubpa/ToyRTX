@@ -118,9 +118,15 @@ bool Image::SetPixel(size_t x, size_t y, const Image::Pixel<float> & pixel) {
 	return SetPixel(x, y, Pixel_F2UB(pixel));
 }
 
+bool Image::SetPixel(size_t x, size_t y, const glm::vec3 & pixel) {
+	return SetPixel(x, y, Pixel_F2UB(Image::Pixel<float>(pixel.r, pixel.g, pixel.b)));
+}
+
 bool Image::SetPixel(size_t x, size_t y, const Image::Pixel<double> & pixel) {
 	return SetPixel(x, y, Pixel_D2UB(pixel));
 }
+
+
 
 Image::Pixel<uByte> Image::GetPixel_UB(size_t x, size_t y) {
 	if (channel == 3)
@@ -158,7 +164,7 @@ void Image::GenBuffer(int width, int height, int channel) {
 	this->height = height;
 	this->channel = channel;
 
-	data = new uByte[width*height*channel];
+	data = new uByte[width*height*channel]();
 	type = ENUM_SRC_TYPE_NEW;
 }
 

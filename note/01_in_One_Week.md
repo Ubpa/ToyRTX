@@ -87,3 +87,6 @@ $$
 (t\mathbf{B}+\mathbf{A}-\mathbf{C})^2=R^2\\
 |\mathbf{B}|^2t^2+2\ dot(\mathbf{B},\ \mathbf{A}-\mathbf{C})\ t+|\mathbf{A}-\mathbf{C}|^2-R^2=0
 $$
+
+## 1.4 Surface normals and multiple objects
+

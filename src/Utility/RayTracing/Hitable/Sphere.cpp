@@ -3,9 +3,10 @@
 using namespace RayTracing;
 using namespace glm;
 
-Sphere::Sphere(const vec3 & center, float radius)
-	: center(center), radius(radius) { };
+Sphere::Sphere(const vec3 & center, float radius, Material * material)
+	: center(center), radius(radius), material(material) { };
 
+Sphere::~Sphere() { }
 
 bool Sphere::Hit(const Ray& ray, float t_min, float t_max, HitRecord& rec) const {
 	vec3 oc = ray.origin - center;
@@ -26,5 +27,6 @@ bool Sphere::Hit(const Ray& ray, float t_min, float t_max, HitRecord& rec) const
 
 	rec.t = t;
 	rec.p = ray(t);
+	rec.normal = (rec.p - center) / radius;
 	return true;
 }

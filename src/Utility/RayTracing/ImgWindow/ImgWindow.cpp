@@ -22,11 +22,11 @@ using namespace CppUtility::Other;
 using namespace Define;
 using namespace std;
 
-CppUtility::Other::Config * DoConfig();
+Ptr<Config> DoConfig();
 
 ImgWindow::ImgWindow(const string & title, size_t fps, ENUM_OPTION option)
 	: title(title), option(option), fps(fps), scale(1.0f){
-	Config * config = DoConfig();
+	Ptr<Config> config = DoConfig();
 	if (config == NULL) {
 		isValid = false;
 		return;
@@ -65,11 +65,13 @@ ImgWindow::ImgWindow(const string & title, size_t fps, ENUM_OPTION option)
 		return;
 	}
 
+	auto pBlurNum = config->GetIntPtr("blurNum");
+	blurNum = pBlurNum ? *pBlurNum : 2;
+
 	isValid = true;
 }
 
-bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
-	this->imgUpdateOp = imgUpdateOp;
+bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	Glfw::GetInstance()->Init(val_windowWidth, val_windowHeight, title);
 
 	//------------ VAO
@@ -139,7 +141,7 @@ bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
 	auto timeUpdate = new LambdaOp([&]() {
 		deltaTime = mainTimer.Log();
 		scale *= deltaTime < 10e-6 ? 2 * scale : tps / deltaTime;
-		curFrame = mainTimer.GetWholeTime() / tps;
+		curFrame = static_cast<size_t>(mainTimer.GetWholeTime() / tps);
 	});
 
 	const Texture * curTex = &tex;
@@ -163,9 +165,17 @@ bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
 	// äÖÈ¾
 	const FBO * curFBO = NULL;
 
+	auto flipOp = Operation::ToPtr(new LambdaOp([&]() {
+		curTex->Use();
+		flipFBO.Use();
+		VAO_FlipScreen.Draw(screenShader);
+		curTex = &flipFBO.GetColorTexture();
+		curFBO = &flipFBO;
+	}));
+
 	auto ppBlurOp = Operation::ToPtr(new LambdaOp([&]() {
 		bool horizontal = true;
-		for (size_t i = 0; i < 4; i++) {
+		for (size_t i = 0; i < 2 * blurNum; i++) {
 			curFBO = &ppBlurFBOs[horizontal];
 			curFBO->Use();
 			ppBlurShader.SetBool("horizontal", horizontal);
@@ -179,10 +189,7 @@ bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
 	auto screenOp = Operation::ToPtr(new LambdaOp([&]() {
 		FBO::UseDefault();
 		curTex->Use();
-		if ((option & ENUM_OPTION_POST_PROCESS_FLIP) != 0)
-			VAO_FlipScreen.Draw(screenShader);
-		else
-			VAO_Screen.Draw(screenShader);
+		VAO_Screen.Draw(screenShader);
 		curTex = &tex;
 	}));
 
@@ -200,6 +207,8 @@ bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
 	});
 
 	auto renderQueue = new OpQueue;
+	if ((option & ENUM_OPTION_POST_PROCESS_FLIP) != 0)
+		(*imgProcessOp) << flipOp;
 	if ((option & ENUM_OPTION_POST_PROCESS_BLUR) != 0)
 		(*imgProcessOp) << ppBlurOp;
 	(*renderQueue) << imgProcessOp << screenOp;
@@ -214,13 +223,14 @@ bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
 
 	//------------
 	if ((option & ENUM_OPTION_SAVE_SRC_IMG) != 0)
-		img.SaveAsPNG(rootPath + "/data/out/" + title + ".png", true);
+		img.SaveAsPNG(rootPath + "/data/out/" + title + ".png");
 
 	if ((option & ENUM_OPTION_SAVE_POST_PROCESS_IMG) != 0 && (option & ENUM_OPTION_POST_PROCESS_ALL) != 0) {
+		bool flip = option & ENUM_OPTION_POST_PROCESS_FLIP ? true : false;
 		curFBO->Use();
 		Image finalImg(val_ImgWidth, val_ImgHeight, val_ImgChannel);
 		glReadPixels(0, 0, val_ImgWidth, val_ImgHeight, GL_RGB, GL_UNSIGNED_BYTE, finalImg.GetData());
-		finalImg.SaveAsPNG(rootPath + "/data/out/" + title + "_post.png");
+		finalImg.SaveAsPNG(rootPath + "/data/out/" + title + "_post.png", flip);
 	}
 
 	Glfw::GetInstance()->Terminate();
@@ -231,18 +241,10 @@ bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
 	return true;
 }
 
-
-void ImgWindow::SetImgUpdateOpDone() {
-	if (imgUpdateOp != NULL) {
-		printf("Image update finish\n");
-		imgUpdateOp->SetIsHold(false);
-	}
-}
-
-Config * DoConfig() {
+Ptr<Config> DoConfig() {
 	printf("INFO: Try to read config.out\n");
 	string rootPath;
-	Config * config = new Config;
+	Ptr<Config> config = Ptr<Config>(new Config);
 
 	rootPath = string(ROOT_PATH);
 	printf("INFO: [1] First Try.\n");
@@ -268,6 +270,6 @@ Config * DoConfig() {
 
 	*config->GetStrPtr("RootPath") = rootPath;
 	printf("INFO: config.out read success\nINFO: RootPath is %s\n", config->GetStrPtr("RootPath")->c_str());
-	GStorage<Config *>::GetInstance()->Register(str_MainCamera, config);
+	GStorage<Ptr<Config>>::GetInstance()->Register(str_MainConfig, config);
 	return config;
 }

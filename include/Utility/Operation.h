@@ -2,12 +2,10 @@
 #define _OPERATION_H_
 
 #include <string>
+#include <Utility/Ptr.h>
 
 namespace CppUtility {
 	namespace Other {
-		template<typename T>
-		using Ptr = std::shared_ptr<T>;
-
 		class Operation {
 		public:
 			template <typename T>

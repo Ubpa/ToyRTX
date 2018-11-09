@@ -27,7 +27,6 @@ namespace CppUtility {
 			};
 
 			FBO(size_t width, size_t height, ENUM_TYPE type = ENUM_TYPE_BASIC);
-
 			bool PassTo(const FBO & fbo, ENUM_PASS_TYPE passType = ENUM_PASS_COLOR) const;
 			bool PassTo(size_t fboID, size_t width, size_t height, ENUM_PASS_TYPE passType = ENUM_PASS_COLOR) const;
 
