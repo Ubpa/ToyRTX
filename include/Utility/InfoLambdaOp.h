@@ -8,13 +8,13 @@ namespace CppUtility {
 	namespace Other {
 		template<typename T>
 		class InfoLambdaOp : public LambdaOp {
+			HEAP_OBJ_SETUP(InfoLambdaOp)
 		public:
 			InfoLambdaOp(const T & info = T(), const std::function<void()> & op = []() {}, bool isHold = true);
 			//------------
 			void SetInfo(const T & info);
 			T & GetInfo();
 		protected:
-			virtual ~InfoLambdaOp();
 			T info;
 		private:
 			InfoLambdaOp(const InfoLambdaOp&) = delete;
@@ -37,11 +37,6 @@ namespace CppUtility {
 		T & InfoLambdaOp<T>::GetInfo() {
 			return info;
 		}
-
-		template<typename T>
-		InfoLambdaOp<T>::~InfoLambdaOp() {
-			printf("Delete InfoLambdaOp\n");
-		};
 	}
 }
 

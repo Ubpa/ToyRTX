@@ -24,8 +24,8 @@ using namespace std;
 
 Ptr<Config> DoConfig();
 
-ImgWindow::ImgWindow(const string & title, size_t fps, ENUM_OPTION option)
-	: title(title), option(option), fps(fps), scale(1.0f){
+ImgWindow::ImgWindow(const string & title)
+	: title(title), scale(1.0f){
 	Ptr<Config> config = DoConfig();
 	if (config == NULL) {
 		isValid = false;
@@ -68,11 +68,17 @@ ImgWindow::ImgWindow(const string & title, size_t fps, ENUM_OPTION option)
 	auto pBlurNum = config->GetIntPtr("blurNum");
 	blurNum = pBlurNum ? *pBlurNum : 2;
 
+	auto pOption = config->GetUnsignedIntPtr("option");
+	option = static_cast<ENUM_OPTION>(pOption ? *pOption : ENUM_OPTION_BASIC);
+
+	auto pFPS = config->GetIntPtr("FPS");
+	fps = pFPS ? *pFPS : 8;
+
 	isValid = true;
 }
 
 bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
-	Glfw::GetInstance()->Init(val_windowWidth, val_windowHeight, title);
+	Glfw::GetInstance()->Init(img.GetWidth(), img.GetHeight(), title);
 
 	//------------ VAO
 	VAO VAO_FlipScreen(&(data_Flip_ScreenVertices[0]), sizeof(data_Flip_ScreenVertices), { 2,2 });
@@ -101,6 +107,17 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	ppBlurShader.SetInt("image", 0);
 
 
+	//------------ interpolation Shader
+	string interpolation_vs = rootPath + str_Interpolation_vs;
+	string interpolation_fs = rootPath + str_Interpolation_fs;
+	Shader interpolationShader(interpolation_vs, interpolation_fs);
+	if (!interpolationShader.IsValid()) {
+		printf("ERROR: interpolationShader load fail\n");
+		return false;
+	}
+	interpolationShader.SetInt("image", 0);
+
+
 	//------------ Í¼Ïñ²ÎÊý»ñÈ¡
 	size_t val_ImgWidth = img.GetWidth();
 	size_t val_ImgHeight = img.GetHeight();
@@ -112,8 +129,20 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	tex.SetImg(img);
 
 
+	//------------ Interpolation »º³å
+	FBO interpolationFBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_COLOR);
+	if (!interpolationFBO.IsValid()) {
+		printf("ERROR: Gen interpolationFBO fail\n");
+		return false;
+	}
+
+
 	//------------ flip »º³å
-	FBO flipFBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_BASIC);
+	FBO flipFBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_COLOR);
+	if (!flipFBO.IsValid()) {
+		printf("ERROR: Gen flipFBO fail\n");
+		return false;
+	}
 
 
 	//------------ ppBlur »º³å
@@ -121,6 +150,10 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 		FBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_COLOR),
 		FBO(val_ImgWidth, val_ImgHeight, FBO::ENUM_TYPE_COLOR)
 	};
+	if (!ppBlurFBOs[0].IsValid() || !ppBlurFBOs[1].IsValid()) {
+		printf("ERROR: Gen ppBlurFBOs fail\n");
+		return false;
+	}
 
 
 	//------------ ²Ù×÷
@@ -145,7 +178,7 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	});
 
 	const Texture * curTex = &tex;
-	Ptr<Operation> texUpdate = Operation::ToPtr(new LambdaOp([&]() {
+	Ptr<Operation> texUpdate = ToPtr(new LambdaOp([&]() {
 		static size_t lastFrame = 0;
 		if (curFrame <= lastFrame)
 			return;
@@ -165,7 +198,15 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	// äÖÈ¾
 	const FBO * curFBO = NULL;
 
-	auto flipOp = Operation::ToPtr(new LambdaOp([&]() {
+	auto interpolationOp = ToPtr(new LambdaOp([&]() {
+		curTex->Use();
+		interpolationFBO.Use();
+		VAO_Screen.Draw(interpolationShader);
+		curTex = &interpolationFBO.GetColorTexture();
+		curFBO = &interpolationFBO;
+	}));
+
+	auto flipOp = ToPtr(new LambdaOp([&]() {
 		curTex->Use();
 		flipFBO.Use();
 		VAO_FlipScreen.Draw(screenShader);
@@ -173,7 +214,7 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 		curFBO = &flipFBO;
 	}));
 
-	auto ppBlurOp = Operation::ToPtr(new LambdaOp([&]() {
+	auto ppBlurOp = ToPtr(new LambdaOp([&]() {
 		bool horizontal = true;
 		for (size_t i = 0; i < 2 * blurNum; i++) {
 			curFBO = &ppBlurFBOs[horizontal];
@@ -186,14 +227,14 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 		}
 	}));
 
-	auto screenOp = Operation::ToPtr(new LambdaOp([&]() {
+	auto screenOp = ToPtr(new LambdaOp([&]() {
 		FBO::UseDefault();
 		curTex->Use();
 		VAO_Screen.Draw(screenShader);
 		curTex = &tex;
 	}));
 
-	auto finalOp = Operation::ToPtr(new LambdaOp([&]() {
+	auto finalOp = ToPtr(new LambdaOp([&]() {
 		glfwSwapBuffers(Glfw::GetInstance()->GetWindow());
 		glfwPollEvents();
 	}));
@@ -207,6 +248,8 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	});
 
 	auto renderQueue = new OpQueue;
+	if ((option & ENUM_OPTION_POST_PROCESS_INTERPOLATION) != 0)
+		(*imgProcessOp) << interpolationOp;
 	if ((option & ENUM_OPTION_POST_PROCESS_FLIP) != 0)
 		(*imgProcessOp) << flipOp;
 	if ((option & ENUM_OPTION_POST_PROCESS_BLUR) != 0)

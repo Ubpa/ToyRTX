@@ -2,28 +2,21 @@
 #define _OPERATION_H_
 
 #include <string>
-#include <Utility/Ptr.h>
+#include <Utility/HeapObj.h>
 
 namespace CppUtility {
 	namespace Other {
-		class Operation {
+		class Operation : public HeapObj {
+			HEAP_OBJ_SETUP(Operation)
 		public:
-			template <typename T>
-			static Ptr<T> ToPtr(T * op) {
-				return Ptr<T>(op, ProtectDelete);
-			}
-			//------------
+			Operation(bool isHold = true);
+
 			bool IsHold();
 			void SetIsHold(bool isHold);
 			void operator()();
 			//------------
 			virtual void Run() = 0;
 		protected:
-			Operation(bool isHold = true);
-			//------------
-			static void ProtectDelete(Operation * op);
-			virtual ~Operation();
-			//------------
 			bool isHold;
 		private:
 			Operation(const Operation&) = delete;

@@ -12,13 +12,13 @@ EventManager * EventManager::GetInstance() {
 
 void EventManager::Register(size_t event, Ptr<Operation> & op) {
 	if (directory.find(event) == directory.end())
-		directory[event] = Operation::ToPtr(new OpQueue);
+		directory[event] = ToPtr(new OpQueue);
 	directory[event]->Push(op);
 }
 
 void EventManager::Register(size_t event, Operation * op) {
 	if(op!=nullptr)
-		Register(event, Operation::ToPtr(op));
+		Register(event, ToPtr(op));
 }
 
 void EventManager::Register(size_t event, const std::function<void ()> & op) {

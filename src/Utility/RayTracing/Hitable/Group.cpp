@@ -5,29 +5,24 @@ using namespace CppUtility::Other;
 
 Group::Group() { }
 
-Group::~Group() { }
+Hitable::HitRst Group::RayIn(Ray::Ptr & ray) const {
+	Hitable::Ptr cloestObj = NULL;
+	HitRst finalHitRst = HitRst::FALSE;
 
-bool Group::Hit(const Ray& ray, float t_min, float t_max, HitRecord& rec) const {
-	HitRecord tmpRec;
-	bool hit_anything = false;
-	float closest_so_far = t_max;
-
-	for (int i = 0; i < size(); i++) {
-		if (at(i)->Hit(ray, t_min, closest_so_far, tmpRec)) {
-			hit_anything = true;
-			closest_so_far = tmpRec.t;
+	for (auto & hitable : *this) {
+		HitRst hitRst = hitable->RayIn(ray);
+		if (hitRst.hit) {
+			cloestObj = hitable;
+			finalHitRst = hitRst;
 		}
 	}
 
-	if (hit_anything)
-		rec = tmpRec;
-
-	return hit_anything;
+	return finalHitRst;
 }
 
-Group & Group::operator <<(const Ptr<Hitable> & hitable) {
-	if(hitable != NULL)
+Group & Group::operator <<(const CppUtility::Other::Ptr<Hitable> & hitable) {
+	if(hitable != false)
 		push_back(hitable);
-
+	
 	return *this;
 }

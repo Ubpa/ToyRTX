@@ -2,39 +2,36 @@
 
 using namespace CppUtility::Other;
 
-OpNode::OpNode(const Ptr<Operation> & preOp, const Ptr<Operation> & postOp, bool isHold)
+OpNode::OpNode(const Operation::Ptr & preOp, const Operation::Ptr & postOp, bool isHold)
 	: preOp(preOp), postOp(postOp), OpQueue(isHold) { }
 
 OpNode::OpNode(Operation * preOp, Operation * postOp, bool isHold)
 	: OpQueue(isHold){
-	this->preOp = preOp != nullptr ? Operation::ToPtr(preOp) : nullptr;
-	this->postOp = postOp != nullptr ? Operation::ToPtr(postOp) : nullptr;
+	this->preOp = preOp != nullptr ? ToPtr(preOp) : nullptr;
+	this->postOp = postOp != nullptr ? ToPtr(postOp) : nullptr;
 }
 
 OpNode::OpNode(const std::function<void()> & preOp, const std::function<void()> & postOp, bool isHold)
 	: OpQueue(isHold){
-	this->preOp = preOp != nullptr ? Operation::ToPtr(new LambdaOp(preOp)) : nullptr;
-	this->postOp = postOp != nullptr ? Operation::ToPtr(new LambdaOp(postOp)) : nullptr;
+	this->preOp = preOp != nullptr ? ToPtr(new LambdaOp(preOp)) : nullptr;
+	this->postOp = postOp != nullptr ? ToPtr(new LambdaOp(postOp)) : nullptr;
 }
 
-OpNode::~OpNode() {
-	printf("INFO: Delete OpNode\n");
-}
 //------------
-void OpNode::SetPreOp(const Ptr<Operation> & preOp) {
+void OpNode::SetPreOp(const Operation::Ptr & preOp) {
 	this->preOp = preOp;
 }
 
-void OpNode::SetPostOp(const Ptr<Operation> & postOp) {
+void OpNode::SetPostOp(const Operation::Ptr & postOp) {
 	this->postOp = postOp;
 }
 
 void OpNode::SetPreOp(Operation * preOp) {
-	SetPreOp(preOp != nullptr ? Operation::ToPtr(preOp) : nullptr);
+	SetPreOp(preOp != nullptr ? ToPtr(preOp) : nullptr);
 }
 
 void OpNode::SetPostOp(Operation * postOp) {
-	SetPreOp(postOp != nullptr ? Operation::ToPtr(postOp) : nullptr);
+	SetPreOp(postOp != nullptr ? ToPtr(postOp) : nullptr);
 }
 
 size_t OpNode::ChildNum() {

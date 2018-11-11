@@ -2,6 +2,7 @@
 
 using namespace CppUtility::Other;
 using namespace glm;
+using namespace std;
 
 ImgPixelSet::ImgPixelSet() {
 
@@ -16,12 +17,12 @@ ImgPixelSet::ImgPixelSet(size_t width, size_t height) {
 	}
 }
 
-size_t ImgPixelSet::RandPick(size_t n, std::vector<glm::vec2> & pixels) {
+size_t ImgPixelSet::RandPick(size_t n, vector<glm::vec2> & pixels) {
 	pixels.clear();
 	const size_t num = glm::min(Size(), n);
 	pixels.reserve(num);
 	for (size_t i=0; i < num; i++)
-		pixels.push_back(RandSet<vec2>::RandPick());
+		pixels.push_back(RandPick());
 	return num;
 }
 

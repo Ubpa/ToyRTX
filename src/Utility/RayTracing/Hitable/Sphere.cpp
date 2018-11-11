@@ -1,32 +1,37 @@
 #include <RayTracing/Sphere.h>
+#include <Utility/Math.h>
 
 using namespace RayTracing;
+using namespace CppUtility::Other::Math;
 using namespace glm;
 
-Sphere::Sphere(const vec3 & center, float radius, Material * material)
-	: center(center), radius(radius), material(material) { };
+Sphere::Sphere(const vec3 & center, float radius, Material::Ptr material)
+	: center(center), radius(radius), Hitable(material) { };
 
-Sphere::~Sphere() { }
-
-bool Sphere::Hit(const Ray& ray, float t_min, float t_max, HitRecord& rec) const {
-	vec3 oc = ray.origin - center;
-	float a = dot(ray.dir, ray.dir);
-	float b = dot(oc, ray.dir);
+Hitable::HitRst Sphere::RayIn(Ray::Ptr & ray) const{
+	vec3 oc = ray->GetOrigin() - center;
+	float a = dot(ray->GetDir(), ray->GetDir());
+	float b = dot(oc, ray->GetDir());
 	float c = dot(oc, oc) - radius * radius;
 	float discriminant = b * b - a * c;
 
 	if (discriminant <= 0)
-		return false;
+		return HitRst::FALSE;
 
 	float t = (-b - sqrt(discriminant)) / a;
-	if (t > t_max || t < t_min) {
+	if (t > ray->GetTMax() || t < tMin) {
 		t = (-b + sqrt(discriminant)) / a;
-		if (t > t_max || t < t_min)
-			return false;
+		if (t > ray->GetTMax() || t < tMin)
+			return HitRst::FALSE;
 	}
+	
+	ray->SetTMax(t);
 
-	rec.t = t;
-	rec.p = ray(t);
-	rec.normal = (rec.p - center) / radius;
-	return true;
+	HitRst hitRst(true);
+	vec3 pos = ray->At(t);
+	vec3 normal = (pos - center) / radius;
+	hitRst.record = HitRecord(ray, pos, normal);
+	hitRst.hitable = this;
+
+	return hitRst;
 }

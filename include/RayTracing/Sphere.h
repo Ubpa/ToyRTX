@@ -5,15 +5,15 @@
 
 namespace RayTracing {
 	class Sphere : public Hitable {
+		HEAP_OBJ_SETUP(Sphere)
 	public:
-		Sphere(const glm::vec3 & center, float radius, Material * material);
-		virtual bool Hit(const Ray& ray, float t_min, float t_max, HitRecord& rec) const;
+		Sphere(const glm::vec3 & center, float radius, Material::Ptr material);
+
+		virtual Hitable::HitRst RayIn(Ray::Ptr & ray) const;
 	protected:
-		virtual ~Sphere();
-	private:
+
 		glm::vec3 center;
 		float radius;
-		Material * material;
 	};
 }
 

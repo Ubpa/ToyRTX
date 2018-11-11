@@ -14,6 +14,7 @@ namespace CppUtility {
 			std::string * GetStrPtr(const std::string & id);
 			float * GetFloatPtr(const std::string & id);
 			int * GetIntPtr(const std::string & id);
+			unsigned int * GetUnsignedIntPtr(const std::string & id);
 			bool IsValid();
 		private:
 			bool Config::DecodeLine(const std::string & data);
@@ -21,6 +22,7 @@ namespace CppUtility {
 			LStorage<std::string> strDirectory;
 			LStorage<float> floatDirectory;
 			LStorage<int> intDirectory;
+			LStorage<unsigned int> unsignedIntDirectory;
 			bool valid;
 		};
 	}

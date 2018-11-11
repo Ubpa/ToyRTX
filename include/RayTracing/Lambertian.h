@@ -5,12 +5,17 @@
 
 namespace RayTracing {
 	class Lambertian : public Material {
+		HEAP_OBJ_SETUP(Lambertian)
 	public:
+		Lambertian(float r, float g, float b);
 		Lambertian(const glm::vec3 & albedo);
 
-		bool Scatter(const Ray& rayIn, const HitRecord& rec, glm::vec3& attenuation, Ray& rayOut) const;
+		// 返回值为 true 说明光线继续传播
+		// 返回值为 false 说明光线不再传播
+		virtual bool Scatter(HitRecord & rec) const;
 	protected:
-		vec3 albedo;
+
+		glm::vec3 albedo;
 	};
 }
 

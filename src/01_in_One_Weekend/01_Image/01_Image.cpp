@@ -11,7 +11,7 @@ using namespace Define;
 using namespace std;
 
 int main(int argc, char ** argv) {
-	ImgWindow imgWindow(str_WindowTitle, val_fps, ImgWindow::ENUM_OPTION_SAVE_SRC_IMG);
+	ImgWindow imgWindow(str_WindowTitle);
 	if (!imgWindow.IsValid()) {
 		printf("ERROR: Image Window Create Fail.\n");
 		return 1;
@@ -22,7 +22,7 @@ int main(int argc, char ** argv) {
 	const size_t val_ImgHeight = img.GetHeight();
 	const size_t val_ImgChannel = img.GetChannel();
 
-	auto imgUpdate = Operation::ToPtr(new LambdaOp([&]() {
+	auto imgUpdate = ToPtr(new LambdaOp([&]() {
 		static int f = 0;
 		for (size_t i = 0; i < img.GetWidth(); i++) {
 			for (size_t j = 0; j < img.GetHeight(); j++) {

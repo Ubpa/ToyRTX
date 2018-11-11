@@ -12,9 +12,9 @@ Sphere::Sphere(size_t n)
 	indexArr = new Array2D<size_t>(triNum, 3);
 	//----------
 	float inc = 1.0f / n;
-	for (int i = 0; i <= n; i++) {
+	for (size_t i = 0; i <= n; i++) {
 		float u = inc * i;
-		for (int j = 0; j <= n; j++) {
+		for (size_t j = 0; j <= n; j++) {
 			float v = inc * j;
 			float theta = PI * (1-u);
 			float phi = 2 * PI * v;
@@ -29,8 +29,8 @@ Sphere::Sphere(size_t n)
 		}
 	}
 	//------------
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
+	for (size_t i = 0; i < n; i++) {
+		for (size_t j = 0; j < n; j++) {
 			// ×óÏÂ ÓÒÏÂ ×óÉÏ
 			indexArr->At(2 * (i*n + j), 0) = i * (n + 1) + j;
 			indexArr->At(2 * (i*n + j), 1) = i * (n + 1) + j + 1;

@@ -6,12 +6,14 @@
 
 namespace RayTracing {
 	class Group : public Hitable, public std::vector<CppUtility::Other::Ptr<Hitable>>{
+		HEAP_OBJ_SETUP(Group)
 	public:
 		Group();
-		virtual bool Hit(const Ray& ray, float t_min, float t_max, HitRecord& rec) const;
+
+		// 返回 true 说明光线继续传播
+		// 返回 false 说明光线传播结束
+		virtual HitRst RayIn(Ray::Ptr & ray) const;
 		Group & operator <<(const CppUtility::Other::Ptr<Hitable> & hitable);
-	protected:
-		virtual ~Group();
 	};
 }
 #endif //!_GROUP_H_

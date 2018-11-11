@@ -15,10 +15,10 @@ using namespace glm;
 using namespace std;
 typedef vec3 rgb;
 
-rgb Background(const Ray & ray);
+rgb Background(const Ray::Ptr & ray);
 
 int main(int argc, char ** argv){
-	ImgWindow imgWindow(str_WindowTitle, val_fps, ImgWindow::ENUM_OPTION_SAVE_SRC_IMG);
+	ImgWindow imgWindow(str_WindowTitle);
 	if (!imgWindow.IsValid()) {
 		printf("ERROR: Image Window Create Fail.\n");
 		return 1;
@@ -33,14 +33,14 @@ int main(int argc, char ** argv){
 	vec3 viewPoint(0, 0, -1);
 	float ratioWH = (float)val_ImgWidth / (float)val_ImgHeight;
 
-	RayCamera camera(origin, viewPoint, ratioWH, 90.0f);
+	RayCamera::Ptr camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, 0, 90.0f));
 
-	auto imgUpdate = Operation::ToPtr(new LambdaOp([&]() {
+	auto imgUpdate = ToPtr(new LambdaOp([&]() {
 		for (size_t i = 0; i < val_ImgWidth; i++) {
 			for (size_t j = 0; j < val_ImgHeight; j++) {
 				float u = i / (float)val_ImgWidth;
 				float v = j / (float)val_ImgHeight;
-				Ray ray = camera.GenRay(u, v);
+				Ray::Ptr ray = camera->GenRay(u, v);
 				rgb backgroundColor = Background(ray);
 				float r = backgroundColor.r;
 				float g = backgroundColor.g;
@@ -55,8 +55,8 @@ int main(int argc, char ** argv){
 	return 0;
 }
 
-rgb Background(const Ray & ray) {
-	float t = 0.5*(normalize(ray.dir).y + 1.0f);
+rgb Background(const Ray::Ptr & ray) {
+	float t = 0.5*(normalize(ray->GetDir()).y + 1.0f);
 	rgb white = rgb(1.0f, 1.0f, 1.0f);
 	rgb blue = rgb(0.5f, 0.7f, 1.0f);
 	return (1 - t)*white + t * blue;

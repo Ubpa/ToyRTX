@@ -3,6 +3,5 @@
 using namespace RayTracing;
 using namespace glm;
 
-vec3 Material::Emit(float u, float v, const glm::vec3& p) const {
-	return vec3(0);
-}
+HitRecord::HitRecord(const Ray::Ptr & ray, const vec3 & pos, const vec3 & normal)
+	:ray(ray), pos(pos), normal(normal) { }

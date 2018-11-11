@@ -1,15 +1,25 @@
 #ifndef _MATERIAL_H_
 #define _MATERIAL_H_
 
+#include <Utility/HeapObj.h>
 #include <RayTracing/Ray.h>
-#include <RayTracing/Hitable.h>
 #include <glm/glm.hpp>
 
 namespace RayTracing {
-	class Material {
+	struct HitRecord {
+		HitRecord(const Ray::Ptr & ray = NULL, const glm::vec3 & pos = glm::vec3(0), const glm::vec3 & normal = glm::vec3(0,0,1));
+
+		Ray::Ptr ray;
+		glm::vec3 pos;
+		glm::vec3 normal;
+	};
+
+	class Material : public CppUtility::Other::HeapObj{
+		HEAP_OBJ_SETUP(Material)
 	public:
-		virtual bool Scatter(const Ray& rayIn, const HitRecord& rec, glm::vec3& attenuation, Ray& rayOut) const = 0;
-		virtual glm::vec3 Emit(float u, float v, const glm::vec3& p) const;
+		// 返回值为 true 说明光线继续传播
+		// 返回值为 false 说明光线不再传播
+		virtual bool Scatter(HitRecord & rec) const = 0;
 	};
 }
 

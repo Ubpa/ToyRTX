@@ -347,9 +347,6 @@ bool FBO::IsValid() const {
 }
 
 bool FBO::IsComplete() const {
-	if (!isValid)
-		return false;
-
 	glBindFramebuffer(GL_FRAMEBUFFER, ID);
 	auto rst = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

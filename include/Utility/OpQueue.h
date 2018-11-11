@@ -7,20 +7,19 @@
 namespace CppUtility {
 	namespace Other {
 		class OpQueue : public Operation {
+			HEAP_OBJ_SETUP(OpQueue)
 		public:
 			OpQueue(bool isHold = true);
 			//------------
-			OpQueue & operator<<(const Ptr<Operation> & operation);
+			OpQueue & operator<<(const Operation::Ptr & operation);
 			OpQueue & operator<<(Operation * operation);
-			void Push(Ptr<Operation> & op);
+			void Push(Operation::Ptr & op);
 			void Push(Operation * op);
 			size_t Size() const;
 			//------------
 			virtual void Run();
 		protected:
-			virtual ~OpQueue();
-			//------------
-			std::list< Ptr<Operation> > opList;
+			std::list< Operation::Ptr > opList;
 		private:
 			OpQueue(const OpQueue &) = delete;
 			OpQueue& operator=(const OpQueue &) = delete;

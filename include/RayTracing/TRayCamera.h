@@ -7,16 +7,17 @@
 
 namespace RayTracing {
 	class TRayCamera : public RayCamera{
+	   HEAP_OBJ_SETUP(TRayCamera)
 	public:
 		// fov is top to bottom in degrees
 		TRayCamera(const glm::vec3 & pos, const glm::vec3 & viewPoint, float ratioWH,
 			float t0 = 0.0f, float t1 = 0.0f, float lenR = 0.0f,
 			float fov = 45.0f, float focus_dist = -1.0f, const glm::vec3 & worldUp = glm::vec3(0, 1, 0));
 
-		TRay GenTRay(float s, float t);
+		TRay::Ptr GenTRay(float s, float t) const;
 	private:
-		float GetRand01();
-		glm::vec2 RandomInUnitCircle();
+		static float GetRand01();
+		static glm::vec2 RandomInUnitCircle();
 
 		glm::vec3 pos;
 		glm::vec3 BL_Corner;

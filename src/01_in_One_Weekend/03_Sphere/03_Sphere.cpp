@@ -6,6 +6,7 @@
 #include <Utility/ImgPixelSet.h>
 
 #include <RayTracing/Sphere.h>
+#include <RayTracing/OpMaterial.h>
 
 #include "Defines.h"
 
@@ -16,15 +17,12 @@ using namespace glm;
 using namespace std;
 typedef vec3 rgb;
 
-rgb Scene(Ptr<Hitable> scene, const Ray & ray);
-rgb Background(const Ray & ray);
+Hitable::Ptr CreateScene();
+rgb RayTracer(Hitable::Ptr scene, Ray::Ptr & ray);
+rgb Background(const Ray::Ptr & ray);
 
 int main(int argc, char ** argv){
-	ImgWindow::ENUM_OPTION option = static_cast<ImgWindow::ENUM_OPTION>(
-		ImgWindow::ENUM_OPTION_SAVE_ALL_IMG
-		| ImgWindow::ENUM_OPTION_POST_PROCESS_BLUR
-	);
-	ImgWindow imgWindow(str_WindowTitle, val_fps, option);
+	ImgWindow imgWindow(str_WindowTitle);
 	if (!imgWindow.IsValid()) {
 		printf("ERROR: Image Window Create Fail.\n");
 		return 1;
@@ -40,11 +38,11 @@ int main(int argc, char ** argv){
 	vec3 viewPoint(0, 0, -1);
 	float ratioWH = (float)val_ImgWidth / (float)val_ImgHeight;
 
-	RayCamera camera(origin, viewPoint, ratioWH, 90.0f);
+	RayCamera::Ptr camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, 0, 90.0f));
 
-	auto sphere = Hitable::ToPtr(new Sphere(vec3(0, 0, -1), 0.5f));
+	auto scene = CreateScene();
 
-	auto imgUpdate = Operation::ToPtr(new LambdaOp([&]() {
+	LambdaOp::Ptr imgUpdate = ToPtr(new LambdaOp([&]() {
 		static double loopMax = 100;
 		loopMax = glm::max(100 * imgWindow.GetScale(), 1.0);
 		int cnt = 0;
@@ -54,8 +52,8 @@ int main(int argc, char ** argv){
 			size_t j = pixel.y;
 			float u = i / (float)val_ImgWidth;
 			float v = j / (float)val_ImgHeight;
-			Ray ray = camera.GenRay(u, v);
-			rgb color = Scene(sphere, ray);
+			Ray::Ptr ray = camera->GenRay(u, v);
+			rgb color = RayTracer(scene, ray);
 			float r = color.r;
 			float g = color.g;
 			float b = color.b;
@@ -63,7 +61,7 @@ int main(int argc, char ** argv){
 			if (++cnt > loopMax)
 				return;
 		}
-		imgWindow.SetImgUpdateOpDone();
+		imgUpdate->SetIsHold(false);
 	}, true));
 
 	imgWindow.Run(imgUpdate);
@@ -71,16 +69,31 @@ int main(int argc, char ** argv){
 	return 0;
 }
 
-rgb Scene(Ptr<Hitable> scene, const Ray & ray) {
-	Hitable::HitRecord record;
-	if (scene->Hit(ray, 0.001f, 9999.0f, record))
-		return record.p;
+Hitable::Ptr CreateScene() {
+	auto posMaterial = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
+		vec3 lightColor = 0.5f * (normalize(rec.normal) + 1.0f);
+		rec.ray->SetLightColor(lightColor);
+		return false;
+	}));
+	auto sphere = ToPtr(new Sphere(vec3(0, 0, -1), 0.5f, posMaterial));
+
+	return sphere;
+}
+
+rgb RayTracer(Ptr<Hitable> scene, Ray::Ptr & ray) {
+	auto hitRst = scene->RayIn(ray);
+	if (hitRst.hit) {
+		if (hitRst.hitable->RayOut(hitRst.record))
+			return RayTracer(scene, ray);
+		else
+			return ray->GetColor();
+	}
 	else
 		return Background(ray);
 }
 
-rgb Background(const Ray & ray) {
-	float t = 0.5*(normalize(ray.dir).y + 1.0f);
+rgb Background(const Ray::Ptr & ray) {
+	float t = 0.5*(normalize(ray->GetDir()).y + 1.0f);
 	rgb white = rgb(1.0f, 1.0f, 1.0f);
 	rgb blue = rgb(0.5f, 0.7f, 1.0f);
 	return (1 - t)*white + t * blue;
