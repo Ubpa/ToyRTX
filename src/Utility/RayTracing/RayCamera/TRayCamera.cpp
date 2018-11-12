@@ -1,32 +1,24 @@
 #include <RayTracing/TRayCamera.h>
+#include <Utility/Math.h>
 
+using namespace CppUtility::Other;
 using namespace RayTracing;
 using namespace glm;
 
-TRayCamera::TRayCamera(const vec3 & pos, const vec3 & viewPoint, float ratioWH, float lenR,
+TRayCamera::TRayCamera(const glm::vec3 & pos, const glm::vec3 & viewPoint, float ratioWH,
 	float t0, float t1,
-	float fov, float focus_dist, const vec3 & worldUp)
-	: RayCamera(pos, viewPoint, ratioWH, lenR, fov, focus_dist, worldUp),
+	float fov, float lenR, float focus_dist,
+	const glm::vec3 & worldUp)
+	: RayCamera(pos, viewPoint, ratioWH, fov, lenR, focus_dist, worldUp),
 	t0(t0), t1(t1), lenR(lenR){
 }
 
-TRay::Ptr TRayCamera::GenTRay(float s, float t) const{
-	vec2 rd = lenR * RandomInUnitCircle();
-	vec3 offset = right * rd.x + up * rd.y;
-	vec3 origin = pos + offset;
-	float time = t0 + GetRand01()*(t1 - t0);
-	vec3 dir = BL_Corner + s * horizontal + t * vertical - origin;
-	return ToPtr(new TRay(origin, dir, time));
-}
+Ray::Ptr TRayCamera::GenRay(float s, float t) const{
+	auto tRay = ToPtr(new TRay);
+	RayCamera::GenRay(s, t, tRay);
 
-float TRayCamera::GetRand01() {
-	return rand() / (float)RAND_MAX;
-}
+	float time = t0 + Math::Rand_F()*(t1 - t0);
+	tRay->SetTime(time);
 
-vec2 TRayCamera::RandomInUnitCircle() {
-	vec2 p;
-	do {
-		p = 2.0f * vec2(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX) - vec2(1, 1);
-	} while (dot(p, p) >= 1.0f);
-	return p;
+	return tRay;
 }

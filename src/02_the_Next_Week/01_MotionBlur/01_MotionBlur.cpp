@@ -7,7 +7,8 @@
 #include <RayTracing/Sphere.h>
 #include <RayTracing/Group.h>
 #include <RayTracing/ImgWindow.h>
-#include <RayTracing/RayCamera.h>
+#include <RayTracing/TRayCamera.h>
+#include <RayTracing/MoveSphere.h>
 
 #include <Utility/Math.h>
 #include <Utility/ImgPixelSet.h>
@@ -104,7 +105,9 @@ Scene::Ptr CreateScene(float ratioWH){
 		return false;
 	}));
 	auto sky = ToPtr(new Sky(skyMat));
-
+	
+	float t0 = 0.0f;
+	float t1 = 1.0f;
 	auto group = ToPtr(new Group);
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
@@ -113,7 +116,7 @@ Scene::Ptr CreateScene(float ratioWH){
 			if ((center - vec3(4, 0.2, 0)).length() > 0.9) {
 				if (choose_mat < 0.8) {  // diffuse
 					auto mat = ToPtr(new Lambertian(vec3(Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F())));
-					auto sphere = ToPtr(new Sphere(center, 0.2, mat));
+					auto sphere = ToPtr(new MoveSphere(t0, t1, center, center+vec3(0,Math::Rand_F()*0.5,0), 0.2, mat));
 					group->push_back(sphere);
 				}
 				else if (choose_mat < 0.95) { // metal
@@ -141,11 +144,24 @@ Scene::Ptr CreateScene(float ratioWH){
 
 	vec3 origin(13, 2, 3);
 	vec3 viewPoint(0, 0, 0);
-	float fov = 20.0f;
-	float lenR = 0.05;
 	float distToFocus = 10.0f;
-	RayCamera::Ptr camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, fov, lenR, distToFocus));
+	float fov = 20.0f;
+	float lenR = 0.05f;
+	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
+	
+	/*
+	auto group = ToPtr(new Group);
+	auto sphereBottom = ToPtr(new Sphere(vec3(0, -1000, 0), 1000, ToPtr(new Lambertian(vec3(0.5, 0.5, 0.5)))));
+	auto sphere0 = ToPtr(new Sphere(vec3(0, 0, -1), 0.5, ToPtr(new Metal(vec3(0.7, 0.6, 0.5), 0.0))));
 
+	(*group) << sphere0 << sphere1 << sphere2 << sphere3 << sphere4 << sphereBottom << sky;
+
+	vec3 origin(0, 0, 0);
+	vec3 viewPoint(0, 0, -1);
+	float distToFocus = 1.0f;
+	float fov = 90.0f;
+	float lenR = 0.05f;
+	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, 0, 1, fov, lenR, distToFocus));*/
 	return ToPtr(new Scene(group, camera));
 }
 

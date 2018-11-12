@@ -8,7 +8,7 @@ namespace RayTracing {
 	class Ray : public CppUtility::Other::HeapObj{
 		HEAP_OBJ_SETUP(Ray)
 	public:
-		Ray(const glm::vec3& origin, const glm::vec3& dir);
+		Ray(const glm::vec3 & origin = glm::vec3(0), const glm::vec3 & dir = glm::vec3(1));
 
 		glm::vec3 operator()(float t) const;
 		glm::vec3 At(float t) const;
@@ -19,9 +19,10 @@ namespace RayTracing {
 		float GetTMax() const { return tMax; }
 		void SetTMax(float tMax) { this->tMax = tMax; }
 
+		void Init(const glm::vec3 & origin, const glm::vec3 & dir);
 		void Update(const glm::vec3 & origin, const glm::vec3 & dir, const glm::vec3 & attenuation);
 		void SetLightColor(const glm::vec3 & lightColor);
-
+		
 	protected:
 
 		glm::vec3 origin;

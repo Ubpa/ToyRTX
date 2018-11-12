@@ -7,8 +7,8 @@ using namespace glm;
 
 const float RayCamera::PI = 3.1415926f;
 
-RayCamera::RayCamera(const vec3 & pos, const vec3 & viewPoint, float ratioWH, float lenR,
-	float fov, float focus_dist, const vec3 & worldUp)
+RayCamera::RayCamera(const vec3 & pos, const vec3 & viewPoint, float ratioWH, float fov,
+	float lenR, float focus_dist, const vec3 & worldUp)
 	:
 	pos(pos), lenR(lenR)
 {
@@ -27,8 +27,14 @@ RayCamera::RayCamera(const vec3 & pos, const vec3 & viewPoint, float ratioWH, fl
 }
 
 Ray::Ptr RayCamera::GenRay(float s, float t) const {
+	auto ray = ToPtr(new Ray);
+	GenRay(s, t, ray);
+	return ray;
+}
+
+void RayCamera::GenRay(float s, float t, Ray::Ptr ray) const {
 	vec2 rd = lenR * Math::RandInCircle();
 	vec3 origin = pos + rd.x * right + rd.y * up;
 	vec3 dir = BL_Corner + s * horizontal + t * vertical - origin;
-	return ToPtr(new Ray(origin, dir));
+	ray->Init(origin, dir);
 }

@@ -50,7 +50,7 @@ int main(int argc, char ** argv){
 	vec3 viewPoint(0, 0, -1);
 	float ratioWH = (float)val_ImgWidth / (float)val_ImgHeight;
 
-	RayCamera::Ptr camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, 0.2f, 45.0f));
+	RayCamera::Ptr camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, 45.0f, 0.2f));
 
 	auto config = GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
 	auto pSampleNum = (*config)->GetIntPtr("sampleNum");

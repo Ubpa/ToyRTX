@@ -1,5 +1,5 @@
-#ifndef _T_RAY_H_
-#define _T_RAY_H_
+#ifndef _TRAY_H_
+#define _TRAY_H_
 
 #include <RayTracing/Ray.h>
 
@@ -7,10 +7,14 @@ namespace RayTracing {
 	class TRay : public Ray {
 		HEAP_OBJ_SETUP(TRay)
 	public:
-		typedef CppUtility::Other::Ptr<TRay> Ptr;
+		TRay(const glm::vec3 & origin = glm::vec3(0), const glm::vec3 & dir = glm::vec3(1), float time = 0.0f);
 
-		TRay(const glm::vec3& origin, const glm::vec3& dir, float time = 0.0f);
+		void SetTime(float time);
+		float GetTime() const;
+
+	protected:
+
 		float time;
 	};
 }
-#endif //!_T_RAY_H_
+#endif //!_TRAY_H_

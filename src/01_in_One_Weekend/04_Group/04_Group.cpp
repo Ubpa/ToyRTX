@@ -41,7 +41,7 @@ int main(int argc, char ** argv){
 	vec3 viewPoint(0, 0, -1);
 	float ratioWH = (float)val_ImgWidth / (float)val_ImgHeight;
 
-	RayCamera::Ptr camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, 0, 90.0f));
+	RayCamera::Ptr camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, 90.0f));
 
 	auto scene = CreateScene();
 

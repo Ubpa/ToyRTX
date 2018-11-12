@@ -3,8 +3,9 @@
 using namespace glm;
 using namespace RayTracing;
 
-Ray::Ray(const vec3& origin, const vec3& dir)
-	: origin(origin), dir(dir), color(vec3(1.0f)), tMax(FLT_MAX) { }
+Ray::Ray(const vec3 & origin, const vec3 & dir){
+	Init(origin, dir);
+}
 
 vec3 Ray::operator ()(float t) const {
 	return  origin + t * dir;
@@ -12,6 +13,13 @@ vec3 Ray::operator ()(float t) const {
 
 vec3 Ray::At(float t) const {
 	return origin + t * dir;
+}
+
+void Ray::Init(const glm::vec3 & origin, const glm::vec3 & dir) {
+	this->origin = origin;
+	this->dir = dir;
+	this->color = vec3(1.0f);
+	this->tMax = FLT_MAX;
 }
 
 void Ray::Update(const vec3 & origin, const vec3 & dir, const vec3 & attenuation) {
