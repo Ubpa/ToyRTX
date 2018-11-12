@@ -8,7 +8,16 @@ const AABB AABB::InValid(vec3(1), vec3(-1), false);
 AABB::AABB(const vec3 & minP, const vec3 & maxP, bool isValid)
 	: minP(minP), maxP(maxP), isValid(isValid) { }
 
+void AABB::SetP(const glm::vec3 & minP, const glm::vec3 & maxP) {
+	this->minP = minP;
+	this->maxP = maxP;
+	isValid = true;
+}
+
 bool AABB::Hit(const Ray::Ptr & ray) const {
+	if (!IsValid())
+		return false;
+
 	const vec3 origin = ray->GetOrigin();
 	const vec3 dir = ray->GetDir();
 	float tMin = Ray::tMin;

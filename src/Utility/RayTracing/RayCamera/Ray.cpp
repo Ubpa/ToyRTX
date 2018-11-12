@@ -38,3 +38,16 @@ void Ray::SetLightColor(const glm::vec3 & lightColor) {
 	this->color *= lightColor;
 	this->tMax = 0;
 }
+
+Ray::Ptr Ray::GenCopy() const {
+	auto ray = ToPtr(new Ray);
+	CopyTo(ray);
+	return ray;
+}
+
+void Ray::CopyTo(Ray::Ptr ray) const{
+	ray->origin = origin;
+	ray->dir = dir;
+	ray->color = color;
+	ray->tMax = tMax;
+}

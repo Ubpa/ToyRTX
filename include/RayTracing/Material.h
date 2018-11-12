@@ -3,6 +3,7 @@
 
 #include <Utility/HeapObj.h>
 #include <RayTracing/Ray.h>
+#include <vector>
 #include <glm/glm.hpp>
 
 namespace RayTracing {
@@ -10,7 +11,7 @@ namespace RayTracing {
 		HitRecord(const Ray::Ptr & ray = NULL, const glm::vec3 & pos = glm::vec3(0), const glm::vec3 & normal = glm::vec3(0,0,1));
 
 		Ray::Ptr ray;
-		glm::vec3 pos;
+		glm::vec3 pos; 
 		glm::vec3 normal;
 	};
 

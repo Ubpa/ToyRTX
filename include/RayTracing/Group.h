@@ -14,7 +14,7 @@ namespace RayTracing {
 		// 返回 false 说明光线传播结束
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 		Group & operator <<(const CppUtility::Other::Ptr<Hitable> & hitable);
-		virtual AABB BoundingBox() const;
+		virtual AABB GetBoundingBox() const;
 	};
 }
 #endif //!_GROUP_H_

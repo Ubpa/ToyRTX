@@ -59,7 +59,7 @@ int val_Default_ImgHeight = 768;
 int FPS = 2;
 
 # 采样率
-int sampleNum = 4;
+int sampleNum = 100;
 
 # 高斯模糊次数
 int blurNum = 1;
@@ -91,3 +91,7 @@ int val_01_in_a_Weekend_06_Scene_ImgHeight = 768;
 # 02_the_Next_Week / 01_MotionBlur 输出图像大小
 int val_02_the_Next_Week_01_MotionBlur_ImgWidth = 640;
 int val_02_the_Next_Week_01_MotionBlur_ImgHeight = 384;
+
+# 02_the_Next_Week / 02_AABB 输出图像大小
+int val_02_the_Next_Week_02_AABB_ImgWidth = 1280;
+int val_02_the_Next_Week_02_AABB_ImgHeight = 768;

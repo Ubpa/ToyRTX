@@ -8,7 +8,7 @@ namespace RayTracing {
 		HEAP_OBJ_SETUP(Dielectric)
 	public:
 		Dielectric(float refractIndex, glm::vec3 attenuationConst = glm::vec3(0));
-
+		
 		// 返回值为 true 说明光线继续传播
 		// 返回值为 false 说明光线不再传播
 		virtual bool Scatter(HitRecord & rec) const;

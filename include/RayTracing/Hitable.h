@@ -14,7 +14,7 @@ namespace RayTracing {
 	public:
 
 		struct HitRst{
-			HitRst(bool hit = false) : hit(hit) { }
+			HitRst(bool hit = false) : hit(hit), hitable(NULL) { }
 
 			bool hit;
 			HitRecord record;
@@ -29,7 +29,7 @@ namespace RayTracing {
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const = 0;
 		bool RayOut(HitRecord & rec) const;
-		virtual AABB BoundingBox() const = 0;
+		virtual AABB GetBoundingBox() const = 0;
 	protected:
 		const Material::Ptr material;
 	};

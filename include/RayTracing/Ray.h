@@ -23,8 +23,11 @@ namespace RayTracing {
 		void Update(const glm::vec3 & origin, const glm::vec3 & dir, const glm::vec3 & attenuation);
 		void SetLightColor(const glm::vec3 & lightColor);
 		
+		virtual Ray::Ptr GenCopy() const;
+
 		static const float tMin;
 	protected:
+		void CopyTo(Ray::Ptr ray) const;
 
 		glm::vec3 origin;
 		glm::vec3 dir;

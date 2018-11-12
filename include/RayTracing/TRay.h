@@ -12,7 +12,9 @@ namespace RayTracing {
 		void SetTime(float time);
 		float GetTime() const;
 
+		virtual Ray::Ptr GenCopy() const;
 	protected:
+		void CopyTo(TRay::Ptr tRay) const;
 
 		float time;
 	};

@@ -68,6 +68,8 @@ namespace CppUtility {
 				float R = R0 + (1 - R0)*pow(1 - cosTheta, 5);
 				return R;
 			}
+
+			
 		}
 	}
 }

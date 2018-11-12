@@ -12,7 +12,7 @@ namespace RayTracing {
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 
-		virtual AABB BoundingBox() const;
+		virtual AABB GetBoundingBox() const;
 	private:
 		glm::vec3 center0;
 		glm::vec3 center1;

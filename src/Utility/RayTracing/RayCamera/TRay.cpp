@@ -13,3 +13,14 @@ float TRay::GetTime() const {
 void TRay::SetTime(float time) {
 	this->time = time;
 }
+
+Ray::Ptr TRay::GenCopy() const {
+	auto tRay = ToPtr(new TRay);
+	CopyTo(tRay);
+	return tRay;
+}
+
+void TRay::CopyTo(TRay::Ptr tRay) const {
+	Ray::CopyTo(tRay);
+	tRay->time = time;
+}

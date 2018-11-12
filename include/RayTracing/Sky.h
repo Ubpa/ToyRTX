@@ -11,7 +11,7 @@ namespace RayTracing {
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 
-		virtual AABB BoundingBox() const;
+		virtual AABB GetBoundingBox() const;
 	};
 }
 

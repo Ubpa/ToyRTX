@@ -16,6 +16,9 @@ Hitable::HitRst MoveSphere::RayIn(Ray::Ptr & ray) const {
 	return Sphere::RayIn(ray);
 }
 
-AABB MoveSphere::BoundingBox() const {
-	//...
+AABB MoveSphere::GetBoundingBox() const {
+	vec3 minP = min(center0 - vec3(radius), center1 - vec3(radius));
+	vec3 maxP = max(center0 + vec3(radius), center1 + vec3(radius));
+
+	return { minP, maxP };
 }

@@ -36,7 +36,7 @@ Hitable::HitRst Sphere::RayIn(Ray::Ptr & ray) const{
 	return hitRst;
 }
 
-AABB Sphere::BoundingBox() const {
+AABB Sphere::GetBoundingBox() const {
 	vec3 minP = center - vec3(radius);
 	vec3 maxP = center + vec3(radius);
 	return { minP, maxP };

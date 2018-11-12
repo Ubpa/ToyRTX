@@ -38,5 +38,6 @@ bool Dielectric::Scatter(HitRecord & rec) const {
 	float fresnelFactor = Math::FresnelSchlick(airViewDir, rec.normal, refractIndex);
 	const vec3 & dir = Math::Rand_F() > fresnelFactor ? refractDir : reflectDir;
 	rec.ray->Update(rec.pos, dir, attenuation);
+
 	return true;
 }

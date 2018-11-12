@@ -2,6 +2,7 @@
 #define _MATH_H_
 
 #include <glm/glm.hpp>
+#include <vector>
 
 namespace CppUtility {
 	namespace Other {
@@ -40,6 +41,31 @@ namespace CppUtility {
 			//     Ni 为 入射光线所在介质的折射率
 			//     Nt 为 折射光线所在介质的折射率
 			float FresnelSchlick(const glm::vec3 & viewDir, const glm::vec3 & halfway, float ratioNtNi);
+
+			template <typename T>
+			T Mean(const std::vector<T> & data) {
+				if (data.size() == 0)
+					return static_cast<T>(0);
+
+				T sum = static_cast<T>(0);
+				for (size_t i = 0; i < data.size(); i++)
+					sum += data[i];
+
+				return sum / data.size();
+			}
+
+			template<typename T>
+			T Variance(const std::vector<T> & data) {
+				if (data.size() <= 1)
+					return static_cast<T>(0);
+
+				T mean = Mean(data);
+				T sum = static_cast<T>(0);
+				for (size_t i = 0; i < data.size(); i++)
+					sum += pow(data[i]-mean, 2);
+
+				return sum / (data.size()-1);
+			}
 		}
 	}
 }
