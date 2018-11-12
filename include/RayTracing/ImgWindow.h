@@ -1,6 +1,7 @@
 #ifndef _IMG_WINDOW_H_
 #define _IMG_WINDOW_H_
 
+#include <Utility/Config.h>
 #include <Utility/Operation.h>
 #include <Utility/Image.h>
 
@@ -19,12 +20,17 @@ namespace RayTracing {
 			ENUM_OPTION_SAVE_ALL_IMG = ENUM_OPTION_SAVE_SRC_IMG | ENUM_OPTION_SAVE_POST_PROCESS_IMG,
 			ENUM_OPTION_ALL = ENUM_OPTION_POST_PROCESS_ALL | ENUM_OPTION_SAVE_ALL_IMG,
 		};
+
 		ImgWindow(const std::string & title = "Image_Window");
-		bool Run(const CppUtility::Other::Ptr<CppUtility::Other::Operation> & imgUpdateOp);
+
 		double GetScale() const { return scale; };
 		CppUtility::Other::Image & GetImg() { return img; };
 		bool IsValid() { return isValid; };
+
+		bool Run(const CppUtility::Other::Ptr<CppUtility::Other::Operation> & imgUpdateOp);
 	private:
+		CppUtility::Other::Ptr<CppUtility::Other::Config> DoConfig();
+
 		size_t fps;
 		const std::string title;
 		double scale;

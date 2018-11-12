@@ -1,28 +1,25 @@
 #include <RayTracing/ImgWindow.h>
 
-#include <ROOT_PATH.h>
-
-#include <GLFW/Glfw.h>
-
-#include <Utility/GStorage.h>
-#include <Utility/LambdaOp.h>
-#include <Utility/Config.h>
-#include <Utility/OpNode.h>
-#include <Utility/Timer.h>
-
 #include <OpenGL/CommonDefine.h>
 #include <OpenGL/Texture.h>
 #include <OpenGL/FBO.h>
 #include <OpenGL/VAO.h>
 #include <OpenGL/Shader.h>
 
+#include <Utility/GStorage.h>
+#include <Utility/LambdaOp.h>
+#include <Utility/OpNode.h>
+#include <Utility/Timer.h>
+
+#include <GLFW/Glfw.h>
+
+#include <ROOT_PATH.h>
+
 using namespace RayTracing;
 using namespace CppUtility::OpenGL;
 using namespace CppUtility::Other;
 using namespace Define;
 using namespace std;
-
-Ptr<Config> DoConfig();
 
 ImgWindow::ImgWindow(const string & title)
 	: title(title), scale(1.0f){
@@ -79,6 +76,7 @@ ImgWindow::ImgWindow(const string & title)
 
 bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	Glfw::GetInstance()->Init(img.GetWidth(), img.GetHeight(), title);
+
 
 	//------------ VAO
 	VAO VAO_FlipScreen(&(data_Flip_ScreenVertices[0]), sizeof(data_Flip_ScreenVertices), { 2,2 });
@@ -267,10 +265,10 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	auto opQueue = new OpQueue;
 	(*opQueue) << updateOpQueue << renderQueue << finalOp;
 
-	//------------
+	//------------ Run
 	Glfw::GetInstance()->Run(opQueue);
 
-	//------------
+	//------------ Save Images
 	if ((option & ENUM_OPTION_SAVE_SRC_IMG) != 0)
 		img.SaveAsPNG(rootPath + "/data/out/" + title + ".png");
 
@@ -284,13 +282,11 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 
 	Glfw::GetInstance()->Terminate();
 
-
-
 	scale = 1.0;
 	return true;
 }
 
-Ptr<Config> DoConfig() {
+Ptr<Config> ImgWindow::DoConfig() {
 	printf("INFO: Try to read config.out\n");
 	string rootPath;
 	Ptr<Config> config = Ptr<Config>(new Config);
