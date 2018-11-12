@@ -61,10 +61,6 @@ bool Config::Load(const std::string & fileName) {
 	return true;
 }
 
-bool Config::IsValid() {
-	return valid;
-}
-
 bool Config::DecodeLine(const string & data) {
 	string strT = "(string)";
 	string intT = "(int)";
@@ -169,16 +165,64 @@ bool Config::DecodeLine(const string & data) {
 	return true;
 }
 
+bool Config::IsValid() const {
+	return valid;
+}
 
-string * Config::GetStrPtr(const std::string & id) {
+const string * Config::GetStrPtr(const std::string & id) const {
 	return strDirectory.GetPtr(id);
 }
-float * Config::GetFloatPtr(const std::string & id) {
+
+const float * Config::GetFloatPtr(const std::string & id) const {
 	return floatDirectory.GetPtr(id);
 }
-int * Config::GetIntPtr(const std::string & id) {
+
+const int * Config::GetIntPtr(const std::string & id) const {
 	return intDirectory.GetPtr(id);
 }
-unsigned int * Config::GetUnsignedIntPtr(const std::string & id) {
+
+const unsigned int * Config::GetUnsignedIntPtr(const std::string & id) const {
 	return unsignedIntDirectory.GetPtr(id);
+}
+
+
+bool Config::GetVal(const std::string & id, float & val, float defaultVal) const {
+	auto p = GetFloatPtr(id);
+	if (p == NULL) {
+		val = defaultVal;
+		return false;
+	}
+	
+	val = *p;
+	return true;
+}
+bool Config::GetVal(const std::string & id, int & val, int defaultVal) const {
+	auto p = GetIntPtr(id);
+	if (p == NULL) {
+		val = defaultVal;
+		return false;
+	}
+
+	val = *p;
+	return true;
+}
+bool Config::GetVal(const std::string & id, unsigned int & val, unsigned int defaultVal) const {
+	auto p = GetUnsignedIntPtr(id);
+	if (p == NULL) {
+		val = defaultVal;
+		return false;
+	}
+
+	val = *p;
+	return true;
+}
+bool Config::GetVal(const std::string & id, std::string & val, const string & defaultVal) const {
+	auto p = GetStrPtr(id);
+	if (p == NULL) {
+		val = defaultVal;
+		return false;
+	}
+
+	val = *p;
+	return true;
 }

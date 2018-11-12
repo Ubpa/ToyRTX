@@ -24,11 +24,12 @@ namespace CppUtility {
 			double Log();
 			void Reset();
 
-			ENUM_STATE GetState();
-			double GetWholeTime();
+			double GetLog(size_t i) const;
+			ENUM_STATE GetState() const;
+			double GetWholeTime() const;
 			std::ostream & operator <<(std::ostream & os);
 		private:
-			double GetCurTime();
+			double GetCurTime() const;
 
 			ENUM_STATE state;
 			std::deque<double> logs;

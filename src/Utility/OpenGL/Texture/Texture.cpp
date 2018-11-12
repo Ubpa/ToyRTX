@@ -171,6 +171,8 @@ bool Texture::SetImg(const Image & img) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	UnBind();
+
+	return true;
 }
 
 bool Texture::Use(size_t id) const{

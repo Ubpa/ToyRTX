@@ -5,6 +5,7 @@
 
 namespace CppUtility {
 	namespace Other {
+		typedef glm::vec3 rgb;
 		namespace Math {
 			const float EPSILON = 10e-6;
 

@@ -166,16 +166,22 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 
 	// ¸üÐÂ
 
-	double deltaTime = 0.0f;
 	size_t curFrame = 0;
-	const double tps = 1.0f / fps;
 	Timer mainTimer;
 	mainTimer.Start();
-	auto timeUpdate = new LambdaOp([&]() {
-		deltaTime = mainTimer.Log();
-		scale *= deltaTime < 10e-6 ? 2 * scale : tps / deltaTime;
+	auto scaleUpdate = ToPtr(new LambdaOp([&]() {
+		double tps = 1.0f / fps;
+		double imgUpdateTime = mainTimer.GetLog(1);
+		double otherTime = mainTimer.GetLog(2);
+		if(tps < otherTime)
+			tps = otherTime * 4;
+		scale *= imgUpdateTime < 10e-6 ? tps/10e-6 * scale : (tps-otherTime) / imgUpdateTime;
 		curFrame = static_cast<size_t>(mainTimer.GetWholeTime() / tps);
-	});
+	}));
+
+	auto timeLogOp = ToPtr(new LambdaOp([&]() {
+		mainTimer.Log();
+	}));
 
 	const Texture * curTex = &tex;
 	Ptr<Operation> texUpdate = ToPtr(new LambdaOp([&]() {
@@ -192,8 +198,8 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 		}
 	}));
 
-	auto updateOpQueue = new OpQueue;
-	(*updateOpQueue) << timeUpdate << imgUpdateOp << texUpdate;
+	auto updateOpQueue = ToPtr(new OpQueue);
+	(*updateOpQueue) << timeLogOp << imgUpdateOp << timeLogOp << scaleUpdate << texUpdate;
 
 	// äÖÈ¾
 	const FBO * curFBO = NULL;
@@ -240,12 +246,12 @@ bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
 	}));
 
 	GLint viewport[4];
-	auto imgProcessOp = new OpNode([&]() {
+	auto imgProcessOp = ToPtr(new OpNode([&]() {
 		glGetIntegerv(GL_VIEWPORT, viewport);
 		glViewport(0, 0, val_ImgWidth, val_ImgHeight);
 	}, [&](){
 		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-	});
+	}));
 
 	auto renderQueue = new OpQueue;
 	if ((option & ENUM_OPTION_POST_PROCESS_INTERPOLATION) != 0)
@@ -310,8 +316,9 @@ Ptr<Config> DoConfig() {
 			}
 		}
 	}
-
-	*config->GetStrPtr("RootPath") = rootPath;
+	
+	auto pRootPath = const_cast<string*>(config->GetStrPtr("RootPath"));
+	*pRootPath = rootPath;
 	printf("INFO: config.out read success\nINFO: RootPath is %s\n", config->GetStrPtr("RootPath")->c_str());
 	GStorage<Ptr<Config>>::GetInstance()->Register(str_MainConfig, config);
 	return config;

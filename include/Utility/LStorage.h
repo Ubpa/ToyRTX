@@ -17,6 +17,8 @@ namespace CppUtility {
 
 			T * GetPtr(const std::string & uniqueID);
 
+			const T * GetPtr(const std::string & uniqueID) const;
+
 			bool Register(const std::string & uniqueID);
 		private:
 
@@ -49,6 +51,15 @@ namespace CppUtility {
 
 		template<typename T>
 		T * LStorage<T>::GetPtr(const std::string & uniqueID) {
+			auto target = directory.find(uniqueID);
+			if (target == directory.end())
+				return NULL;
+
+			return &(target->second);
+		}
+
+		template<typename T>
+		const T * LStorage<T>::GetPtr(const std::string & uniqueID) const {
 			auto target = directory.find(uniqueID);
 			if (target == directory.end())
 				return NULL;

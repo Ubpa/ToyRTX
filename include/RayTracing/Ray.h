@@ -16,11 +16,11 @@ namespace RayTracing {
 		glm::vec3 GetOrigin() const { return origin; };
 		glm::vec3 GetDir() const { return dir; }
 		glm::vec3 GetColor() const { return color; }
-		void SetTMax(float tMax) { this->tMax = tMax; }
 		float GetTMax() const { return tMax; }
+		void SetTMax(float tMax) { this->tMax = tMax; }
 
-		void Update(const glm::vec3 & origin, const glm::vec3 & dir, const glm::vec3 &attenuation);
-		void SetLightColor(const glm::vec3 lightColor);
+		void Update(const glm::vec3 & origin, const glm::vec3 & dir, const glm::vec3 & attenuation);
+		void SetLightColor(const glm::vec3 & lightColor);
 
 	protected:
 

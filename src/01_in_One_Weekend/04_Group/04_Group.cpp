@@ -36,8 +36,6 @@ int main(int argc, char ** argv){
 	const size_t val_ImgChannel = img.GetChannel();
 
 	ImgPixelSet pixelSet(val_ImgWidth, val_ImgHeight);
-	//ImgPixelSet pixelSet;
-	//pixelSet << vec2(val_ImgWidth / 2, val_ImgHeight / 2);
 
 	vec3 origin(0, 0, 0);
 	vec3 viewPoint(0, 0, -1);

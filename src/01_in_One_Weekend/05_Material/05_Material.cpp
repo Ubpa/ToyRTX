@@ -45,8 +45,6 @@ int main(int argc, char ** argv){
 	const size_t val_ImgChannel = img.GetChannel();
 
 	ImgPixelSet pixelSet(val_ImgWidth, val_ImgHeight);
-	//ImgPixelSet pixelSet;
-	//pixelSet << vec2(val_ImgWidth / 2, val_ImgHeight / 4*1.05f);
 
 	vec3 origin(-2, 2, 1);
 	vec3 viewPoint(0, 0, -1);
@@ -60,7 +58,7 @@ int main(int argc, char ** argv){
 
 	printf("INFO: cores : %d\n", omp_get_num_procs());
 	omp_set_num_threads(omp_get_num_procs());
-	vector<vec2> pixels;
+	vector<uvec2> pixels;
 
 	auto scene = CreateScene();
 
@@ -75,7 +73,7 @@ int main(int argc, char ** argv){
 		int pixelsNum = pixels.size();
 		#pragma omp parallel for
 		for (int pixelIdx = 0; pixelIdx < pixelsNum; pixelIdx++) {
-			vec2 pixel = pixels[pixelIdx];
+			const uvec2 & pixel = pixels[pixelIdx];
 			rgb color(0);
 			for (int k = 0; k < sampleNum; k++) {
 				float u = (pixel.x + randMap(engine)) / (float)val_ImgWidth;

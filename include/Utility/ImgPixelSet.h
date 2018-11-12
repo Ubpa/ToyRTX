@@ -7,15 +7,15 @@
 
 namespace CppUtility {
 	namespace Other {
-		class ImgPixelSet : public RandSet<glm::vec2>{
+		class ImgPixelSet : public RandSet<glm::uvec2>{
 		public:
 			ImgPixelSet();
 			ImgPixelSet(size_t width, size_t height);
 
-			using RandSet<glm::vec2>::RandPick;
-			size_t RandPick(size_t n, std::vector<glm::vec2> & pixels);
+			using RandSet<glm::uvec2>::RandPick;
+			size_t RandPick(size_t n, std::vector<glm::uvec2> & pixels);
 		protected:
-			using RandSet<glm::vec2>::Insert;
+			using RandSet<glm::uvec2>::Insert;
 		};
 	}
 }

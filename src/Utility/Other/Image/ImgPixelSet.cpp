@@ -17,7 +17,7 @@ ImgPixelSet::ImgPixelSet(size_t width, size_t height) {
 	}
 }
 
-size_t ImgPixelSet::RandPick(size_t n, vector<glm::vec2> & pixels) {
+size_t ImgPixelSet::RandPick(size_t n, vector<glm::uvec2> & pixels) {
 	pixels.clear();
 	const size_t num = glm::min(Size(), n);
 	pixels.reserve(num);

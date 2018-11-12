@@ -28,7 +28,6 @@ using namespace RayTracing;
 using namespace Define;
 using namespace glm;
 using namespace std;
-typedef vec3 rgb;
 
 Scene::Ptr CreateScene(float ratioWH);
 rgb RayTracer(const Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth = 50);
@@ -48,58 +47,48 @@ int main(int argc, char ** argv){
 	const float val_RatioWH = (float)val_ImgWidth / (float)val_ImgHeight;
 
 	ImgPixelSet pixelSet(val_ImgWidth, val_ImgHeight);
-	//ImgPixelSet pixelSet;
-	//pixelSet << vec2(val_ImgWidth / 2, val_ImgHeight / 4*1.05f);
 
-	auto config = GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
-	auto pSampleNum = (*config)->GetIntPtr("sampleNum");
-	const int sampleNum = pSampleNum ? *pSampleNum : 1;
+	auto config = *GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
+	int sampleNum;
+	config->GetVal("sampleNum", sampleNum, 1);
 
 	printf("INFO: cores : %d\n", omp_get_num_procs());
 	omp_set_num_threads(omp_get_num_procs());
-	vector<vec2> pixels;
+	vector<uvec2> pixels;
 
 	auto scene = CreateScene(val_RatioWH);
 
 	Timer timer;
 	timer.Start();
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
-		static double loopMax = 100;
-		static uniform_real_distribution<> randMap(0.0f,1.0f);
-		static default_random_engine engine;
-		loopMax = glm::max(100 * imgWindow.GetScale(), 1.0);
-		
+		size_t loopMax = glm::max(imgWindow.GetScale(), 1.0);
 		pixelSet.RandPick(loopMax, pixels);
 		int pixelsNum = pixels.size();
 
 #pragma omp parallel for
 		for (int pixelIdx = 0; pixelIdx < pixelsNum; pixelIdx++) {
-			vec2 pixel = pixels[pixelIdx];
+			const uvec2 & pixel = pixels[pixelIdx];
 			rgb color(0);
-			for (int k = 0; k < sampleNum; k++) {
-				float u = (pixel.x + randMap(engine)) / (float)val_ImgWidth;
-				float v = (pixel.y + randMap(engine)) / (float)val_ImgHeight;
-				Ray::Ptr ray = scene->camera->GenRay(u, v);
-				color += RayTracer(scene->obj, ray);
+			for (size_t k = 0; k < sampleNum; k++) {
+				float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
+				float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
+				color += RayTracer(scene->obj, scene->camera->GenRay(u, v));
 			}
 			color /= sampleNum;
 			img.SetPixel(pixel.x, val_ImgHeight - 1 - pixel.y, sqrt(color));
 		}
 
 		float curStep = 100 * (1 - pixelSet.Size() / float(val_ImgWidth * val_ImgHeight));
-		float t = timer.Log();
-		static float speed = 0;
-		static size_t cnt = 0;
-		speed = (speed * cnt + pixelsNum / t) / (cnt + 1);
-		cnt++;
 		float wholeTime = timer.GetWholeTime();
+		float speed = (val_ImgWidth * val_ImgHeight - pixelSet.Size()) / wholeTime;
 		float needTime = pixelSet.Size() / speed;
-		printf("\r%.2f%%, %.2f pixle / s, use %.2f s, need %.2f s, sum %.2f s", curStep, speed, wholeTime, needTime, wholeTime + needTime);
+		printf("\rINFO: %.2f%%, %.2f pixle / s, use %.2f s, need %.2f s, sum %.2f s     ",
+			curStep, speed, wholeTime, needTime, wholeTime + needTime);
 		if (pixelSet.Size() == 0) {
 			printf("\n");
 			imgUpdate->SetIsHold(false);
 		}
-	}, true));
+	}));
 
 	auto success = imgWindow.Run(imgUpdate);
 	return success ? 0 : 1;
@@ -146,7 +135,7 @@ Scene::Ptr CreateScene(float ratioWH){
 	auto sphere1 = ToPtr(new Sphere(vec3(2, 1, 0), 1.0, ToPtr(new Dielectric(1.5))));
 	auto sphere2 = ToPtr(new Sphere(vec3(2, 1, 0), -0.8, ToPtr(new Dielectric(1.5))));
 	auto sphere3 = ToPtr(new Sphere(vec3(-2, 1, 0), 1.0, ToPtr(new Lambertian(vec3(0.4, 0.2, 0.1)))));
-	auto sphere4 = ToPtr(new Sphere(vec3(-6, 1, 0), 1.0, ToPtr(new Dielectric(2.5))));
+	auto sphere4 = ToPtr(new Sphere(vec3(-6, 1, 0), 1.0, ToPtr(new Dielectric(2.5, vec3(0,100,0)))));
 
 	(*group) << sphere0 << sphere1 << sphere2 << sphere3 << sphere4 << sphereBottom << sky;
 
