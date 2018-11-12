@@ -19,9 +19,9 @@ Hitable::HitRst Sphere::RayIn(Ray::Ptr & ray) const{
 		return HitRst::FALSE;
 
 	float t = (-b - sqrt(discriminant)) / a;
-	if (t > ray->GetTMax() || t < tMin) {
+	if (t > ray->GetTMax() || t < Ray::tMin) {
 		t = (-b + sqrt(discriminant)) / a;
-		if (t > ray->GetTMax() || t < tMin)
+		if (t > ray->GetTMax() || t < Ray::tMin)
 			return HitRst::FALSE;
 	}
 	
@@ -34,4 +34,10 @@ Hitable::HitRst Sphere::RayIn(Ray::Ptr & ray) const{
 	hitRst.hitable = this;
 
 	return hitRst;
+}
+
+AABB Sphere::BoundingBox() const {
+	vec3 minP = center - vec3(radius);
+	vec3 maxP = center + vec3(radius);
+	return { minP, maxP };
 }

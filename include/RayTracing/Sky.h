@@ -10,6 +10,8 @@ namespace RayTracing {
 		using Hitable::Hitable;
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
+
+		virtual AABB BoundingBox() const;
 	};
 }
 

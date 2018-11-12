@@ -15,3 +15,7 @@ Hitable::HitRst MoveSphere::RayIn(Ray::Ptr & ray) const {
 		const_cast<vec3&>(center) = mix(center0, center1, tRay->GetTime());
 	return Sphere::RayIn(ray);
 }
+
+AABB MoveSphere::BoundingBox() const {
+	//...
+}

@@ -1,6 +1,7 @@
 #ifndef _HITABLE_H_
 #define _HITABLE_H_ 
 
+#include <RayTracing/AABB.h>
 #include <RayTracing/Ray.h>
 #include <RayTracing/Material.h>
 
@@ -28,8 +29,8 @@ namespace RayTracing {
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const = 0;
 		bool RayOut(HitRecord & rec) const;
+		virtual AABB BoundingBox() const = 0;
 	protected:
-		static const float tMin;
 		const Material::Ptr material;
 	};
 }

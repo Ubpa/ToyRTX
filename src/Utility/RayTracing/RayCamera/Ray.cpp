@@ -3,6 +3,8 @@
 using namespace glm;
 using namespace RayTracing;
 
+const float Ray::tMin = 10e-4;
+
 Ray::Ray(const vec3 & origin, const vec3 & dir){
 	Init(origin, dir);
 }

@@ -23,6 +23,7 @@ namespace RayTracing {
 		void Update(const glm::vec3 & origin, const glm::vec3 & dir, const glm::vec3 & attenuation);
 		void SetLightColor(const glm::vec3 & lightColor);
 		
+		static const float tMin;
 	protected:
 
 		glm::vec3 origin;

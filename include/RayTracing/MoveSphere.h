@@ -11,6 +11,8 @@ namespace RayTracing {
 		MoveSphere(float t0, float t1, const glm::vec3 & center0, const glm::vec3 & center1, float radius, Material::Ptr material);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
+
+		virtual AABB BoundingBox() const;
 	private:
 		glm::vec3 center0;
 		glm::vec3 center1;

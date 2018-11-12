@@ -15,3 +15,7 @@ Hitable::HitRst Sky::RayIn(Ray::Ptr & ray) const {
 
 	return hitRst;
 }
+
+AABB Sky::BoundingBox() const {
+	return { vec3(10e-20), vec3(10e20) };
+}

@@ -26,3 +26,14 @@ Group & Group::operator <<(const CppUtility::Other::Ptr<Hitable> & hitable) {
 	
 	return *this;
 }
+
+AABB Group::BoundingBox() const {
+	if (size() == 0)
+		return AABB::InValid;
+
+	AABB rst = at(0)->BoundingBox();
+	for (size_t i = 1; i < size(); i++)
+		rst += at(i)->BoundingBox();
+
+	return rst;
+}
