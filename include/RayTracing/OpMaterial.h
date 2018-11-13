@@ -1,9 +1,9 @@
 #ifndef _OP_MATERIAL_H_
 #define _OP_MATERIAL_H_
 
-#include <functional>
-
 #include <RayTracing/Material.h>
+
+#include <functional>
 
 namespace RayTracing {
 	class OpMaterial : public Material{

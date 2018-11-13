@@ -6,7 +6,6 @@
 
 namespace CppUtility {
 	namespace Other {
-		typedef glm::vec3 rgb;
 		namespace Math {
 			const float EPSILON = 10e-6;
 
@@ -14,18 +13,19 @@ namespace CppUtility {
 
 			glm::vec3 RandInSphere();
 
-			//-0x7FFFFFFFF -- 0x7FFFFFFF
+			// [-0x7FFFFFFFF, 0x7FFFFFFF]
 			int Rand_I();
 
-			//0 -- 0xFFFFFFFF
+			// [0, 0xFFFFFFFF]
 			unsigned int Rand_UI();
 
-			//0.0f -- 1.0f
+			// [0.0f, 1.0f]
 			float Rand_F();
 
-			//0.0 -- 1.0
+			// [0.0, 1.0]
 			double Rand_D();
 
+			// dor( (0.299, 0.587, 0.114), color )
 			float Gray(const glm::vec3 & color);
 
 			// 折射
@@ -42,6 +42,24 @@ namespace CppUtility {
 			//     Nt 为 折射光线所在介质的折射率
 			float FresnelSchlick(const glm::vec3 & viewDir, const glm::vec3 & halfway, float ratioNtNi);
 
+			template <typename T>
+			T Mean(const std::vector<T> & data);
+
+			template<typename T>
+			T Variance(const std::vector<T> & data);
+
+			// 变更所有元素的位置, 新位置的概率平均
+			template<typename T>
+			void Permute(std::vector<T> data);
+
+
+			//--------------以下为模板的实现----------------
+			//--------------以下为模板的实现----------------
+			//--------------以下为模板的实现----------------
+			//--------------以下为模板的实现----------------
+			//--------------以下为模板的实现----------------
+			//--------------以下为模板的实现----------------
+			//--------------以下为模板的实现----------------
 			template <typename T>
 			T Mean(const std::vector<T> & data) {
 				if (data.size() == 0)
@@ -62,9 +80,17 @@ namespace CppUtility {
 				T mean = Mean(data);
 				T sum = static_cast<T>(0);
 				for (size_t i = 0; i < data.size(); i++)
-					sum += pow(data[i]-mean, 2);
+					sum += pow(data[i] - mean, 2);
 
-				return sum / (data.size()-1);
+				return sum / (data.size() - 1);
+			}
+
+			template<typename T>
+			void Permute(std::vector<T> data) {
+				for (size_t i = data.size() - 1; i > 0; i--) {
+					size_t target = Rand_UI() % i;
+					std::swap(data[i], data[target]);
+				}
 			}
 		}
 	}

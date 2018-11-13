@@ -1,17 +1,22 @@
 #ifndef _MATERIAL_H_
 #define _MATERIAL_H_
 
-#include <Utility/HeapObj.h>
 #include <RayTracing/Ray.h>
-#include <vector>
+
+#include <Utility/HeapObj.h>
+
 #include <glm/glm.hpp>
+
+#include <vector>
 
 namespace RayTracing {
 	struct HitRecord {
 		HitRecord(const Ray::Ptr & ray = NULL, const glm::vec3 & pos = glm::vec3(0), const glm::vec3 & normal = glm::vec3(0,0,1));
 
 		Ray::Ptr ray;
-		glm::vec3 pos; 
+		float u;
+		float v;
+		glm::vec3 pos;
 		glm::vec3 normal;
 	};
 

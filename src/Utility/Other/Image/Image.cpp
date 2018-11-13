@@ -52,11 +52,11 @@ Image::Pixel<double> Image::Pixel_UB2D(const Pixel<uByte> & pixel) {
 Image::Image()
 	:data(NULL), width(0), height(0), channel(0), type(ENUM_SRC_TYPE_INVALID){ }
 
-Image::Image(int width, int height, int channel){
+Image::Image(size_t width, size_t height, size_t channel){
 	GenBuffer(width, height, channel);
 }
 
-Image::Image(const char * fileName, bool flip, int req_comp) {
+Image::Image(const char * fileName, bool flip, size_t req_comp) {
 	data = NULL;
 	type = ENUM_SRC_TYPE_INVALID;
 	Load(fileName, flip, req_comp);
@@ -86,15 +86,15 @@ const uByte * Image::GetConstData() const{
 	return data;
 }
 
-int Image::GetWidth() const{
+size_t Image::GetWidth() const{
 	return width;
 }
 
-int Image::GetHeight() const{
+size_t Image::GetHeight() const{
 	return height;
 }
 
-int Image::GetChannel() const{
+size_t Image::GetChannel() const{
 	return channel;
 }
 
@@ -129,10 +129,11 @@ bool Image::SetPixel(size_t x, size_t y, const Image::Pixel<double> & pixel) {
 
 
 Image::Pixel<uByte> Image::GetPixel_UB(size_t x, size_t y) {
-	if (channel == 3)
-		return { At(x, y, 0), At(x, y, 1), At(x, y, 2) };
-	else if (channel == 4)
-		return { At(x, y, 0), At(x, y, 1), At(x, y, 2), At(x, y, 3) };
+	Pixel<uByte> rst(channel);
+	for (size_t i = 0; i < channel; i++)
+		rst[i] = At(x, y, i);
+
+	return rst;
 }
 
 
@@ -146,10 +147,17 @@ Image::Pixel<double> Image::GetPixel_D(size_t x, size_t y) {
 
 //------------
 
-bool Image::Load(const std::string & fileName, bool flip, int req_comp) {
+bool Image::Load(const std::string & fileName, bool flip, size_t req_comp) {
 	Free();
+
 	stbi_set_flip_vertically_on_load(flip);
-	data = stbi_load(fileName.c_str(), &width, &height, &channel, req_comp);
+
+	int tmpW, tmpH, tmpC;
+	data = stbi_load(fileName.c_str(), &tmpW, &tmpH, &tmpC, req_comp);
+	width = tmpW;
+	height = tmpH;
+	channel = tmpC;
+
 	if (data == NULL) {
 		type = ENUM_SRC_TYPE_INVALID;
 		return false;
@@ -158,7 +166,7 @@ bool Image::Load(const std::string & fileName, bool flip, int req_comp) {
 	type = ENUM_SRC_TYPE_STB;
 	return true;
 }
-void Image::GenBuffer(int width, int height, int channel) {
+void Image::GenBuffer(size_t width, size_t height, size_t channel) {
 	Free();
 	this->width = width;
 	this->height = height;

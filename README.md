@@ -14,7 +14,9 @@
 >
 > https://github.com/petershirley/raytracingtherestofyourlife
 
-对内容进行了一定的修改，图形接口使用的是 OpenGL
+对内容进行了一定的修改，包括类设计等
+
+图形接口使用的是 OpenGL
 
 # 2. 内容
 
@@ -26,6 +28,10 @@
   -01_04_Group
   -01_05_Material
   -01_06_Scene
+/02_the_Next_Week
+  -02_01_MotionBlur
+  -02_02_AABB
+  -02_03_Texture
 /Utility
   /OpenGL
     -Camera
@@ -45,16 +51,17 @@
     -Header: Array2D, GStorage, LStorage, Pool, Ptr, RandSet, Singleton, Vec
     -HeapObj
     -Image
-    -Math
+    -Math: Math, Perlin
     -Operation: Operation, LambdaOp, InfoLambdaOp, OpQueue
     -Shape: Shape, Cube, Sphere
     -Timer
   /RayTracing
-    -Hitable: Group, Hitable, Sky, Spheres
+    -Hitable: AABB, BVH_Node, Group, Hitable, MoveSphere, Sky, Sphere
     -ImgWindow
     -Material: Dielectric, Lambertian, Material, Metal, OpMaterial
-    -Ray: Ray, TRay
-    -RayCamera: RayCamera, TRayCamera
+    -Ray: 
+    -RayCamera: Ray, RayCamera, TRay, TRayCamera
+    -RT_Texture: OpTexture(Const, Checker, Noise), Texture
     -Scene
 ```
 
@@ -88,4 +95,4 @@ cmake ..
 
 ## 2.4 配置
 
-在运行exe前，可以对config.out进行修改来配置，在调试时在config.in进行修改来配置
+在运行exe前，可以对 `config.out` 进行修改来配置，在调试时在 `config.in` 进行修改来配置

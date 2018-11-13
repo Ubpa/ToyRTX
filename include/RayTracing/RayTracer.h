@@ -2,12 +2,12 @@
 #define _RAY_TRACER_H_
 
 #include <RayTracing/Hitable.h>
-#include <Utility/Math.h>
+#include <glm/glm.hpp>
 
 namespace RayTracing {
 	class RayTracer {
 	public:
-		static CppUtility::Other::rgb Trace(Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth = 50);
+		static glm::rgb Trace(Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth = 50);
 	};
 }
 

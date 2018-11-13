@@ -115,3 +115,7 @@
 #include "matrix.hpp"
 #include "vector_relational.hpp"
 #include "integer.hpp"
+
+namespace glm {
+	typedef vec3 rgb;
+}

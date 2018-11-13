@@ -95,3 +95,7 @@ int val_02_the_Next_Week_01_MotionBlur_ImgHeight = 384;
 # 02_the_Next_Week / 02_AABB 输出图像大小
 int val_02_the_Next_Week_02_AABB_ImgWidth = 1280;
 int val_02_the_Next_Week_02_AABB_ImgHeight = 768;
+
+# 02_the_Next_Week / 03_Texture 输出图像大小
+int val_02_the_Next_Week_03_Texture_ImgWidth = 1280;
+int val_02_the_Next_Week_03_Texture_ImgHeight = 768;

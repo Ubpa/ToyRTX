@@ -1,7 +1,7 @@
 #include <RayTracing/RayTracer.h>
 
 using namespace RayTracing;
-using namespace CppUtility::Other;
+using namespace glm;
 
 rgb RayTracer::Trace(Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth) {
 	if (depth == 0)

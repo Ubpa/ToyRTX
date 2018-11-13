@@ -30,16 +30,16 @@ namespace CppUtility {
 			};
 
 			Image();
-			Image(int width, int height, int channel);
-			Image(const char * fileName, bool flip = false, int req_comp = 0);
+			Image(size_t width, size_t height, size_t channel);
+			Image(const char * fileName, bool flip = false, size_t req_comp = 0);
 			~Image();
 			//------------
 			bool IsValid() const;
 			uByte * GetData();
 			const uByte * GetConstData() const;
-			int GetWidth() const;
-			int GetHeight() const;
-			int GetChannel() const;
+			size_t GetWidth() const;
+			size_t GetHeight() const;
+			size_t GetChannel() const;
 			//------------
 			bool SetPixel(size_t x, size_t y, const Pixel<uByte> & pixel);
 			bool SetPixel(size_t x, size_t y, const Pixel<float> & pixel);
@@ -50,8 +50,8 @@ namespace CppUtility {
 			Pixel<double> GetPixel_D(size_t x, size_t y);
 			uByte & At(size_t x, size_t y, size_t channel);
 			//------------
-			bool Load(const std::string & fileName, bool flip = false, int req_comp = 0);
-			void GenBuffer(int width, int height, int channel);
+			bool Load(const std::string & fileName, bool flip = false, size_t req_comp = 0);
+			void GenBuffer(size_t width, size_t height, size_t channel);
 			void Free();
 			bool SaveAsPNG(const std::string & fileName, bool flip = false) const;
 			//------------
@@ -70,9 +70,9 @@ namespace CppUtility {
 			};
 
 			uByte * data;
-			int width;
-			int height;
-			int channel;
+			size_t width;
+			size_t height;
+			size_t channel;
 			ENUM_SRC_TYPE type;
 		};
 
