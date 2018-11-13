@@ -31,7 +31,7 @@ namespace CppUtility {
 
 			Image();
 			Image(size_t width, size_t height, size_t channel);
-			Image(const char * fileName, bool flip = false, size_t req_comp = 0);
+			Image(const char * fileName, bool flip = false);
 			~Image();
 			//------------
 			bool IsValid() const;
@@ -45,12 +45,13 @@ namespace CppUtility {
 			bool SetPixel(size_t x, size_t y, const Pixel<float> & pixel);
 			bool SetPixel(size_t x, size_t y, const Pixel<double> & pixel);
 			bool SetPixel(size_t x, size_t y, const glm::vec3 & pixel);
-			Pixel<uByte> GetPixel_UB(size_t x, size_t y);
-			Pixel<float> GetPixel_F(size_t x, size_t y);
-			Pixel<double> GetPixel_D(size_t x, size_t y);
+			Pixel<uByte> GetPixel_UB(size_t x, size_t y) const;
+			Pixel<float> GetPixel_F(size_t x, size_t y) const;
+			Pixel<double> GetPixel_D(size_t x, size_t y) const;
 			uByte & At(size_t x, size_t y, size_t channel);
+			const uByte & At(size_t x, size_t y, size_t channel) const;
 			//------------
-			bool Load(const std::string & fileName, bool flip = false, size_t req_comp = 0);
+			bool Load(const std::string & fileName, bool flip = false);
 			void GenBuffer(size_t width, size_t height, size_t channel);
 			void Free();
 			bool SaveAsPNG(const std::string & fileName, bool flip = false) const;

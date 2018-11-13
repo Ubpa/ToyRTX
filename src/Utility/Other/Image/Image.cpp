@@ -56,10 +56,10 @@ Image::Image(size_t width, size_t height, size_t channel){
 	GenBuffer(width, height, channel);
 }
 
-Image::Image(const char * fileName, bool flip, size_t req_comp) {
+Image::Image(const char * fileName, bool flip) {
 	data = NULL;
 	type = ENUM_SRC_TYPE_INVALID;
-	Load(fileName, flip, req_comp);
+	Load(fileName, flip);
 }
 
 Image::~Image() {
@@ -104,6 +104,10 @@ uByte & Image::At(size_t x, size_t y, size_t channel) {
 	return data[(y*width + x)*this->channel + channel];
 }
 
+const uByte & Image::At(size_t x, size_t y, size_t channel) const {
+	return data[(y*width + x)*this->channel + channel];
+}
+
 bool Image::SetPixel(size_t x, size_t y, const Pixel<uByte> & pixel) {
 	if (pixel.channel != this->channel)
 		return false;
@@ -126,9 +130,7 @@ bool Image::SetPixel(size_t x, size_t y, const Image::Pixel<double> & pixel) {
 	return SetPixel(x, y, Pixel_D2UB(pixel));
 }
 
-
-
-Image::Pixel<uByte> Image::GetPixel_UB(size_t x, size_t y) {
+Image::Pixel<uByte> Image::GetPixel_UB(size_t x, size_t y) const {
 	Pixel<uByte> rst(channel);
 	for (size_t i = 0; i < channel; i++)
 		rst[i] = At(x, y, i);
@@ -136,24 +138,23 @@ Image::Pixel<uByte> Image::GetPixel_UB(size_t x, size_t y) {
 	return rst;
 }
 
-
-Image::Pixel<float> Image::GetPixel_F(size_t x, size_t y) {
+Image::Pixel<float> Image::GetPixel_F(size_t x, size_t y) const {
 	return Pixel_UB2F(GetPixel_UB(x, y));
 }
 
-Image::Pixel<double> Image::GetPixel_D(size_t x, size_t y) {
+Image::Pixel<double> Image::GetPixel_D(size_t x, size_t y) const {
 	return Pixel_UB2D(GetPixel_UB(x, y));
 }
 
 //------------
 
-bool Image::Load(const std::string & fileName, bool flip, size_t req_comp) {
+bool Image::Load(const std::string & fileName, bool flip) {
 	Free();
 
 	stbi_set_flip_vertically_on_load(flip);
 
 	int tmpW, tmpH, tmpC;
-	data = stbi_load(fileName.c_str(), &tmpW, &tmpH, &tmpC, req_comp);
+	data = stbi_load(fileName.c_str(), &tmpW, &tmpH, &tmpC, 0);
 	width = tmpW;
 	height = tmpH;
 	channel = tmpC;

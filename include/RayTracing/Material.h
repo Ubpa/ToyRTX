@@ -11,7 +11,7 @@
 
 namespace RayTracing {
 	struct HitRecord {
-		HitRecord(const Ray::Ptr & ray = NULL, const glm::vec3 & pos = glm::vec3(0), const glm::vec3 & normal = glm::vec3(0,0,1));
+		HitRecord(const Ray::Ptr & ray = NULL, const glm::vec3 & pos = glm::vec3(0), const glm::vec3 & normal = glm::vec3(0,0,1), float u = 0, float v = 0);
 
 		Ray::Ptr ray;
 		float u;

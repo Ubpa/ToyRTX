@@ -3,7 +3,7 @@
 
 namespace Define {
 	const std::string str_Chapter = "02_the_Next_Week";
-	const std::string str_Subchapter = "03_Texture";
+	const std::string str_Subchapter = "04_RectLight";
 	const std::string str_WindowTitle = str_Chapter + "_" + str_Subchapter;
 
 	const std::string str_Img_Earth = "/data/textures/earth.jpg";

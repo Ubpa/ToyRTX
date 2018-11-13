@@ -8,6 +8,7 @@ namespace CppUtility {
 	namespace Other {
 		namespace Math {
 			const float EPSILON = 10e-6;
+			const float PI = 3.1415926;
 
 			glm::vec2 RandInCircle();
 
@@ -51,6 +52,9 @@ namespace CppUtility {
 			// 变更所有元素的位置, 新位置的概率平均
 			template<typename T>
 			void Permute(std::vector<T> data);
+
+			// 将三维坐标转化为参数坐标
+			glm::vec2 Sphere2UV(const glm::vec3 & normal);
 
 
 			//--------------以下为模板的实现----------------

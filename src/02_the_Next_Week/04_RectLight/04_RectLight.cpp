@@ -1,3 +1,4 @@
+#include <RayTracing/Light.h>
 #include <RayTracing/ImgTexture.h>
 #include <RayTracing/RayTracer.h>
 #include <RayTracing/OpTexture.h>
@@ -34,7 +35,8 @@ using namespace Define;
 using namespace glm;
 using namespace std;
 
-Scene::Ptr CreateScene(float ratioWH);
+Scene::Ptr CreateScene0(float ratioWH);
+Scene::Ptr CreateScene1(float ratioWH);
 rgb Background(const Ray::Ptr & ray);
 
 int main(int argc, char ** argv){
@@ -59,7 +61,7 @@ int main(int argc, char ** argv){
 
 	vector<uvec2> pixels;
 
-	auto scene = CreateScene((float)val_ImgWidth / (float)val_ImgHeight);
+	auto scene = CreateScene1((float)val_ImgWidth / (float)val_ImgHeight);
 
 	Timer timer;
 	timer.Start();
@@ -99,7 +101,7 @@ int main(int argc, char ** argv){
 	return success ? 0 : 1;
 }
 
-Scene::Ptr CreateScene(float ratioWH){
+Scene::Ptr CreateScene0(float ratioWH){
 	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
 		float t = 0.5 * (rec.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
@@ -167,5 +169,45 @@ Scene::Ptr CreateScene(float ratioWH){
 	float distToFocus = 10.0f;
 	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
 	
+	return ToPtr(new Scene(group, camera));
+}
+
+Scene::Ptr CreateScene1(float ratioWH) {
+	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
+		float t = 0.5 * (rec.pos.y + 1.0f);
+		rgb c0 = rgb(0.005f);
+		rgb c1 = c0 * rgb(0.75f, 0.5f, 0.375f);
+		rgb lightColor = (1 - t) * c0 + t * c1;
+		rec.ray->SetLightColor(lightColor);
+		return false;
+	}));
+	auto sky = ToPtr(new Sky(skyMat));
+
+	auto group = ToPtr(new Group);
+
+	auto noiseMat = ToPtr(new Lambertian(OpTexture::NoiseTexture(0, vec3(1), 3)));
+	auto redLightMat = ToPtr(new Light(rgb(1.0f, 0, 0)));
+	auto greenLightMat = ToPtr(new Light(rgb(0, 1.0f, 0)));
+	auto blueLightMat = ToPtr(new Light(rgb(0, 0, 1.0f)));
+	auto whiteLightMat = ToPtr(new Light(rgb(1.0f)));
+
+	auto sphere0 = ToPtr(new Sphere(vec3(0, 1, 0), 1.0f, noiseMat));
+	auto sphere1 = ToPtr(new Sphere(vec3(0, -1000, 0), 1000.0f, noiseMat));
+	auto sphere2 = ToPtr(new Sphere(vec3(-2, 2, 1.732), 0.5f, redLightMat));
+	auto sphere3 = ToPtr(new Sphere(vec3(2, 2, 1.732), 0.5f, greenLightMat));
+	auto sphere4 = ToPtr(new Sphere(vec3(0, 2, -1.732), 0.5f, blueLightMat));
+	auto sphere5 = ToPtr(new Sphere(vec3(0, 3, 0), 0.5f, whiteLightMat));
+
+	(*group) << sphere0 << sphere1 << sphere2 << sphere3 << sphere4 << sphere5 << sky;
+
+	float t0 = 0.0f;
+	float t1 = 1.0f;
+	vec3 origin(0, 1, 5);
+	vec3 viewPoint(0, 1, 0);
+	float fov = 45.0f;
+	float lenR = 0.05f;
+	float distToFocus = 5.0f;
+	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
+
 	return ToPtr(new Scene(group, camera));
 }

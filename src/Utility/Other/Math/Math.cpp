@@ -65,3 +65,12 @@ float Math::FresnelSchlick(const vec3 & viewDir, const vec3 & halfway, float rat
 	float R = R0 + (1 - R0)*pow(1 - cosTheta, 5);
 	return R;
 }
+
+vec2 Math::Sphere2UV(const vec3 & normal) {
+	vec2 rst;
+	float phi = atan2(normal.z, normal.x);
+	float theta = asin(normal.y);
+	rst.s = 1 - (phi + PI) / (2 * PI);
+	rst.t = (theta + PI/2) / PI;
+	return rst;
+}
