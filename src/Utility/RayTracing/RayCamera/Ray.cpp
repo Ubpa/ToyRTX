@@ -10,7 +10,7 @@ Ray::Ray(const vec3 & origin, const vec3 & dir){
 }
 
 vec3 Ray::operator ()(float t) const {
-	return  origin + t * dir;
+	return origin + t * dir;
 }
 
 vec3 Ray::At(float t) const {
@@ -20,23 +20,29 @@ vec3 Ray::At(float t) const {
 void Ray::Init(const glm::vec3 & origin, const glm::vec3 & dir) {
 	this->origin = origin;
 	this->dir = dir;
-	this->color = vec3(1.0f);
-	this->tMax = FLT_MAX;
+	color = vec3(1.0f);
+	tMax = FLT_MAX;
 }
 
 void Ray::Update(const vec3 & origin, const vec3 & dir, const vec3 & attenuation) {
 	this->origin = origin;
 	this->dir = dir;
-	this->color *= attenuation;
-	this->tMax = FLT_MAX;
+	color *= attenuation;
+	tMax = FLT_MAX;
 }
 
 
 void Ray::SetLightColor(const glm::vec3 & lightColor) {
-	this->origin = vec3(0);
-	this->dir = vec3(0);
-	this->color *= lightColor;
-	this->tMax = 0;
+	origin = vec3(0);
+	dir = vec3(0);
+	color *= lightColor;
+	tMax = 0;
+}
+
+void Ray::SetTransform(const glm::mat4 & transform) {
+	dir = mat3(transform) * dir;
+	auto originQ = transform * vec4(origin, 1.0f);
+	origin = vec3(originQ) / originQ.w;
 }
 
 Ray::Ptr Ray::GenCopy() const {

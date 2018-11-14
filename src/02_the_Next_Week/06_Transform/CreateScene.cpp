@@ -1,107 +1,37 @@
+#include "CreateScene.h"
+
+#include <RayTracing/Transform.h>
+#include <RayTracing/TriMesh.h>
 #include <RayTracing/Light.h>
-#include <RayTracing/ImgTexture.h>
-#include <RayTracing/RayTracer.h>
+#include <RayTracing/Group.h>
 #include <RayTracing/OpTexture.h>
 #include <RayTracing/BVH_Node.h>
 #include <RayTracing/MoveSphere.h>
-#include <RayTracing/Scene.h>
 #include <RayTracing/Dielectric.h>
+#include <RayTracing/Sky.h>
+#include <RayTracing/OpMaterial.h>
 #include <RayTracing/Metal.h>
 #include <RayTracing/Lambertian.h>
-#include <RayTracing/OpMaterial.h>
-#include <RayTracing/Sky.h>
 #include <RayTracing/Sphere.h>
-#include <RayTracing/Group.h>
-#include <RayTracing/ImgWindow.h>
+#include <RayTracing/ImgTexture.h>
 #include <RayTracing/TRayCamera.h>
 
-#include <Utility/Math.h>
-#include <Utility/ImgPixelSet.h>
-#include <Utility/Image.h>
 #include <Utility/Config.h>
-#include <Utility/LambdaOp.h>
+#include <Utility/Math.h>
 #include <Utility/GStorage.h>
-#include <Utility/Timer.h>
-
-#include <OpenGL/CommonDefine.h>
-
-#include <omp.h>
 
 #include "Defines.h"
+#include <OpenGL/CommonDefine.h>
 
-using namespace CppUtility::Other;
+#include <glm/gtc/matrix_transform.hpp>
+
 using namespace RayTracing;
+using namespace CppUtility::Other;
 using namespace Define;
 using namespace glm;
 using namespace std;
 
-Scene::Ptr CreateScene0(float ratioWH);
-Scene::Ptr CreateScene1(float ratioWH);
-rgb Background(const Ray::Ptr & ray);
-
-int main(int argc, char ** argv){
-	ImgWindow imgWindow(str_WindowTitle);
-	if (!imgWindow.IsValid()) {
-		printf("ERROR: Image Window Create Fail.\n");
-		return 1;
-	}
-
-	printf("INFO: cores : %d\n", omp_get_num_procs());
-	omp_set_num_threads(omp_get_num_procs());
-
-	Image & img = imgWindow.GetImg();
-	const size_t val_ImgWidth = img.GetWidth();
-	const size_t val_ImgHeight = img.GetHeight();
-
-	ImgPixelSet pixelSet(val_ImgWidth, val_ImgHeight);
-
-	auto config = *GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
-	int sampleNum;
-	config->GetVal("sampleNum", sampleNum, 1);
-
-	vector<uvec2> pixels;
-
-	auto scene = CreateScene1((float)val_ImgWidth / (float)val_ImgHeight);
-
-	Timer timer;
-	timer.Start();
-	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
-		size_t loopMax = glm::max(imgWindow.GetScale(), 1.0);
-		pixelSet.RandPick(loopMax, pixels);
-
-		int pixelsNum = pixels.size();
-#pragma omp parallel for
-		for (int pixelIdx = 0; pixelIdx < pixelsNum; pixelIdx++) {
-			const uvec2 & pixel = pixels[pixelIdx];
-			rgb color(0);
-			for (size_t k = 0; k < sampleNum; k++) {
-				float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
-				float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
-				color += RayTracer::Trace(scene->obj, scene->camera->GenRay(u, v));
-			}
-			color /= sampleNum;
-			img.SetPixel(pixel.x, val_ImgHeight - 1 - pixel.y, sqrt(color));
-		}
-
-		float curStep = 100 * (1 - pixelSet.Size() / float(val_ImgWidth * val_ImgHeight));
-		float wholeTime = timer.GetWholeTime();
-		float speed = (val_ImgWidth * val_ImgHeight - pixelSet.Size()) / wholeTime;
-		float needTime = pixelSet.Size() / speed;
-		float sumTime = wholeTime + needTime;
-		printf("\rINFO: %.2f%%, %.2f pixle / s, use %.2f s, need %.2f s, sum %.2f s     ",
-			curStep, speed, wholeTime, needTime, sumTime);
-
-		if (pixelSet.Size() == 0) {
-			printf("\n");
-			imgUpdate->SetIsHold(false);
-		}
-	}));
-
-	bool success = imgWindow.Run(imgUpdate);
-	return success ? 0 : 1;
-}
-
-Scene::Ptr CreateScene0(float ratioWH){
+Scene::Ptr CreateScene0(float ratioWH) {
 	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
 		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
@@ -111,10 +41,10 @@ Scene::Ptr CreateScene0(float ratioWH){
 		return false;
 	}));
 	auto sky = ToPtr(new Sky(skyMat));
-	
+
 	float t0 = 0.0f;
 	float t1 = 1.0f;
-	
+
 	vector<Hitable::Ptr> bvhData;
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
@@ -123,7 +53,7 @@ Scene::Ptr CreateScene0(float ratioWH){
 			if ((center - vec3(4, 0.2, 0)).length() > 0.9) {
 				if (choose_mat < 0.8) {  // diffuse
 					auto mat = ToPtr(new Lambertian(vec3(Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F())));
-					auto sphere = ToPtr(new MoveSphere(t0, t1, center, center+vec3(0,Math::Rand_F()*0.5,0), 0.2, mat));
+					auto sphere = ToPtr(new MoveSphere(t0, t1, center, center + vec3(0, Math::Rand_F()*0.5, 0), 0.2, mat));
 					bvhData.push_back(sphere);
 				}
 				else if (choose_mat < 0.95) { // metal
@@ -168,7 +98,7 @@ Scene::Ptr CreateScene0(float ratioWH){
 	float lenR = 0.05f;
 	float distToFocus = 10.0f;
 	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
-	
+
 	return ToPtr(new Scene(group, camera));
 }
 
@@ -186,20 +116,28 @@ Scene::Ptr CreateScene1(float ratioWH) {
 	auto group = ToPtr(new Group);
 
 	auto noiseMat = ToPtr(new Lambertian(OpTexture::NoiseTexture(0, vec3(1), 3)));
-	auto redLightMat = ToPtr(new Light(rgb(1.0f, 0, 0)));
-	auto greenLightMat = ToPtr(new Light(rgb(0, 1.0f, 0)));
-	auto blueLightMat = ToPtr(new Light(rgb(0, 0, 1.0f)));
-	auto whiteLightMat = ToPtr(new Light(rgb(1.0f)));
 
 	auto sphere00 = ToPtr(new Sphere(vec3(0, 1, 0), 1.0, ToPtr(new Dielectric(1.5))));
 	auto sphere01 = ToPtr(new Sphere(vec3(0, 1, 0), -0.8, ToPtr(new Dielectric(1.5))));
 	auto sphere1 = ToPtr(new Sphere(vec3(0, -1000, 0), 1000.0f, noiseMat));
-	auto sphere2 = ToPtr(new Sphere(vec3(-2, 2, 1.732), 0.5f, redLightMat));
-	auto sphere3 = ToPtr(new Sphere(vec3(2, 2, 1.732), 0.5f, greenLightMat));
-	auto sphere4 = ToPtr(new Sphere(vec3(0, 2, -1.732), 0.5f, blueLightMat));
-	auto sphere5 = ToPtr(new Sphere(vec3(0, 3, 0), 0.5f, whiteLightMat));
 
-	(*group) << sphere00 << sphere01 << sphere1 << sphere2 << sphere3 << sphere4 << sphere5 << sky;
+	vector<Vertex> vertexs;
+	for (size_t i = 0; i < sizeof(data_RectVertexPos) / sizeof(float); i += 3)
+		vertexs.push_back(Vertex(vec3(data_RectVertexPos[i], data_RectVertexPos[i + 1], data_RectVertexPos[i + 2])));
+
+	auto lightMat = ToPtr(new Light(vec3(1)));
+	auto triMesh = ToPtr(new TriMesh(vertexs, lightMat));
+	if (!triMesh->IsValid()) {
+		printf("ERROR: triMesh is invalid.\n");
+		exit(1);
+	}
+	mat4 tfm(1.0f);
+	tfm = translate(tfm, vec3(2, 1.5, 0));
+	tfm = scale(tfm, vec3(1, 2, 1));
+	tfm = rotate(tfm, Math::PI / 2, vec3(0, 1, 0));
+	auto tfmL = ToPtr(new Transform(tfm, triMesh));
+
+	(*group) << sphere00 << sphere01 << sphere1 << tfmL << sky;
 
 	float t0 = 0.0f;
 	float t1 = 1.0f;
@@ -208,6 +146,76 @@ Scene::Ptr CreateScene1(float ratioWH) {
 	float fov = 45.0f;
 	float lenR = 0.05f;
 	float distToFocus = 5.0f;
+	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
+
+	return ToPtr(new Scene(group, camera));
+}
+
+Scene::Ptr CreateScene2(float ratioWH) {
+	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
+		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
+		rgb c0 = rgb(1.0f);
+		rgb c1 = c0 * rgb(0.5,0.7,1.0);
+		rgb lightColor = (1 - t) * c0 + t * c1;
+		rec.ray->SetLightColor(lightColor);
+		return false;
+	}));
+	auto sky = ToPtr(new Sky(skyMat));
+
+	vector<Vertex> vertexs;
+	for (size_t i = 0; i < sizeof(data_RectVertexPos) / sizeof(float); i += 3)
+		vertexs.push_back(Vertex(vec3(data_RectVertexPos[i], data_RectVertexPos[i + 1], data_RectVertexPos[i + 2])));
+
+	auto redMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(1.0, 0, 0))));
+	auto redWall = ToPtr(new TriMesh(vertexs, redMat));
+	if (!redWall->IsValid()) {
+		printf("ERROR: redWall is invalid.\n");
+		exit(1);
+	}
+	mat4 tfmRed(1.0f);
+	tfmRed = translate(tfmRed, vec3(3, 3, 0));
+	tfmRed = scale(tfmRed, vec3(2, 6, 2));
+	tfmRed = rotate(tfmRed, Math::PI / 2, vec3(0, 1, 0));
+	auto tfmRedWall = ToPtr(new Transform(tfmRed, redWall));
+
+	auto greenMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(0, 1.0f, 0))));
+	auto greenWall = ToPtr(new TriMesh(vertexs, greenMat));
+	if (!greenWall->IsValid()) {
+		printf("ERROR: greenWall is invalid.\n");
+		exit(1);
+	}
+	mat4 tfmGreen(1.0f);
+	tfmGreen = translate(tfmGreen, vec3(-3, 3, 0));
+	tfmGreen = scale(tfmGreen, vec3(2, 6, 2));
+	tfmGreen = rotate(tfmGreen, Math::PI / 2, vec3(0, 1, 0));
+	auto tfmGreenWall = ToPtr(new Transform(tfmGreen, greenWall));
+
+	auto grayMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(0.8))));
+	auto grayWall = ToPtr(new TriMesh(vertexs, grayMat));
+	if (!grayWall->IsValid()) {
+		printf("ERROR: grayWall is invalid.\n");
+		exit(1);
+	}
+	mat4 tfmGray(1.0f);
+	//tfmGray = translate(tfmGray, vec3(3, 3, 0));
+	tfmGray = scale(tfmGray, vec3(6, 2, 2));
+	tfmGray = rotate(tfmGray, Math::PI / 2, vec3(1, 0, 0));
+	auto tfmGrayWall = ToPtr(new Transform(tfmGray, grayWall));
+
+	auto whiteLightMat = ToPtr(new Light(rgb(1.0f)));
+	auto sphere = ToPtr(new Sphere(vec3(0, 6, 0), 0.5f, whiteLightMat));
+
+	auto group = ToPtr(new Group);
+
+	(*group) << tfmRedWall << tfmGreenWall << tfmGrayWall << sphere << sky;
+
+	float t0 = 0.0f;
+	float t1 = 1.0f;
+	vec3 origin(0, 1, 8);
+	vec3 viewPoint(0, 1, 0);
+	float fov = 45.0f;
+	float lenR = 0.05f;
+	float distToFocus = 8.0f;
 	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
 
 	return ToPtr(new Scene(group, camera));
