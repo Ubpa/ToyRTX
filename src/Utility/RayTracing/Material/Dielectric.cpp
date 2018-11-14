@@ -13,10 +13,10 @@ Dielectric::Dielectric(float refractIndex, vec3 attenuationConst)
 // 返回值为 false 说明光线不再传播
 bool Dielectric::Scatter(HitRecord & rec) const {
 	vec3 refractDir;
-	const vec3 reflectDir = reflect(rec.ray->GetDir(), rec.normal);
+	const vec3 reflectDir = reflect(rec.ray->GetDir(), rec.vertex.normal);
 
 	const vec3 & d = rec.ray->GetDir();
-	const vec3 & n = rec.normal;
+	const vec3 & n = rec.vertex.normal;
 	vec3 attenuation;
 	vec3 airViewDir;
 	if (dot(d,n) < 0) {
@@ -28,16 +28,16 @@ bool Dielectric::Scatter(HitRecord & rec) const {
 		attenuation = exp(-attenuationConst * rec.ray->GetTMax() * dot(rec.ray->GetDir(), rec.ray->GetDir()));
 
 		if (!Math::Refract(d, -n, refractIndex, refractDir)) {
-			rec.ray->Update(rec.pos, reflectDir, attenuation);
+			rec.ray->Update(rec.vertex.pos, reflectDir, attenuation);
 			return true;
 		}
 		
 		airViewDir = refractDir;
 	}
 
-	float fresnelFactor = Math::FresnelSchlick(airViewDir, rec.normal, refractIndex);
+	float fresnelFactor = Math::FresnelSchlick(airViewDir, rec.vertex.normal, refractIndex);
 	const vec3 & dir = Math::Rand_F() > fresnelFactor ? refractDir : reflectDir;
-	rec.ray->Update(rec.pos, dir, attenuation);
+	rec.ray->Update(rec.vertex.pos, dir, attenuation);
 
 	return true;
 }

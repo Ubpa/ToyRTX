@@ -81,13 +81,13 @@ int main(int argc, char ** argv){
 
 Hitable::Ptr CreateScene() {
 	auto normalMaterial = ToPtr(new OpMaterial([](HitRecord & rec)->bool{
-		vec3 lightColor = 0.5f * (rec.normal + 1.0f);
+		vec3 lightColor = 0.5f * (rec.vertex.normal + 1.0f);
 		rec.ray->SetLightColor(lightColor);
 		return false;
 	}));
 
 	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.pos.y + 1.0f);
+		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
 		rgb lightColor = (1 - t) * white + t * blue;

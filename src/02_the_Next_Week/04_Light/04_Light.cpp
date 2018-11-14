@@ -1,3 +1,9 @@
+#include <RayTracing/Light.h>
+#include <RayTracing/ImgTexture.h>
+#include <RayTracing/RayTracer.h>
+#include <RayTracing/OpTexture.h>
+#include <RayTracing/BVH_Node.h>
+#include <RayTracing/MoveSphere.h>
 #include <RayTracing/Scene.h>
 #include <RayTracing/Dielectric.h>
 #include <RayTracing/Metal.h>
@@ -7,7 +13,7 @@
 #include <RayTracing/Sphere.h>
 #include <RayTracing/Group.h>
 #include <RayTracing/ImgWindow.h>
-#include <RayTracing/RayCamera.h>
+#include <RayTracing/TRayCamera.h>
 
 #include <Utility/Math.h>
 #include <Utility/ImgPixelSet.h>
@@ -29,8 +35,8 @@ using namespace Define;
 using namespace glm;
 using namespace std;
 
-Scene::Ptr CreateScene(float ratioWH);
-rgb RayTracer(const Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth = 50);
+Scene::Ptr CreateScene0(float ratioWH);
+Scene::Ptr CreateScene1(float ratioWH);
 rgb Background(const Ray::Ptr & ray);
 
 int main(int argc, char ** argv){
@@ -40,11 +46,12 @@ int main(int argc, char ** argv){
 		return 1;
 	}
 
+	printf("INFO: cores : %d\n", omp_get_num_procs());
+	omp_set_num_threads(omp_get_num_procs());
+
 	Image & img = imgWindow.GetImg();
 	const size_t val_ImgWidth = img.GetWidth();
 	const size_t val_ImgHeight = img.GetHeight();
-	const size_t val_ImgChannel = img.GetChannel();
-	const float val_RatioWH = (float)val_ImgWidth / (float)val_ImgHeight;
 
 	ImgPixelSet pixelSet(val_ImgWidth, val_ImgHeight);
 
@@ -52,19 +59,17 @@ int main(int argc, char ** argv){
 	int sampleNum;
 	config->GetVal("sampleNum", sampleNum, 1);
 
-	printf("INFO: cores : %d\n", omp_get_num_procs());
-	omp_set_num_threads(omp_get_num_procs());
 	vector<uvec2> pixels;
 
-	auto scene = CreateScene(val_RatioWH);
+	auto scene = CreateScene1((float)val_ImgWidth / (float)val_ImgHeight);
 
 	Timer timer;
 	timer.Start();
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
 		size_t loopMax = glm::max(imgWindow.GetScale(), 1.0);
 		pixelSet.RandPick(loopMax, pixels);
-		int pixelsNum = pixels.size();
 
+		int pixelsNum = pixels.size();
 #pragma omp parallel for
 		for (int pixelIdx = 0; pixelIdx < pixelsNum; pixelIdx++) {
 			const uvec2 & pixel = pixels[pixelIdx];
@@ -72,7 +77,7 @@ int main(int argc, char ** argv){
 			for (size_t k = 0; k < sampleNum; k++) {
 				float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
 				float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
-				color += RayTracer(scene->obj, scene->camera->GenRay(u, v));
+				color += RayTracer::Trace(scene->obj, scene->camera->GenRay(u, v));
 			}
 			color /= sampleNum;
 			img.SetPixel(pixel.x, val_ImgHeight - 1 - pixel.y, sqrt(color));
@@ -82,21 +87,23 @@ int main(int argc, char ** argv){
 		float wholeTime = timer.GetWholeTime();
 		float speed = (val_ImgWidth * val_ImgHeight - pixelSet.Size()) / wholeTime;
 		float needTime = pixelSet.Size() / speed;
+		float sumTime = wholeTime + needTime;
 		printf("\rINFO: %.2f%%, %.2f pixle / s, use %.2f s, need %.2f s, sum %.2f s     ",
-			curStep, speed, wholeTime, needTime, wholeTime + needTime);
+			curStep, speed, wholeTime, needTime, sumTime);
+
 		if (pixelSet.Size() == 0) {
 			printf("\n");
 			imgUpdate->SetIsHold(false);
 		}
 	}));
 
-	auto success = imgWindow.Run(imgUpdate);
+	bool success = imgWindow.Run(imgUpdate);
 	return success ? 0 : 1;
 }
 
-Scene::Ptr CreateScene(float ratioWH){
+Scene::Ptr CreateScene0(float ratioWH){
 	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
+		float t = 0.5 * (rec.vertex.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
 		rgb lightColor = (1 - t) * white + t * blue;
@@ -104,8 +111,11 @@ Scene::Ptr CreateScene(float ratioWH){
 		return false;
 	}));
 	auto sky = ToPtr(new Sky(skyMat));
-
-	auto group = ToPtr(new Group);
+	
+	float t0 = 0.0f;
+	float t1 = 1.0f;
+	
+	vector<Hitable::Ptr> bvhData;
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
 			float choose_mat = Math::Rand_F();
@@ -113,53 +123,92 @@ Scene::Ptr CreateScene(float ratioWH){
 			if ((center - vec3(4, 0.2, 0)).length() > 0.9) {
 				if (choose_mat < 0.8) {  // diffuse
 					auto mat = ToPtr(new Lambertian(vec3(Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F())));
-					auto sphere = ToPtr(new Sphere(center, 0.2, mat));
-					group->push_back(sphere);
+					auto sphere = ToPtr(new MoveSphere(t0, t1, center, center+vec3(0,Math::Rand_F()*0.5,0), 0.2, mat));
+					bvhData.push_back(sphere);
 				}
 				else if (choose_mat < 0.95) { // metal
 					auto mat = ToPtr(new Metal(vec3(0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F())), 0.5*Math::Rand_F()));
 					auto sphere = ToPtr(new Sphere(center, 0.2, mat));
-					group->push_back(sphere);
+					bvhData.push_back(sphere);
 				}
 				else {  // glass
 					auto mat = ToPtr(new Dielectric(1.5));
 					auto sphere = ToPtr(new Sphere(center, 0.2, mat));
-					group->push_back(sphere);
+					bvhData.push_back(sphere);
 				}
 			}
 		}
 	}
-	
-	auto sphereBottom = ToPtr(new Sphere(vec3(0, -1000, 0), 1000, ToPtr(new Lambertian(vec3(0.5, 0.5, 0.5)))));
+
+	auto bvhNode = ToPtr(new BVH_Node(bvhData));
+
+	auto checkTex = OpTexture::CheckerTexture(rgb(0.2, 0.3, 0.1), rgb(0.9, 0.9, 0.9));
+	auto noiseTex = OpTexture::NoiseTexture(0, vec3(1), 3);
+	auto config = *GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
+	auto rootPath = *config->GetStrPtr("RootPath");
+	auto earthTex = ToPtr(new ImgTexture(rootPath + str_Img_Earth, true));
+	if (!earthTex->IsValid()) {
+		printf("ERROR: earthTex[%s] is invalid.\n", (str_RootPath + str_Img_Earth).c_str());
+		exit(1);
+	}
+
+	auto group = ToPtr(new Group);
+	auto sphereBottom = ToPtr(new Sphere(vec3(0, -1000, 0), 1000, ToPtr(new Lambertian(noiseTex))));
 	auto sphere0 = ToPtr(new Sphere(vec3(6, 1, 0), 1.0, ToPtr(new Metal(vec3(0.7, 0.6, 0.5), 0.0))));
 	auto sphere1 = ToPtr(new Sphere(vec3(2, 1, 0), 1.0, ToPtr(new Dielectric(1.5))));
 	auto sphere2 = ToPtr(new Sphere(vec3(2, 1, 0), -0.8, ToPtr(new Dielectric(1.5))));
-	auto sphere3 = ToPtr(new Sphere(vec3(-2, 1, 0), 1.0, ToPtr(new Lambertian(vec3(0.4, 0.2, 0.1)))));
-	auto sphere4 = ToPtr(new Sphere(vec3(-6, 1, 0), 1.0, ToPtr(new Dielectric(2.5, vec3(0,100,0)))));
+	auto sphere3 = ToPtr(new Sphere(vec3(-2, 1, 0), 1.0, ToPtr(new Lambertian(earthTex))));
+	auto sphere4 = ToPtr(new Sphere(vec3(-6, 1, 0), 1.0, ToPtr(new Lambertian(checkTex))));
 
-	(*group) << sphere0 << sphere1 << sphere2 << sphere3 << sphere4 << sphereBottom << sky;
+	(*group) << bvhNode << sphere0 << sphere1 << sphere2 << sphere3 << sphere4 << sphereBottom << sky;
 
 	vec3 origin(13, 2, 3);
 	vec3 viewPoint(0, 0, 0);
 	float fov = 20.0f;
-	float lenR = 0.05;
+	float lenR = 0.05f;
 	float distToFocus = 10.0f;
-	RayCamera::Ptr camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, fov, lenR, distToFocus));
-
+	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
+	
 	return ToPtr(new Scene(group, camera));
 }
 
-rgb RayTracer(const Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth) {
-	if(depth == 0)
-		return rgb(10e-6);
+Scene::Ptr CreateScene1(float ratioWH) {
+	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
+		float t = 0.5 * (rec.vertex.vertex.pos.y + 1.0f);
+		rgb c0 = rgb(0.005f);
+		rgb c1 = c0 * rgb(0.75f, 0.5f, 0.375f);
+		rgb lightColor = (1 - t) * c0 + t * c1;
+		rec.ray->SetLightColor(lightColor);
+		return false;
+	}));
+	auto sky = ToPtr(new Sky(skyMat));
 
-	auto hitRst = scene->RayIn(ray);
-	if (hitRst.hit) {
-		if (hitRst.hitable->RayOut(hitRst.record))
-			return RayTracer(scene, ray, depth-1);
-		else
-			return ray->GetColor();
-	}
-	else
-		return rgb(10e-6);
+	auto group = ToPtr(new Group);
+
+	auto noiseMat = ToPtr(new Lambertian(OpTexture::NoiseTexture(0, vec3(1), 3)));
+	auto redLightMat = ToPtr(new Light(rgb(1.0f, 0, 0)));
+	auto greenLightMat = ToPtr(new Light(rgb(0, 1.0f, 0)));
+	auto blueLightMat = ToPtr(new Light(rgb(0, 0, 1.0f)));
+	auto whiteLightMat = ToPtr(new Light(rgb(1.0f)));
+
+	auto sphere00 = ToPtr(new Sphere(vec3(0, 1, 0), 1.0, ToPtr(new Dielectric(1.5))));
+	auto sphere01 = ToPtr(new Sphere(vec3(0, 1, 0), -0.8, ToPtr(new Dielectric(1.5))));
+	auto sphere1 = ToPtr(new Sphere(vec3(0, -1000, 0), 1000.0f, noiseMat));
+	auto sphere2 = ToPtr(new Sphere(vec3(-2, 2, 1.732), 0.5f, redLightMat));
+	auto sphere3 = ToPtr(new Sphere(vec3(2, 2, 1.732), 0.5f, greenLightMat));
+	auto sphere4 = ToPtr(new Sphere(vec3(0, 2, -1.732), 0.5f, blueLightMat));
+	auto sphere5 = ToPtr(new Sphere(vec3(0, 3, 0), 0.5f, whiteLightMat));
+
+	(*group) << sphere00 << sphere01 << sphere1 << sphere2 << sphere3 << sphere4 << sphere5 << sky;
+
+	float t0 = 0.0f;
+	float t1 = 1.0f;
+	vec3 origin(0, 1, 5);
+	vec3 viewPoint(0, 1, 0);
+	float fov = 45.0f;
+	float lenR = 0.05f;
+	float distToFocus = 5.0f;
+	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
+
+	return ToPtr(new Scene(group, camera));
 }

@@ -56,6 +56,11 @@ namespace CppUtility {
 			// 将三维坐标转化为参数坐标
 			glm::vec2 Sphere2UV(const glm::vec3 & normal);
 
+			// 返回值: (alpah, beta, gamma, t)
+			// e + t * d == alpha * a + beta * b + gamma * c
+			// alpha + beta + gammma == 1
+			// 如果平行, 返回 (0, 0, 0, 0)
+			glm::vec4 Intersect_RayTri(const glm::vec3 & e, const glm::vec3 & d, const glm::vec3 & a, const glm::vec3 & b, const glm::vec3 & c);
 
 			//--------------以下为模板的实现----------------
 			//--------------以下为模板的实现----------------

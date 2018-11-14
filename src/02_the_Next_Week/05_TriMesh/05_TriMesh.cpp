@@ -1,3 +1,5 @@
+#include <RayTracing/TriMesh.h>
+#include <RayTracing/Triangle.h>
 #include <RayTracing/Light.h>
 #include <RayTracing/ImgTexture.h>
 #include <RayTracing/RayTracer.h>
@@ -54,6 +56,8 @@ int main(int argc, char ** argv){
 	const size_t val_ImgHeight = img.GetHeight();
 
 	ImgPixelSet pixelSet(val_ImgWidth, val_ImgHeight);
+	//ImgPixelSet pixelSet;
+	//pixelSet << vec2(val_ImgWidth / 2, val_ImgHeight / 2);
 
 	auto config = *GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
 	int sampleNum;
@@ -103,7 +107,7 @@ int main(int argc, char ** argv){
 
 Scene::Ptr CreateScene0(float ratioWH){
 	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.pos.y + 1.0f);
+		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
 		rgb lightColor = (1 - t) * white + t * blue;
@@ -174,7 +178,7 @@ Scene::Ptr CreateScene0(float ratioWH){
 
 Scene::Ptr CreateScene1(float ratioWH) {
 	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.pos.y + 1.0f);
+		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
 		rgb c0 = rgb(0.005f);
 		rgb c1 = c0 * rgb(0.75f, 0.5f, 0.375f);
 		rgb lightColor = (1 - t) * c0 + t * c1;
@@ -186,19 +190,23 @@ Scene::Ptr CreateScene1(float ratioWH) {
 	auto group = ToPtr(new Group);
 
 	auto noiseMat = ToPtr(new Lambertian(OpTexture::NoiseTexture(0, vec3(1), 3)));
-	auto redLightMat = ToPtr(new Light(rgb(1.0f, 0, 0)));
-	auto greenLightMat = ToPtr(new Light(rgb(0, 1.0f, 0)));
-	auto blueLightMat = ToPtr(new Light(rgb(0, 0, 1.0f)));
-	auto whiteLightMat = ToPtr(new Light(rgb(1.0f)));
 
-	auto sphere0 = ToPtr(new Sphere(vec3(0, 1, 0), 1.0f, noiseMat));
+	auto sphere00 = ToPtr(new Sphere(vec3(0, 1, 0), 1.0, ToPtr(new Dielectric(1.5))));
+	auto sphere01 = ToPtr(new Sphere(vec3(0, 1, 0), -0.8, ToPtr(new Dielectric(1.5))));
 	auto sphere1 = ToPtr(new Sphere(vec3(0, -1000, 0), 1000.0f, noiseMat));
-	auto sphere2 = ToPtr(new Sphere(vec3(-2, 2, 1.732), 0.5f, redLightMat));
-	auto sphere3 = ToPtr(new Sphere(vec3(2, 2, 1.732), 0.5f, greenLightMat));
-	auto sphere4 = ToPtr(new Sphere(vec3(0, 2, -1.732), 0.5f, blueLightMat));
-	auto sphere5 = ToPtr(new Sphere(vec3(0, 3, 0), 0.5f, whiteLightMat));
 
-	(*group) << sphere0 << sphere1 << sphere2 << sphere3 << sphere4 << sphere5 << sky;
+	vector<Vertex> vertexs;
+	for (size_t i = 0; i < sizeof(data_RectVertexPos) / sizeof(float); i+=3)
+		vertexs.push_back(Vertex(vec3(data_RectVertexPos[i], data_RectVertexPos[i + 1], data_RectVertexPos[i + 2])));
+
+	auto lightMat = ToPtr(new Light(vec3(1)));
+	auto triMesh = ToPtr(new TriMesh(vertexs, lightMat));
+	if (!triMesh->IsValid()) {
+		printf("ERROR: triMesh is invalid.\n");
+		exit(1);
+	}
+
+	(*group) << sphere00 << sphere01 << sphere1 << triMesh << sky;
 
 	float t0 = 0.0f;
 	float t1 = 1.0f;

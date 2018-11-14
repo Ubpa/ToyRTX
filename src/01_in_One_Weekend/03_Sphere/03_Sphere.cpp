@@ -71,7 +71,7 @@ int main(int argc, char ** argv){
 
 Hitable::Ptr CreateScene() {
 	auto posMaterial = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		vec3 lightColor = 0.5f * (normalize(rec.normal) + 1.0f);
+		vec3 lightColor = 0.5f * (normalize(rec.vertex.normal) + 1.0f);
 		rec.ray->SetLightColor(lightColor);
 		return false;
 	}));

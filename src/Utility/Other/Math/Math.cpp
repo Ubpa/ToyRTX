@@ -47,7 +47,7 @@ float Math::Gray(const vec3 & color) {
 	return color.r * 0.299 + color.g * 0.587 + color.b * 0.114;
 }
 
-bool Math::Refract(const glm::vec3 & viewDir, const glm::vec3 & normal, float ratioNiNt, glm::vec3 & refractDir) {
+bool Math::Refract(const vec3 & viewDir, const vec3 & normal, float ratioNiNt, vec3 & refractDir) {
 	const vec3 ud = normalize(viewDir);
 	float cosTheta = dot(ud, normal);
 	float discriminent = 1 - pow(ratioNiNt, 2) * (1 - pow(cosTheta, 2));
@@ -67,10 +67,22 @@ float Math::FresnelSchlick(const vec3 & viewDir, const vec3 & halfway, float rat
 }
 
 vec2 Math::Sphere2UV(const vec3 & normal) {
-	vec2 rst;
+	vec2 uv;
 	float phi = atan2(normal.z, normal.x);
 	float theta = asin(normal.y);
-	rst.s = 1 - (phi + PI) / (2 * PI);
-	rst.t = (theta + PI/2) / PI;
-	return rst;
+	uv[0] = 1 - (phi + PI) / (2 * PI);
+	uv[1] = (theta + PI/2) / PI;
+	return uv;
+}
+
+vec4 Math::Intersect_RayTri(const vec3 & e, const vec3 & d, const vec3 & a, const vec3 & b, const vec3 & c) {
+	mat3 equation_A(vec3(a-b), vec3(a-c), d);
+
+	if (abs(determinant(equation_A)) < EPSILON)
+		return vec4(0, 0, 0, 0);
+
+	vec3 equation_b = a - e;
+	vec3 equation_X = inverse(equation_A) * equation_b;
+	float alpha = 1 - equation_X[0] - equation_X[1];
+	return vec4(alpha, equation_X);
 }

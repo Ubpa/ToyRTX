@@ -17,7 +17,7 @@ Lambertian::Lambertian(const rgb & albedo) {
 }
 
 bool Lambertian::Scatter(HitRecord & rec) const {
-	vec3 dir = rec.normal + Math::RandInSphere();
-	rec.ray->Update(rec.pos, dir, albedo->Value(rec.u,rec.v,rec.pos));
+	vec3 dir = rec.vertex.normal + Math::RandInSphere();
+	rec.ray->Update(rec.vertex.pos, dir, albedo->Value(rec.vertex.u,rec.vertex.v,rec.vertex.pos));
 	return true;
 }

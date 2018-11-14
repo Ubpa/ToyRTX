@@ -19,15 +19,15 @@ Metal::Metal(const glm::rgb & specular, float fuzz)
 }
 
 bool Metal::Scatter(HitRecord & rec) const {
-	vec3 dir = reflect(rec.ray->GetDir(), rec.normal);
+	vec3 dir = reflect(rec.ray->GetDir(), rec.vertex.normal);
 	vec3 dirFuzz = dir + fuzz * Math::RandInSphere();
 
 	// 反射光线在表面之下
-	if (dot(dirFuzz, rec.normal) < 0) {
+	if (dot(dirFuzz, rec.vertex.normal) < 0) {
 		rec.ray->SetLightColor(vec3(0));
 		return false;
 	}
 
-	rec.ray->Update(rec.pos, dirFuzz, specular->Value(rec.u,rec.v,rec.pos));
+	rec.ray->Update(rec.vertex.pos, dirFuzz, specular->Value(rec.vertex.u,rec.vertex.v,rec.vertex.pos));
 	return true;
 }

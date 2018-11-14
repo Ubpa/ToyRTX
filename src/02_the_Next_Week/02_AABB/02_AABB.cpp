@@ -99,7 +99,7 @@ int main(int argc, char ** argv){
 
 Scene::Ptr CreateScene(float ratioWH){
 	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.pos.y + 1.0f);
+		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
 		rgb lightColor = (1 - t) * white + t * blue;

@@ -1,0 +1,22 @@
+#include <RayTracing/TriMesh.h>
+
+using namespace RayTracing;
+using namespace CppUtility::Other;
+using namespace glm;
+using namespace std;
+
+TriMesh::TriMesh(const std::vector<Vertex> & vertexs, const Material::Ptr & material){
+	if (vertexs.size() % 3 != 0) {
+		isValid = false;
+		return;
+	}
+
+	vector<Hitable::Ptr> triangles;
+	for (size_t i = 0; i < vertexs.size(); i += 3) {
+		auto triangle = ToPtr(new Triangle(vertexs[i], vertexs[i+1],vertexs[i+2], material));
+		triangles.push_back(triangle);
+	}
+
+	Build(triangles.begin(), triangles.end());
+	isValid = true;
+}

@@ -10,14 +10,22 @@
 #include <vector>
 
 namespace RayTracing {
+	
+	struct Vertex {
+		Vertex(glm::vec3 pos = glm::vec3(0), glm::vec3 normal = glm::vec3(0, 0, 1), float u = 0, float v = 0);
+		glm::vec3 pos;
+		glm::vec3 normal;
+		float u;
+		float v;
+		
+		static Vertex Interpolate_Tri(const glm::vec3 & abg, const Vertex & A, const Vertex & B, const Vertex & C);
+	};
+
 	struct HitRecord {
 		HitRecord(const Ray::Ptr & ray = NULL, const glm::vec3 & pos = glm::vec3(0), const glm::vec3 & normal = glm::vec3(0,0,1), float u = 0, float v = 0);
 
 		Ray::Ptr ray;
-		float u;
-		float v;
-		glm::vec3 pos;
-		glm::vec3 normal;
+		Vertex vertex;
 	};
 
 	class Material : public CppUtility::Other::HeapObj{

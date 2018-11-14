@@ -14,8 +14,6 @@ namespace CppUtility {
 
 			using RandSet<glm::uvec2>::RandPick;
 			size_t RandPick(size_t n, std::vector<glm::uvec2> & pixels);
-		protected:
-			using RandSet<glm::uvec2>::Insert;
 		};
 	}
 }

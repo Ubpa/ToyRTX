@@ -31,7 +31,7 @@ Hitable::HitRst Sphere::RayIn(Ray::Ptr & ray) const{
 	vec3 pos = ray->At(t);
 	vec3 normal = (pos - center) / radius;
 	vec2 uv = Sphere2UV(normal);
-	hitRst.record = HitRecord(ray, pos, normal, uv.s, uv.t);
+	hitRst.record = HitRecord(ray, pos, normal, uv[0], uv[1]);
 	hitRst.hitable = this;
 
 	return hitRst;

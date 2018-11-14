@@ -17,7 +17,7 @@ namespace RayTracing {
 	protected:
 		void Build(std::vector<Hitable::Ptr>::iterator begin, std::vector<Hitable::Ptr>::iterator end);
 		size_t GetAxis(std::vector<Hitable::Ptr>::const_iterator begin, const std::vector<Hitable::Ptr>::const_iterator end) const;
-	private:
+
 		Hitable::Ptr left;
 		Hitable::Ptr right;
 		AABB box;

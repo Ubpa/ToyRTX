@@ -11,6 +11,6 @@ Light::Light(const rgb & color) {
 
 
 bool Light::Scatter(HitRecord & rec) const {
-	rec.ray->SetLightColor(lightTex->Value(rec.u, rec.v, rec.pos));
+	rec.ray->SetLightColor(lightTex->Value(rec.vertex.u, rec.vertex.v, rec.vertex.pos));
 	return false;
 }
