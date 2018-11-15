@@ -14,7 +14,8 @@ HitRst Triangle::RayIn(Ray::Ptr & ray) const {
 	if (abgt == vec4(0)
 		|| abgt[0] < 0 || abgt[0] > 1
 		|| abgt[1] < 0 || abgt[1] > 1
-		|| abgt[2] < 0 || abgt[2] > 1)
+		|| abgt[2] < 0 || abgt[2] > 1
+		|| abgt[3] < Ray::tMin || abgt[3] > ray->GetTMax())
 		return HitRst::FALSE;
 
 	HitRst hitRst(true);

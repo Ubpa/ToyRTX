@@ -18,10 +18,12 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 	if (!hitRst.hit)
 		return HitRst::FALSE;
 
-	auto reverseRay = ToPtr(new Ray(ray->GetOrigin(), -ray->GetDir()));
+	auto reverseRay = ToPtr(new Ray(ray->GetOrigin(), - ray->GetDir()));
 	auto reverseHitRst = boundary->RayIn(reverseRay);
 	
-	float t0 = reverseHitRst.hit ? - hitRst.record.ray->GetTMax() : hitRst.record.ray->GetTMax();
+	// 反向光线撞击到边界, 说明光线在内部, 则此时体积内部的起点为 光线起点
+	// 否则说明光线在外部, 则此时体积内部的起点为 光线撞击处
+	float t0 = Ray::tMin + ( reverseHitRst.hit ? 0 : hitRst.record.ray->GetTMax() );
 
 	auto t0Ray = ToPtr(new Ray(ray->At(t0), ray->GetDir()));
 	auto t0HitRst = boundary->RayIn(t0Ray);
@@ -32,20 +34,20 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 		return HitRst::FALSE;
 	}
 
-	float t1 = min(originTMax, t0HitRst.record.ray->GetTMax());
+	float t1 = min(originTMax, t0 + t0HitRst.record.ray->GetTMax());
 	float lenInVolume = (t1 - t0) * length(ray->GetDir());
 
 	// p = C * dL
 	// p(L) = lim(n->inf, (1 - CL/n)^n) = exp(-CL)
 	// L = -(1/C)ln(pL)
-	float hitLen = -(1.0 / density)*log(Math::Rand_F());
+	float hitLen = -(1.0f / density)*log(Math::Rand_F());
 
 	if (hitLen >= lenInVolume) {
 		ray->SetTMax(originTMax);
 		return HitRst::FALSE;
 	}
 
-	float tFinal = hitLen / length(ray->GetDir());
+	float tFinal = t0 + hitLen / length(ray->GetDir());
 	ray->SetTMax(tFinal);
 
 	hitRst.hit = true;

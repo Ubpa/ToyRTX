@@ -183,9 +183,9 @@ Scene::Ptr CreateScene2(float ratioWH) {
 	auto redMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(0.65f, 0.05f, 0.05f))));
 	auto greenMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(0.12f, 0.45f, 0.15f))));
 	auto grayMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(0.73f, 0.73f, 0.73f))));
-	auto lightMat = ToPtr(new Light(rgb(4.0f)));
+	auto lightMat = ToPtr(new Light(rgb(3.0f)));
 	auto cubeMat = ToPtr(new Lambertian(rgb(1.0f)));
-	auto volumnMat = ToPtr(new Isotropic(vec3(0.5,0.5,0.5)));
+	auto volumnMat = ToPtr(new Isotropic(vec3(1.0f)));
 
 	// Transform
 	mat4 tfmRight(1.0f);
@@ -219,21 +219,22 @@ Scene::Ptr CreateScene2(float ratioWH) {
 	
 	mat4 tfmLight(1.0f);
 	tfmLight = translate(tfmLight, vec3(0, 2.999, 0));
-	tfmLight = scale(tfmLight, vec3(2));
+	tfmLight = scale(tfmLight, vec3(4));
 	tfmLight = rotate(tfmLight, Math::PI / 2, vec3(1, 0, 0));
 	auto light = ToPtr(new Transform(tfmLight, square, lightMat));
 
 	mat4 tfmCube1(1.0f);
-	tfmCube1 = translate(tfmCube1, vec3(1.1, -2.2, 1.5));
+	tfmCube1 = translate(tfmCube1, vec3(1.1, -2.2, 1));
 	tfmCube1 = scale(tfmCube1, vec3(1.6));
 	tfmCube1 = rotate(tfmCube1, - Math::PI / 12, vec3(0, 1, 0));
 	auto cube1 = ToPtr(new Transform(tfmCube1, cube, cubeMat));
 
 	mat4 tfmCube2(1.0f);
-	tfmCube2 = translate(tfmCube2, vec3(-1.1, -1, -0.5));
-	tfmCube2 = scale(tfmCube2, vec3(1.6,4,1.6));
+	tfmCube2 = translate(tfmCube2, vec3(-1.1, -1.5, -0.5));
+	tfmCube2 = scale(tfmCube2, vec3(1.6,3,1.6));
 	tfmCube2 = rotate(tfmCube2, Math::PI / 9, vec3(0, 1, 0));
-	auto volumn = ToPtr(new Volume(cube, 1.0f, volumnMat));
+	//tfmCube2 = scale(tfmCube2, vec3(4));
+	auto volumn = ToPtr(new Volume(cube, 3.0f, volumnMat));
 	auto cube2 = ToPtr(new Transform(tfmCube2, volumn));
 	
 
