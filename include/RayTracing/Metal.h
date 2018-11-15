@@ -10,13 +10,13 @@ namespace RayTracing {
 	public:
 		Metal(float r, float g, float b, float fuzz = 0.0f);
 		Metal(const glm::rgb & specular, float fuzz = 0.0f);
-		Metal(const Texture::Ptr & specular, float fuzz = 0.0f);
+		Metal(const Texture::CPtr & specular, float fuzz = 0.0f);
 
 		// 返回值为 true 说明光线继续传播
 		// 返回值为 false 说明光线不再传播
 		virtual bool Scatter(HitRecord & rec) const;
 	protected:
-		Texture::Ptr specular;
+		Texture::CPtr specular;
 		float fuzz;
 	};
 }

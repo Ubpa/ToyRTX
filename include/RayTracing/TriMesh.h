@@ -10,7 +10,7 @@ namespace RayTracing {
 	class TriMesh : public BVH_Node{
 		HEAP_OBJ_SETUP(TriMesh)
 	public:
-		TriMesh(const std::vector<Vertex> & vertexs, const Material::Ptr & material = NULL);
+		TriMesh(const std::vector<Vertex> & vertexs, const Material::CPtr & material = NULL);
 
 		bool IsValid() const { return isValid; };
 	protected:

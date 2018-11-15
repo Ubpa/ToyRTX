@@ -8,7 +8,7 @@ using namespace std;
 
 const HitRst HitRst::FALSE(false);
 
-Hitable::Hitable(const Material::Ptr & material)
+Hitable::Hitable(const Material::CPtr & material)
 	: material(material) {
 	isMatCoverable = material ? false : true;
 }

@@ -7,7 +7,7 @@ using namespace CppUtility::Other;
 using namespace glm;
 
 
-Metal::Metal(const Texture::Ptr & specular, float fuzz)
+Metal::Metal(const Texture::CPtr & specular, float fuzz)
 	: specular(specular), fuzz(fuzz) { }
 
 Metal::Metal(float r, float g, float b, float fuzz)
@@ -28,6 +28,7 @@ bool Metal::Scatter(HitRecord & rec) const {
 		return false;
 	}
 
-	rec.ray->Update(rec.vertex.pos, dirFuzz, specular->Value(rec.vertex.u,rec.vertex.v,rec.vertex.pos));
+	auto attenuation = specular->Value(rec.vertex.u, rec.vertex.v, rec.vertex.pos);
+	rec.ray->Update(rec.vertex.pos, dirFuzz, attenuation);
 	return true;
 }

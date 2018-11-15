@@ -5,7 +5,7 @@ using namespace CppUtility::Other;
 using namespace glm;
 using namespace std;
 
-TriMesh::TriMesh(const std::vector<Vertex> & vertexs, const Material::Ptr & material)
+TriMesh::TriMesh(const vector<Vertex> & vertexs, const Material::CPtr & material)
 	: BVH_Node(material){
 	if (vertexs.size() % 3 != 0) {
 		isValid = false;

@@ -3,14 +3,14 @@
 using namespace RayTracing;
 using namespace glm;
 
-Transform::Transform(const glm::mat4 & transform, const Hitable::CPtr & hitable, const Material::Ptr & material)
+Transform::Transform(const mat4 & transform, const Hitable::CPtr & hitable, const Material::CPtr & material)
 	: transform(transform), hitable(hitable), Hitable(material) { }
 
 HitRst Transform::RayIn(Ray::Ptr & ray) const {
 	if (hitable == NULL)
 		return HitRst::FALSE;
 
-	ray->SetTransform(inverse(transform));
+	ray->Transform(inverse(transform));
 
 	auto hitRst = hitable->RayIn(ray);
 
@@ -23,7 +23,7 @@ HitRst Transform::RayIn(Ray::Ptr & ray) const {
 		hitRst.record.vertex.Transform(transform);
 	}
 
-	ray->SetTransform(transform);
+	ray->Transform(transform);
 
 	return hitRst;
 }

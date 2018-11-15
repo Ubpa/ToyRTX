@@ -8,7 +8,7 @@ namespace RayTracing {
 	class BVH_Node : public Hitable{
 		HEAP_OBJ_SETUP(BVH_Node)
 	public:
-		BVH_Node(const Material::Ptr & material = NULL);
+		BVH_Node(const Material::CPtr & material = NULL);
 		BVH_Node(std::vector<Hitable::Ptr> & hitables);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;

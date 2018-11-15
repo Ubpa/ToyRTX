@@ -39,7 +39,7 @@ void Ray::SetLightColor(const glm::vec3 & lightColor) {
 	tMax = 0;
 }
 
-void Ray::SetTransform(const glm::mat4 & transform) {
+void Ray::Transform(const glm::mat4 & transform) {
 	dir = mat3(transform) * dir;
 	auto originQ = transform * vec4(origin, 1.0f);
 	origin = vec3(originQ) / originQ.w;

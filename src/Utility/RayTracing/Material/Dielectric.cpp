@@ -25,7 +25,7 @@ bool Dielectric::Scatter(HitRecord & rec) const {
 		airViewDir = -d;
 	}
 	else {
-		attenuation = exp(-attenuationConst * rec.ray->GetTMax() * dot(rec.ray->GetDir(), rec.ray->GetDir()));
+		attenuation = exp(-attenuationConst * rec.ray->GetTMax() * length(rec.ray->GetDir()));
 
 		if (!Math::Refract(d, -n, refractIndex, refractDir)) {
 			rec.ray->Update(rec.vertex.pos, reflectDir, attenuation);

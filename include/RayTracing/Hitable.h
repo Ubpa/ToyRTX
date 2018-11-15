@@ -25,13 +25,10 @@ namespace RayTracing {
 	class Hitable : public CppUtility::Other::HeapObj{
 		HEAP_OBJ_SETUP(Hitable)
 	public:
-		Hitable(const Material::Ptr & material = NULL);
+		Hitable(const Material::CPtr & material = NULL);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const = 0;
 		virtual AABB GetBoundingBox() const = 0;
-
-		//bool RayOut(HitRecord & rec) const;
-		//void SetMaterial(const Material::Ptr & material);
 	protected:
 		Material::CPtr material;
 		bool isMatCoverable;

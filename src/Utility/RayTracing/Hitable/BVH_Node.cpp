@@ -7,7 +7,7 @@ using namespace CppUtility::Other;
 using namespace glm;
 using namespace std;
 
-BVH_Node::BVH_Node(const Material::Ptr & material)
+BVH_Node::BVH_Node(const Material::CPtr & material)
 	: box(AABB::InValid), Hitable(material) { }
 
 BVH_Node::BVH_Node(vector<Hitable::Ptr> & hitables)
@@ -79,7 +79,7 @@ HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
 }
 
 
-size_t BVH_Node::GetAxis(std::vector<Hitable::Ptr>::const_iterator begin, const std::vector<Hitable::Ptr>::const_iterator end) const {
+size_t BVH_Node::GetAxis(vector<Hitable::Ptr>::const_iterator begin, const vector<Hitable::Ptr>::const_iterator end) const {
 	size_t num = end - begin;
 	vector<float> X, Y, Z;
 	X.reserve(num);

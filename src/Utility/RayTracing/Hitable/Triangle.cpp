@@ -6,7 +6,7 @@ using namespace CppUtility::Other;
 using namespace glm;
 
 
-Triangle::Triangle(const Vertex & A, const Vertex & B, const Vertex & C, const Material::Ptr & material)
+Triangle::Triangle(const Vertex & A, const Vertex & B, const Vertex & C, const Material::CPtr & material)
 	: A(A), B(B), C(C), Hitable(material) { }
 
 HitRst Triangle::RayIn(Ray::Ptr & ray) const {

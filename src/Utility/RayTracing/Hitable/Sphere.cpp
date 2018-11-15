@@ -5,7 +5,7 @@ using namespace RayTracing;
 using namespace CppUtility::Other;
 using namespace glm;
 
-Sphere::Sphere(const vec3 & center, float radius, const Material::Ptr & material)
+Sphere::Sphere(const vec3 & center, float radius, const Material::CPtr & material)
 	: center(center), radius(radius), Hitable(material) { };
 
 HitRst Sphere::RayIn(Ray::Ptr & ray) const {

@@ -8,7 +8,7 @@ namespace RayTracing {
 	class MoveSphere : public Hitable{
 		HEAP_OBJ_SETUP(MoveSphere)
 	public:
-		MoveSphere(float t0, float t1, const glm::vec3 & center0, const glm::vec3 & center1, float radius, const Material::Ptr & material = NULL);
+		MoveSphere(float t0, float t1, const glm::vec3 & center0, const glm::vec3 & center1, float radius, const Material::CPtr & material = NULL);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 

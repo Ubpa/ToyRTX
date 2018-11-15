@@ -8,7 +8,7 @@ using namespace CppUtility::Other;
 using namespace glm;
 using namespace std;
 
-MoveSphere::MoveSphere(float t0, float t1, const glm::vec3 & center0, const glm::vec3 & center1, float radius, const Material::Ptr & material)
+MoveSphere::MoveSphere(float t0, float t1, const vec3 & center0, const vec3 & center1, float radius, const Material::CPtr & material)
 	: radius(radius), Hitable(material), center0(center0), center1(center1), t0(t0), t1(t1) { }
 
 HitRst MoveSphere::RayIn(Ray::Ptr & ray) const {
