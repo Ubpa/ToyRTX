@@ -163,8 +163,11 @@ Scene::Ptr CreateScene2(float ratioWH) {
 	auto sky = ToPtr(new Sky(skyMat));
 
 	vector<Vertex> vertexs;
-	for (size_t i = 0; i < sizeof(data_RectVertexPos) / sizeof(float); i += 3)
-		vertexs.push_back(Vertex(vec3(data_RectVertexPos[i], data_RectVertexPos[i + 1], data_RectVertexPos[i + 2])));
+	for (size_t i = 0; i < sizeof(data_RectVertexPos) / sizeof(float); i += 6) {
+		vec3 pos(data_RectVertexPos[i], data_RectVertexPos[i + 1], data_RectVertexPos[i + 2]);
+		vec3 normal(data_RectVertexPos[i+3], data_RectVertexPos[i + 4], data_RectVertexPos[i + 5]);
+		vertexs.push_back(Vertex());
+	}
 
 	auto redMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(1.0, 0, 0))));
 	auto redWall = ToPtr(new TriMesh(vertexs, redMat));
@@ -173,8 +176,8 @@ Scene::Ptr CreateScene2(float ratioWH) {
 		exit(1);
 	}
 	mat4 tfmRed(1.0f);
-	tfmRed = translate(tfmRed, vec3(3, 3, 0));
-	tfmRed = scale(tfmRed, vec3(2, 6, 2));
+	tfmRed = translate(tfmRed, vec3(3, 0, 0));
+	tfmRed = scale(tfmRed, vec3(6));
 	tfmRed = rotate(tfmRed, Math::PI / 2, vec3(0, 1, 0));
 	auto tfmRedWall = ToPtr(new Transform(tfmRed, redWall));
 
@@ -185,8 +188,8 @@ Scene::Ptr CreateScene2(float ratioWH) {
 		exit(1);
 	}
 	mat4 tfmGreen(1.0f);
-	tfmGreen = translate(tfmGreen, vec3(-3, 3, 0));
-	tfmGreen = scale(tfmGreen, vec3(2, 6, 2));
+	tfmGreen = translate(tfmGreen, vec3(-3, 0, 0));
+	tfmGreen = scale(tfmGreen, vec3(6));
 	tfmGreen = rotate(tfmGreen, Math::PI / 2, vec3(0, 1, 0));
 	auto tfmGreenWall = ToPtr(new Transform(tfmGreen, greenWall));
 
@@ -196,23 +199,46 @@ Scene::Ptr CreateScene2(float ratioWH) {
 		printf("ERROR: grayWall is invalid.\n");
 		exit(1);
 	}
-	mat4 tfmGray(1.0f);
-	//tfmGray = translate(tfmGray, vec3(3, 3, 0));
-	tfmGray = scale(tfmGray, vec3(6, 2, 2));
-	tfmGray = rotate(tfmGray, Math::PI / 2, vec3(1, 0, 0));
-	auto tfmGrayWall = ToPtr(new Transform(tfmGray, grayWall));
+	mat4 tfm1Gray(1.0f);
+	tfm1Gray = translate(tfm1Gray, vec3(0, -3, 0));
+	tfm1Gray = scale(tfm1Gray, vec3(6));
+	tfm1Gray = rotate(tfm1Gray, Math::PI / 2, vec3(1, 0, 0));
+	auto tfm1GrayWall = ToPtr(new Transform(tfm1Gray, grayWall));
 
-	auto whiteLightMat = ToPtr(new Light(rgb(1.0f)));
-	auto sphere = ToPtr(new Sphere(vec3(0, 6, 0), 0.5f, whiteLightMat));
+	mat4 tfm2Gray(1.0f);
+	tfm2Gray = translate(tfm2Gray, vec3(0, 3, 0));
+	tfm2Gray = scale(tfm2Gray, vec3(6));
+	tfm2Gray = rotate(tfm2Gray, Math::PI / 2, vec3(1, 0, 0));
+	auto tfm2GrayWall = ToPtr(new Transform(tfm2Gray, grayWall));
+
+	mat4 tfm3Gray(1.0f);
+	tfm3Gray = translate(tfm3Gray, vec3(0, 0, -3));
+	tfm3Gray = scale(tfm3Gray, vec3(6));
+	auto tfm3GrayWall = ToPtr(new Transform(tfm3Gray, grayWall));
+
+	auto whiteLightMat = ToPtr(new Light(rgb(0.5f)));
+	auto sphere = ToPtr(new Sphere(vec3(0, 0, 0), 0.5f, whiteLightMat));
 
 	auto group = ToPtr(new Group);
 
-	(*group) << tfmRedWall << tfmGreenWall << tfmGrayWall << sphere << sky;
+	(*group) /*<< tfmRedWall << tfmGreenWall << tfm1GrayWall << tfm2GrayWall << tfm3GrayWall*/ << sphere;// << sky;
+
+	vector<Vertex> vertexs2;
+	for (size_t i = 0; i < sizeof(data_Rect2VertexPos) / sizeof(float); i += 3)
+		vertexs2.push_back(Vertex(vec3(data_Rect2VertexPos[i], data_Rect2VertexPos[i + 1], data_Rect2VertexPos[i + 2])));
+	auto grayMat2 = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(0.8))));
+	auto grayWall2 = ToPtr(new TriMesh(vertexs2, grayMat2));
+	if (!grayWall2->IsValid()) {
+		printf("ERROR: grayWall is invalid.\n");
+		exit(1);
+	}
+
+	(*group) << grayWall2;
 
 	float t0 = 0.0f;
 	float t1 = 1.0f;
-	vec3 origin(0, 1, 8);
-	vec3 viewPoint(0, 1, 0);
+	vec3 origin(0, 0, 15);
+	vec3 viewPoint(0, 0, 0);
 	float fov = 45.0f;
 	float lenR = 0.05f;
 	float distToFocus = 8.0f;

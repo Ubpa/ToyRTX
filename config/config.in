@@ -107,3 +107,7 @@ int val_02_the_Next_Week_04_RectLight_ImgHeight = 768;
 # 02_the_Next_Week / 05_TriMesh 输出图像大小
 int val_02_the_Next_Week_05_TriMesh_ImgWidth = 1280;
 int val_02_the_Next_Week_05_TriMesh_ImgHeight = 768;
+
+# 02_the_Next_Week / 06_Transform 输出图像大小
+int val_02_the_Next_Week_06_Transform_ImgWidth = 768;
+int val_02_the_Next_Week_06_Transform_ImgHeight = 768;
