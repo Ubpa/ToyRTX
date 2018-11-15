@@ -13,7 +13,7 @@ namespace CppUtility {
 			//------------
 			OpQueue & operator<<(const Operation::Ptr & operation);
 			OpQueue & operator<<(Operation * operation);
-			void Push(Operation::Ptr & op);
+			void Push(const Operation::Ptr & op);
 			void Push(Operation * op);
 			size_t Size() const;
 			//------------

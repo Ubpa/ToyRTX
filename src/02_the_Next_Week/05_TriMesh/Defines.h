@@ -8,7 +8,7 @@ namespace Define {
 
 	const std::string str_Img_Earth = "/data/textures/earth.jpg";
 
-	const float data_RectVertexPos[18] = {
+	const float data_SquareVertexPos[18] = {
 		2, 0.5f, -1,
 		2, 0.5f,  1,
 		2, 1.5f, -1,

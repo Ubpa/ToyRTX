@@ -40,7 +40,7 @@ int main(int argc, char ** argv){
 
 	ImgPixelSet pixelSet(val_ImgWidth, val_ImgHeight);
 	//ImgPixelSet pixelSet;
-	//pixelSet << vec2(val_ImgWidth / 2, val_ImgHeight / 2);
+	//pixelSet << vec2(val_ImgWidth / 2*0.8, val_ImgHeight / 2 * 0.8);
 
 	auto config = *GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
 	int sampleNum;

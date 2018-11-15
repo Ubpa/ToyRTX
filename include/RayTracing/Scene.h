@@ -8,7 +8,7 @@ namespace RayTracing {
 	class Scene : public CppUtility::Other::HeapObj{
 		HEAP_OBJ_SETUP(Scene)
 	public:
-		Scene(const Hitable::Ptr & obj, const RayCamera::Ptr & camera);
+const 		Scene(const Hitable::Ptr & obj, const RayCamera::Ptr & camera);
 
 		Hitable::Ptr obj;
 		const RayCamera::Ptr camera;

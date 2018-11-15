@@ -4,15 +4,11 @@
 using namespace RayTracing;
 using namespace CppUtility::Other;
 using namespace glm;
+using namespace std;
 
-const Hitable::HitRst Hitable::HitRst::FALSE(false);
+const HitRst HitRst::FALSE(false);
 
 Hitable::Hitable(const Material::Ptr & material)
-	: material(material) { }
-
-bool Hitable::RayOut(HitRecord & rec) const {
-	if (material == NULL)
-		return false;
-
-	return material->Scatter(rec);
+	: material(material) {
+	isMatCoverable = material ? false : true;
 }

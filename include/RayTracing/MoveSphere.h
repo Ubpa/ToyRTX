@@ -5,19 +5,20 @@
 #include <RayTracing/Sphere.h>
 
 namespace RayTracing {
-	class MoveSphere : public Sphere{
+	class MoveSphere : public Hitable{
 		HEAP_OBJ_SETUP(MoveSphere)
 	public:
-		MoveSphere(float t0, float t1, const glm::vec3 & center0, const glm::vec3 & center1, float radius, Material::Ptr material);
+		MoveSphere(float t0, float t1, const glm::vec3 & center0, const glm::vec3 & center1, float radius, const Material::Ptr & material = NULL);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 
 		virtual AABB GetBoundingBox() const;
 	private:
-		glm::vec3 center0;
-		glm::vec3 center1;
+		const glm::vec3 center0;
+		const glm::vec3 center1;
 		float t0;
 		float t1;
+		float radius;
 	};
 }
 

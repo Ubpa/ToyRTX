@@ -18,6 +18,7 @@ namespace RayTracing {
 		float u;
 		float v;
 		
+		void Transform(const glm::mat4 & transform);
 		static Vertex Interpolate_Tri(const glm::vec3 & abg, const Vertex & A, const Vertex & B, const Vertex & C);
 	};
 

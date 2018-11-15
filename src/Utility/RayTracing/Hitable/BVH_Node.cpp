@@ -7,6 +7,9 @@ using namespace CppUtility::Other;
 using namespace glm;
 using namespace std;
 
+BVH_Node::BVH_Node(const Material::Ptr & material)
+	: box(AABB::InValid), Hitable(material) { }
+
 BVH_Node::BVH_Node(vector<Hitable::Ptr> & hitables)
 	: box(AABB::InValid){
 	if (hitables.size() == 0)
@@ -49,23 +52,30 @@ void BVH_Node::Build(std::vector<Hitable::Ptr>::iterator begin, std::vector<Hita
 	box = left->GetBoundingBox() + right->GetBoundingBox();
 }
 
-Hitable::HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
+HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
 	if (!box.Hit(ray))
 		return false;
 
+	HitRst * front;
 	HitRst hitRstLeft = left != NULL ? left->RayIn(ray) : HitRst::FALSE;
 	HitRst hitRstRight = right != NULL ? right->RayIn(ray) : HitRst::FALSE;
-	
+
 	//先进行左边的测试, 则测试后 ray.tMax 被更新(在有碰撞的情况下)
 	//此时如果 hitRstRight 有效, 则可知其 ray.tMax 更小
 	//故只要 hitRstRight 有效, 则说明 right 更近
 	if (hitRstRight.hit)
-		return hitRstRight;
+		front = &hitRstRight;
+	else if(hitRstLeft.hit)
+		front = &hitRstLeft;
+	else
+		return HitRst::FALSE;
 
-	if (hitRstLeft.hit)
-		return hitRstLeft;
+	if (material != NULL && front->isMatCoverable) {
+		front->material = material;
+		front->isMatCoverable = isMatCoverable;
+	}
 
-	return HitRst::FALSE;
+	return *front;
 }
 
 

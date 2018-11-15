@@ -2,13 +2,13 @@
 #include <Utility/Math.h>
 
 using namespace RayTracing;
-using namespace CppUtility::Other::Math;
+using namespace CppUtility::Other;
 using namespace glm;
 
-Sphere::Sphere(const vec3 & center, float radius, Material::Ptr material)
+Sphere::Sphere(const vec3 & center, float radius, const Material::Ptr & material)
 	: center(center), radius(radius), Hitable(material) { };
 
-Hitable::HitRst Sphere::RayIn(Ray::Ptr & ray) const{
+HitRst Sphere::RayIn(Ray::Ptr & ray) const {
 	vec3 oc = ray->GetOrigin() - center;
 	float a = dot(ray->GetDir(), ray->GetDir());
 	float b = dot(oc, ray->GetDir());
@@ -30,9 +30,11 @@ Hitable::HitRst Sphere::RayIn(Ray::Ptr & ray) const{
 	HitRst hitRst(true);
 	vec3 pos = ray->At(t);
 	vec3 normal = (pos - center) / radius;
-	vec2 uv = Sphere2UV(normal);
+	vec2 uv = Math::Sphere2UV(normal);
 	hitRst.record = HitRecord(ray, pos, normal, uv[0], uv[1]);
 	hitRst.hitable = this;
+	hitRst.material = material;
+	hitRst.isMatCoverable = isMatCoverable;
 
 	return hitRst;
 }

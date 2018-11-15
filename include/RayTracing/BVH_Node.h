@@ -8,12 +8,11 @@ namespace RayTracing {
 	class BVH_Node : public Hitable{
 		HEAP_OBJ_SETUP(BVH_Node)
 	public:
-		BVH_Node() : box(AABB::InValid){ }
+		BVH_Node(const Material::Ptr & material = NULL);
 		BVH_Node(std::vector<Hitable::Ptr> & hitables);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 		virtual AABB GetBoundingBox() const { return box; };
-
 	protected:
 		void Build(std::vector<Hitable::Ptr>::iterator begin, std::vector<Hitable::Ptr>::iterator end);
 		size_t GetAxis(std::vector<Hitable::Ptr>::const_iterator begin, const std::vector<Hitable::Ptr>::const_iterator end) const;

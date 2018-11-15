@@ -22,7 +22,7 @@ OpQueue & OpQueue::operator<<(Operation * op) {
 	return *this;
 }
 
-void OpQueue::Push(Operation::Ptr & op) {
+void OpQueue::Push(const Operation::Ptr & op) {
 	if (op != nullptr)
 		opList.push_back(op);
 }

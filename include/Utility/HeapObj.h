@@ -6,6 +6,7 @@
 #define HEAP_OBJ_SETUP(CLASS) \
 public:\
 	typedef CppUtility::Other::Ptr<CLASS> Ptr;\
+	typedef CppUtility::Other::CPtr<CLASS> CPtr;\
 	virtual char * GetClassName(){ return "#CLASS"; }\
 protected:\
 	virtual ~CLASS() = default;

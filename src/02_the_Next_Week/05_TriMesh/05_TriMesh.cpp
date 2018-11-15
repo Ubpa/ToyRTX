@@ -196,8 +196,8 @@ Scene::Ptr CreateScene1(float ratioWH) {
 	auto sphere1 = ToPtr(new Sphere(vec3(0, -1000, 0), 1000.0f, noiseMat));
 
 	vector<Vertex> vertexs;
-	for (size_t i = 0; i < sizeof(data_RectVertexPos) / sizeof(float); i+=3)
-		vertexs.push_back(Vertex(vec3(data_RectVertexPos[i], data_RectVertexPos[i + 1], data_RectVertexPos[i + 2])));
+	for (size_t i = 0; i < sizeof(data_SquareVertexPos) / sizeof(float); i+=3)
+		vertexs.push_back(Vertex(vec3(data_SquareVertexPos[i], data_SquareVertexPos[i + 1], data_SquareVertexPos[i + 2])));
 
 	auto lightMat = ToPtr(new Light(vec3(1)));
 	auto triMesh = ToPtr(new TriMesh(vertexs, lightMat));
