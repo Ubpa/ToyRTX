@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace RayTracing {
-	class Group : public Hitable, public std::vector<Hitable::Ptr>{
+	class Group : public Hitable, public std::vector<Hitable::CPtr>{
 		HEAP_OBJ_SETUP(Group)
 	public:
 		using Hitable::Hitable;
@@ -13,7 +13,7 @@ namespace RayTracing {
 		// 返回 true 说明光线继续传播
 		// 返回 false 说明光线传播结束
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
-		Group & operator <<(const Hitable::Ptr & hitable);
+		Group & operator <<(const Hitable::CPtr & hitable);
 		virtual AABB GetBoundingBox() const;
 	};
 }

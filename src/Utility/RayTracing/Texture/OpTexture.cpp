@@ -16,20 +16,20 @@ rgb OpTexture::Value(float u, float v, const vec3 & p) const {
 	return op(u, v, p);
 }
 
-OpTexture::Ptr OpTexture::ConstantTexture(const rgb & color) {
+Texture::CPtr OpTexture::ConstantTexture(const rgb & color) {
 	return ToPtr(new OpTexture([=](float u, float v, const vec3 & p) -> rgb {
 		return color;
 	}));
 }
 
-OpTexture::Ptr OpTexture::CheckerTexture(const glm::rgb & color0, const glm::rgb & color1, float scale) {
+Texture::CPtr OpTexture::CheckerTexture(const glm::rgb & color0, const glm::rgb & color1, float scale) {
 	return ToPtr(new OpTexture([=](float u, float v, const vec3 & p) -> rgb {
 		float sines = sinf(scale * p.x) * sinf(scale * p.y) * sinf(scale * p.z);
 		return sines < 0 ? color0 : color1;
 	}));
 }
 
-OpTexture::Ptr OpTexture::NoiseTexture(size_t mode, const glm::rgb & color, float scale) {
+Texture::CPtr OpTexture::NoiseTexture(size_t mode, const glm::rgb & color, float scale) {
 	return ToPtr(new OpTexture([=](float u, float v, const vec3 & p) -> rgb {
 		vec3 rst;
 		switch (mode)

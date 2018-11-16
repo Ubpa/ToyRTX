@@ -11,12 +11,12 @@ namespace RayTracing {
 	class Hitable;
 
 	struct HitRst {
-		HitRst(bool hit = false) : hit(hit), hitable(NULL), isMatCoverable(true), material(NULL) { }
+		HitRst(bool hit = false) : hit(hit)/*, hitable(NULL)*/, isMatCoverable(true), material(NULL) { }
 
 		bool hit;
 		HitRecord record;
 		CppUtility::Other::CPtr<Material> material;
-		const Hitable * hitable;
+		//const Hitable * hitable;
 		bool isMatCoverable;
 		//------------
 		static const HitRst FALSE;

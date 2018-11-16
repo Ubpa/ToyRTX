@@ -15,6 +15,7 @@ namespace RayTracing {
 	private:
 		glm::mat4 transform;
 		Hitable::CPtr hitable;
+		AABB box;
 	};
 }
 

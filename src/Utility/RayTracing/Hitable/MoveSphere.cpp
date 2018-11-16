@@ -42,7 +42,7 @@ HitRst MoveSphere::RayIn(Ray::Ptr & ray) const {
 	vec3 normal = (pos - center) / radius;
 	vec2 uv = Math::Sphere2UV(normal);
 	hitRst.record = HitRecord(ray, pos, normal, uv[0], uv[1]);
-	hitRst.hitable = this;
+	//hitRst.hitable = this;
 	hitRst.material = material;
 	hitRst.isMatCoverable = isMatCoverable;
 

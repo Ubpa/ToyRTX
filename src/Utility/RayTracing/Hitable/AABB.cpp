@@ -5,6 +5,10 @@ using namespace glm;
 
 const AABB AABB::InValid(vec3(1), vec3(-1), false);
 
+AABB::AABB(){
+	*this = InValid;
+}
+
 AABB::AABB(const vec3 & minP, const vec3 & maxP, bool isValid)
 	: minP(minP), maxP(maxP), isValid(isValid) { }
 

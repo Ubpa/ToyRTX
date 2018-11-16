@@ -12,14 +12,14 @@ namespace RayTracing {
 	public:
 		Lambertian(float r, float g, float b);
 		Lambertian(const glm::rgb & albedo);
-		Lambertian(const Texture::Ptr & albedo);
+		Lambertian(const Texture::CPtr & albedo);
 
 		// 返回值为 true 说明光线继续传播
 		// 返回值为 false 说明光线不再传播
 		virtual bool Scatter(HitRecord & rec) const;
 	protected:
 
-		Texture::Ptr albedo;
+		Texture::CPtr albedo;
 	};
 }
 

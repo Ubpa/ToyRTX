@@ -14,7 +14,7 @@ namespace RayTracing {
 		// 返回值为 false 说明光线不再传播
 		virtual bool Scatter(HitRecord & rec) const;
 	private:
-		Texture::Ptr lightTex;
+		Texture::CPtr lightTex;
 	};
 }
 

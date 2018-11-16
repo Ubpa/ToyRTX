@@ -20,7 +20,7 @@ HitRst Triangle::RayIn(Ray::Ptr & ray) const {
 
 	HitRst hitRst(true);
 	hitRst.record.vertex = Vertex::Interpolate_Tri(vec3(abgt[0], abgt[1], abgt[2]), A, B, C);
-	hitRst.hitable = this;
+	//hitRst.hitable = this;
 	hitRst.record.ray = ray;
 	hitRst.material = material;
 	hitRst.isMatCoverable = isMatCoverable;
@@ -33,8 +33,8 @@ AABB Triangle::GetBoundingBox() const {
 	vec3 maxP = max(max(A.pos, B.pos), C.pos);
 	for (size_t i = 0; i < 3; i++) {
 		if (minP[i] == maxP[i]) {
-			minP[i] -= Math::EPSILON;
-			maxP[i] += Math::EPSILON;
+			minP[i] -= 0.001f;
+			maxP[i] += 0.001f;
 		}
 	}
 	return AABB(minP, maxP);

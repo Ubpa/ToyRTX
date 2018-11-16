@@ -7,8 +7,8 @@
 namespace CppUtility {
 	namespace Other {
 		namespace Math {
-			const float EPSILON = 10e-6;
-			const float PI = 3.1415926;
+			const float EPSILON = 10e-6f;
+			const float PI = 3.1415926f;
 
 			glm::vec2 RandInCircle();
 
@@ -62,6 +62,12 @@ namespace CppUtility {
 			// 如果平行, 返回 (0, 0, 0, 0)
 			glm::vec4 Intersect_RayTri(const glm::vec3 & e, const glm::vec3 & d, const glm::vec3 & a, const glm::vec3 & b, const glm::vec3 & c);
 
+			template<typename T>
+			T min(const std::vector<T> & val);
+
+			template<typename T>
+			T max(const std::vector<T> & val);
+
 			//--------------以下为模板的实现----------------
 			//--------------以下为模板的实现----------------
 			//--------------以下为模板的实现----------------
@@ -100,6 +106,30 @@ namespace CppUtility {
 					size_t target = Rand_UI() % i;
 					std::swap(data[i], data[target]);
 				}
+			}
+
+			template<typename T>
+			T min(const std::vector<T> & val) {
+				if (val.empty())
+					return static_cast<T>(0);
+
+				T rst = val[0];
+				for (size_t i = 1; i < val.size(); i++)
+					rst = glm::min(rst, val[i]);
+
+				return rst;
+			}
+
+			template<typename T>
+			T max(const std::vector<T> & val) {
+				if (val.empty())
+					return static_cast<T>(0);
+
+				T rst = val[0];
+				for (size_t i = 1; i < val.size(); i++)
+					rst = glm::max(rst, val[i]);
+
+				return rst;
 			}
 		}
 	}

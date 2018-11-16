@@ -44,7 +44,7 @@ vec3 Math::RandInSphere() {
 }
 
 float Math::Gray(const vec3 & color) {
-	return color.r * 0.299 + color.g * 0.587 + color.b * 0.114;
+	return color.r * 0.299f + color.g * 0.587f + color.b * 0.114f;
 }
 
 bool Math::Refract(const vec3 & viewDir, const vec3 & normal, float ratioNiNt, vec3 & refractDir) {

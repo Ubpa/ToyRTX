@@ -10,20 +10,20 @@ using namespace std;
 BVH_Node::BVH_Node(const Material::CPtr & material)
 	: box(AABB::InValid), Hitable(material) { }
 
-BVH_Node::BVH_Node(vector<Hitable::Ptr> & hitables)
-	: box(AABB::InValid){
+BVH_Node::BVH_Node(vector<Hitable::CPtr> & hitables, const Material::CPtr & material)
+	: box(AABB::InValid), Hitable(material){
 	if (hitables.size() == 0)
 		return;
 
-	remove_if(hitables.begin(), hitables.end(), [](const Hitable::Ptr & hitable)->bool { return hitable->GetBoundingBox().IsValid(); });
+	remove_if(hitables.begin(), hitables.end(), [](const Hitable::CPtr & hitable)->bool { return hitable->GetBoundingBox().IsValid(); });
 	Build(hitables.begin(), hitables.end());
 }
 
-void BVH_Node::Build(std::vector<Hitable::Ptr>::iterator begin, std::vector<Hitable::Ptr>::iterator end){
+void BVH_Node::Build(std::vector<Hitable::CPtr>::iterator begin, std::vector<Hitable::CPtr>::iterator end){
 	size_t num = end - begin;
 	
 	size_t axis = GetAxis(begin, end);
-	sort(begin, end, [&](const Hitable::Ptr & a, const Hitable::Ptr & b)->bool {
+	sort(begin, end, [&](const Hitable::CPtr & a, const Hitable::CPtr & b)->bool {
 		return a->GetBoundingBox().GetMinP()[axis] < b->GetBoundingBox().GetMinP()[axis];
 	});
 
@@ -79,13 +79,13 @@ HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
 }
 
 
-size_t BVH_Node::GetAxis(vector<Hitable::Ptr>::const_iterator begin, const vector<Hitable::Ptr>::const_iterator end) const {
+size_t BVH_Node::GetAxis(vector<Hitable::CPtr>::const_iterator begin, const vector<Hitable::CPtr>::const_iterator end) const {
 	size_t num = end - begin;
 	vector<float> X, Y, Z;
 	X.reserve(num);
 	Y.reserve(num);
 	Z.reserve(num);
-	for_each(begin, end, [&](const Hitable::Ptr & hitable) {
+	for_each(begin, end, [&](const Hitable::CPtr & hitable) {
 		auto box = hitable->GetBoundingBox();
 		auto center = box.GetCenter();
 		X.push_back(center.x);

@@ -14,16 +14,16 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 
 	float originTMax = ray->GetTMax();
 
-	auto hitRst = boundary->RayIn(ray);
-	if (!hitRst.hit)
+	auto boundaryHitRst = boundary->RayIn(ray);
+	if (!boundaryHitRst.hit)
 		return HitRst::FALSE;
 
-	auto reverseRay = ToPtr(new Ray(ray->GetOrigin(), - ray->GetDir()));
+	auto reverseRay = ToPtr(new Ray(ray->At(Ray::tMin*1.001f), - ray->GetDir()));
 	auto reverseHitRst = boundary->RayIn(reverseRay);
 	
 	// 反向光线撞击到边界, 说明光线在内部, 则此时体积内部的起点为 光线起点
 	// 否则说明光线在外部, 则此时体积内部的起点为 光线撞击处
-	float t0 = Ray::tMin + ( reverseHitRst.hit ? 0 : hitRst.record.ray->GetTMax() );
+	float t0 = /*Ray::tMin +*/ ( reverseHitRst.hit ? 0 : boundaryHitRst.record.ray->GetTMax() );
 
 	auto t0Ray = ToPtr(new Ray(ray->At(t0), ray->GetDir()));
 	auto t0HitRst = boundary->RayIn(t0Ray);
@@ -50,13 +50,11 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 	float tFinal = t0 + hitLen / length(ray->GetDir());
 	ray->SetTMax(tFinal);
 
-	hitRst.hit = true;
-	hitRst.hitable = this;
+	HitRst hitRst(true);
+	//hitRst.hitable = this;
 	hitRst.record = HitRecord(ray, ray->At(tFinal));
-	if (hitRst.isMatCoverable && material != NULL) {
-		hitRst.material = material;
-		hitRst.isMatCoverable = isMatCoverable;
-	}
+	hitRst.material = material;
+	hitRst.isMatCoverable = isMatCoverable;
 	return hitRst;
 }
 

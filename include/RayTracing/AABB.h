@@ -7,6 +7,7 @@
 namespace RayTracing {
 	class AABB {
 	public:
+		AABB();
 		AABB(const glm::vec3 & minP, const glm::vec3 & maxP, bool isValid = true);
 
 		glm::vec3 GetMinP() const { return minP; }

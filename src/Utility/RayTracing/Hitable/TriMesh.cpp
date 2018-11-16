@@ -12,7 +12,7 @@ TriMesh::TriMesh(const vector<Vertex> & vertexs, const Material::CPtr & material
 		return;
 	}
 
-	vector<Hitable::Ptr> triangles;
+	vector<Hitable::CPtr> triangles;
 	for (size_t i = 0; i < vertexs.size(); i += 3) {
 		auto triangle = ToPtr(new Triangle(vertexs[i], vertexs[i+1],vertexs[i+2]));
 		triangles.push_back(triangle);

@@ -4,17 +4,18 @@ using namespace RayTracing;
 using namespace CppUtility::Other;
 
 HitRst Group::RayIn(Ray::Ptr & ray) const {
-	Hitable::Ptr cloestObj = NULL;
 	HitRst finalHitRst = HitRst::FALSE;
 
-	for (auto & hitable : *this) {
+	for (size_t i = 0; i < size(); i++) {
+		Hitable::CPtr hitable = at(i);
 		HitRst hitRst = hitable->RayIn(ray);
 
-		if (hitRst.hit) {
-			cloestObj = hitable;
+		if (hitRst.hit)
 			finalHitRst = hitRst;
-		}
+
 	}
+	//for (auto & hitable : *this) {
+	//}
 	if (finalHitRst.hit && finalHitRst.isMatCoverable && material != NULL) {
 		finalHitRst.material = material;
 		finalHitRst.isMatCoverable = isMatCoverable;
@@ -23,7 +24,7 @@ HitRst Group::RayIn(Ray::Ptr & ray) const {
 	return finalHitRst;
 }
 
-Group & Group::operator <<(const Hitable::Ptr & hitable) {
+Group & Group::operator <<(const Hitable::CPtr & hitable) {
 	if (hitable != NULL)
 		push_back(hitable);
 	
