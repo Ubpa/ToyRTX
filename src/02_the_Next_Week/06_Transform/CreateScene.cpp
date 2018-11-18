@@ -32,8 +32,8 @@ using namespace glm;
 using namespace std;
 
 Scene::Ptr CreateScene0(float ratioWH) {
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
 		rgb lightColor = (1 - t) * white + t * blue;
@@ -45,7 +45,7 @@ Scene::Ptr CreateScene0(float ratioWH) {
 	float t0 = 0.0f;
 	float t1 = 1.0f;
 
-	vector<Hitable::Ptr> bvhData;
+	vector<Hitable::CPtr> bvhData;
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
 			float choose_mat = Math::Rand_F();
@@ -57,7 +57,7 @@ Scene::Ptr CreateScene0(float ratioWH) {
 					bvhData.push_back(sphere);
 				}
 				else if (choose_mat < 0.95) { // metal
-					auto mat = ToPtr(new Metal(vec3(0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F())), 0.5*Math::Rand_F()));
+					auto mat = ToPtr(new Metal(vec3(0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F())), 0.5f*Math::Rand_F()));
 					auto sphere = ToPtr(new Sphere(center, 0.2, mat));
 					bvhData.push_back(sphere);
 				}
@@ -103,8 +103,8 @@ Scene::Ptr CreateScene0(float ratioWH) {
 }
 
 Scene::Ptr CreateScene1(float ratioWH) {
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb c0 = rgb(0.005f);
 		rgb c1 = c0 * rgb(0.75f, 0.5f, 0.375f);
 		rgb lightColor = (1 - t) * c0 + t * c1;

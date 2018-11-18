@@ -10,9 +10,10 @@ namespace RayTracing {
 		Triangle(const Vertex & A, const Vertex & B, const Vertex & C, const Material::CPtr & material = NULL);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
-		virtual AABB GetBoundingBox() const;
+		virtual const AABB GetBoundingBox() const { return box; }
 	private:
 		Vertex A, B, C;
+		AABB box;
 	};
 }
 

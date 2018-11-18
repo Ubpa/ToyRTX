@@ -10,7 +10,7 @@ namespace RayTracing {
 		Volume(const Hitable::CPtr & boundary = NULL, float density = 1.0f, const Material::CPtr & material = NULL);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
-		virtual AABB GetBoundingBox() const;
+		virtual const AABB GetBoundingBox() const { return boundary ? boundary->GetBoundingBox() : AABB::InValid; }
 	private:
 		const Hitable::CPtr boundary;
 		const float density;

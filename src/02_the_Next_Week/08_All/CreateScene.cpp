@@ -34,7 +34,7 @@ using namespace glm;
 using namespace std;
 
 Scene::Ptr CreateScene0(float ratioWH) {
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
 		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
@@ -59,7 +59,7 @@ Scene::Ptr CreateScene0(float ratioWH) {
 					bvhData.push_back(sphere);
 				}
 				else if (choose_mat < 0.95) { // metal
-					auto mat = ToPtr(new Metal(vec3(0.5*(1 + Math::Rand_F()), 0.5f*(1 + Math::Rand_F()), 0.5f*(1 + Math::Rand_F())), 0.5f*Math::Rand_F()));
+					auto mat = ToPtr(new Metal(vec3(0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F())), 0.5f*Math::Rand_F()));
 					auto sphere = ToPtr(new Sphere(center, 0.2f, mat));
 					bvhData.push_back(sphere);
 				}
@@ -105,7 +105,7 @@ Scene::Ptr CreateScene0(float ratioWH) {
 }
 
 Scene::Ptr CreateScene1(float ratioWH) {
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
 		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb c0 = rgb(0.005f);
 		rgb c1 = c0 * rgb(0.75f, 0.5f, 0.375f);
@@ -268,6 +268,7 @@ Scene::Ptr CreateScene3(float ratioWH) {
 	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
 
 	// Mesh
+	// Mesh Square
 	vector<Vertex> squareVertexs;
 	for (size_t i = 0; i < sizeof(data_SquareVertexPos) / sizeof(float); i += 6) {
 		vec3 pos(data_SquareVertexPos[i], data_SquareVertexPos[i + 1], data_SquareVertexPos[i + 2]);
@@ -280,6 +281,7 @@ Scene::Ptr CreateScene3(float ratioWH) {
 		exit(1);
 	}
 
+	// Mesh Cube
 	vector<Vertex> cubeVertexs;
 	for (size_t i = 0; i < sizeof(data_CubeVertexPos) / sizeof(float); i += 6) {
 		vec3 pos(data_CubeVertexPos[i], data_CubeVertexPos[i + 1], data_CubeVertexPos[i + 2]);
@@ -291,9 +293,8 @@ Scene::Ptr CreateScene3(float ratioWH) {
 		printf("ERROR: cube is invalid.\n");
 		exit(1);
 	}
-	
-	// Material
 
+	// Ground
 	int nb = 20;
 	auto groundMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(0.48f, 0.83f, 0.53f))));
 	vector<Hitable::CPtr> boxs;
@@ -319,7 +320,8 @@ Scene::Ptr CreateScene3(float ratioWH) {
 	}
 	auto boxBVH = ToPtr(new BVH_Node(boxs, groundMat));
 
-	//x0 = 123, x1 = 423, z0 = 147, z1 = 412, y = 554
+	// Light
+	// x0 = 123, x1 = 423, z0 = 147, z1 = 412, y = 554
 	auto lightMat = ToPtr(new Light(vec3(7)));
 	mat4 lightTfm(1.0f);
 	lightTfm = translate(lightTfm, vec3((123+423)/2, 554, (147+412)/2));
@@ -327,19 +329,24 @@ Scene::Ptr CreateScene3(float ratioWH) {
 	lightTfm = scale(lightTfm, vec3(423 - 123, 412 - 127, 1.00));
 	auto light = ToPtr(new Transform(lightTfm, square, lightMat));
 
+	// Move Sphere
 	vec3 center(400, 400, 200);
 	auto moveSphereMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(0.7, 0.3, 0.1))));
 	auto moveSphere = ToPtr(new MoveSphere(t0, t1, center, center + vec3(30, 0, 0), 50, moveSphereMat));
 
+	// Dielectric, Metal
 	auto sphere1 = ToPtr(new Sphere(vec3(260, 150, 45), 50, ToPtr(new Dielectric(1.5f))));
 	auto sphere2 = ToPtr(new Sphere(vec3(0, 150, 145), 50, ToPtr(new Metal(vec3(0.8f, 0.8f, 0.9f), 10.0f))));
 
+	// Sphere Volume with Dielelctric Boundary
 	auto sphereBoundary = ToPtr(new Sphere(vec3(360, 150, 145), 70, ToPtr(new Dielectric(1.5f/*, vec3(0.01, 1, 0.01)/*/))));
-	auto sphereVolume = ToPtr(new Volume(sphereBoundary, 0.2f, ToPtr(new Isotropic(rgb(0.0f,0.4,0.9f)))));
+	auto sphereVolume = ToPtr(new Volume(sphereBoundary, 0.2f, ToPtr(new Isotropic(rgb(0.2f,0.4,0.9f)))));
 
+	// Air
 	auto airBoundary = ToPtr(new Sphere(vec3(0), 5000));
 	auto airVolume = ToPtr(new Volume(airBoundary, 0.0001f, ToPtr(new Isotropic(rgb(1.0f)))));
 
+	// Earth
 	auto config = *GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
 	auto rootPath = *config->GetStrPtr("RootPath");
 	auto earthTex = ToPtr(new ImgTexture(rootPath + str_Img_Earth, true));
@@ -350,13 +357,15 @@ Scene::Ptr CreateScene3(float ratioWH) {
 	auto earthMat = ToPtr(new Lambertian(earthTex));
 	auto earth = ToPtr(new Sphere(vec3(400, 200, 400), 100, earthMat));
 
-	auto noiseMat = ToPtr(new Lambertian(OpTexture::NoiseTexture(0, vec3(1), 100)));
+	// Noise Sphere
+	auto noiseMat = ToPtr(new Lambertian(OpTexture::NoiseTexture(0, vec3(1), 0.1)));
 	auto noiseSphere = ToPtr(new Sphere(vec3(220, 280, 300), 80, noiseMat));
 
+	// Balls Cube
 	vector<Hitable::CPtr> balls;
-	int ns = 1000;
-	for (int j = 0; j < ns; j++) {
-		vec3 center = vec3(165 * Math::Rand_F(), 165 * Math::Rand_F(), 165 * Math::Rand_F());
+	size_t ns = 1000;
+	for (size_t j = 0; j < ns; j++) {
+		vec3 center = 165.0f * vec3(Math::Rand_F(), Math::Rand_F(), Math::Rand_F());
 		balls.push_back(ToPtr(new Sphere(center, 10)));
 	}
 	auto ballBVH = ToPtr(new BVH_Node(balls));
@@ -366,10 +375,12 @@ Scene::Ptr CreateScene3(float ratioWH) {
 	auto whiteMat = ToPtr(new Lambertian(OpTexture::ConstantTexture(vec3(0.73f, 0.73f, 0.73f))));
 	auto tfmBallBVH = ToPtr(new Transform(tfmBalls, ballBVH, whiteMat));
 
+	// Group
 	auto group = ToPtr(new Group);
 	(*group) << light
 		<< moveSphere << sphere1 << sphere2 << noiseSphere << earth
 		<< sphereBoundary << sphereVolume << airVolume
 		<< boxBVH << tfmBallBVH;
+
 	return ToPtr(new Scene(group, camera));
 }

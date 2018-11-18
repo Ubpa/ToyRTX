@@ -1,3 +1,4 @@
+#include <RayTracing/RayTracer.h>
 #include <RayTracing/Scene.h>
 #include <RayTracing/Dielectric.h>
 #include <RayTracing/Metal.h>
@@ -31,8 +32,6 @@ using namespace glm;
 using namespace std;
 
 Scene::Ptr CreateScene(float ratioWH);
-rgb RayTracer(const Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth = 50);
-rgb Background(const Ray::Ptr & ray);
 
 int main(int argc, char ** argv){
 	ImgWindow imgWindow(str_WindowTitle);
@@ -62,7 +61,7 @@ int main(int argc, char ** argv){
 	Timer timer;
 	timer.Start();
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
-		size_t loopMax = glm::max(imgWindow.GetScale(), 1.0);
+		size_t loopMax = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
 		pixelSet.RandPick(loopMax, pixels);
 		int pixelsNum = pixels.size();
 
@@ -70,10 +69,10 @@ int main(int argc, char ** argv){
 		for (int pixelIdx = 0; pixelIdx < pixelsNum; pixelIdx++) {
 			const uvec2 & pixel = pixels[pixelIdx];
 			rgb color(0);
-			for (size_t k = 0; k < sampleNum; k++) {
+			for (int k = 0; k < sampleNum; k++) {
 				float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
 				float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
-				color += RayTracer(scene->obj, scene->camera->GenRay(u, v));
+				color += RayTracer::Trace(scene->obj, scene->camera->GenRay(u, v));
 			}
 			color /= sampleNum;
 			img.SetPixel(pixel.x, val_ImgHeight - 1 - pixel.y, sqrt(color));
@@ -96,8 +95,8 @@ int main(int argc, char ** argv){
 }
 
 Scene::Ptr CreateScene(float ratioWH){
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
 		rgb lightColor = (1 - t) * white + t * blue;
@@ -120,7 +119,7 @@ Scene::Ptr CreateScene(float ratioWH){
 					group->push_back(sphere);
 				}
 				else if (choose_mat < 0.95) { // metal
-					auto mat = ToPtr(new Metal(vec3(0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F())), 0.5*Math::Rand_F()));
+					auto mat = ToPtr(new Metal(vec3(0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F())), 0.5f*Math::Rand_F()));
 					auto sphere = ToPtr(new Sphere(center, 0.2, mat));
 					group->push_back(sphere);
 				}
@@ -148,34 +147,6 @@ Scene::Ptr CreateScene(float ratioWH){
 	float fov = 20.0f;
 	float lenR = 0.05f;
 	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
-	
-	/*
-	auto group = ToPtr(new Group);
-	auto sphereBottom = ToPtr(new Sphere(vec3(0, -1000, 0), 1000, ToPtr(new Lambertian(vec3(0.5, 0.5, 0.5)))));
-	auto sphere0 = ToPtr(new Sphere(vec3(0, 0, -1), 0.5, ToPtr(new Metal(vec3(0.7, 0.6, 0.5), 0.0))));
 
-	(*group) << sphere0 << sphere1 << sphere2 << sphere3 << sphere4 << sphereBottom << sky;
-
-	vec3 origin(0, 0, 0);
-	vec3 viewPoint(0, 0, -1);
-	float distToFocus = 1.0f;
-	float fov = 90.0f;
-	float lenR = 0.05f;
-	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, 0, 1, fov, lenR, distToFocus));*/
 	return ToPtr(new Scene(group, camera));
-}
-
-rgb RayTracer(const Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth) {
-	if(depth == 0)
-		return rgb(10e-6);
-
-	auto hitRst = scene->RayIn(ray);
-	if (hitRst.hit) {
-		if (hitRst.hitable->RayOut(hitRst.record))
-			return RayTracer(scene, ray, depth-1);
-		else
-			return ray->GetColor();
-	}
-	else
-		return rgb(10e-6);
 }

@@ -10,11 +10,12 @@ namespace RayTracing {
 		Sphere(const glm::vec3 & center = glm::vec3(0.0f), float radius = 1.0f, const Material::CPtr & material = NULL);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
-		virtual AABB GetBoundingBox() const;
+		virtual const AABB GetBoundingBox() const { return box; }
 	protected:
 
 		glm::vec3 center;
 		float radius;
+		AABB box;
 	};
 }
 

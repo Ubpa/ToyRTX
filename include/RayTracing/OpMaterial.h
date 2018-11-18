@@ -9,11 +9,11 @@ namespace RayTracing {
 	class OpMaterial : public Material{
 		HEAP_OBJ_SETUP(OpMaterial)
 	public:
-		OpMaterial(const std::function<bool(HitRecord & rec)> & op);
+		OpMaterial(const std::function<bool(const HitRecord & rec)> & op);
 
-		virtual bool Scatter(HitRecord & rec) const;
+		virtual bool Scatter(const HitRecord & rec) const;
 	protected:
-		std::function<bool(HitRecord & rec)> op;
+		std::function<bool(const HitRecord & rec)> op;
 	};
 }
 

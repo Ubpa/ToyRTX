@@ -1,3 +1,4 @@
+#include <RayTracing/RayTracer.h>
 #include <RayTracing/Dielectric.h>
 #include <RayTracing/Metal.h>
 #include <RayTracing/Lambertian.h>
@@ -29,8 +30,6 @@ using namespace std;
 typedef vec3 rgb;
 
 Hitable::Ptr CreateScene();
-rgb RayTracer(const Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth = 20);
-rgb Background(const Ray::Ptr & ray);
 
 int main(int argc, char ** argv){
 	ImgWindow imgWindow(str_WindowTitle);
@@ -79,7 +78,7 @@ int main(int argc, char ** argv){
 				float u = (pixel.x + randMap(engine)) / (float)val_ImgWidth;
 				float v = (pixel.y + randMap(engine)) / (float)val_ImgHeight;
 				Ray::Ptr ray = camera->GenRay(u, v);
-				color += RayTracer(scene, ray);
+				color += RayTracer::Trace(scene, ray);
 			}
 			color /= sampleNum;
 			img.SetPixel(pixel.x, val_ImgHeight - 1 - pixel.y, sqrt(color));
@@ -97,7 +96,7 @@ int main(int argc, char ** argv){
 }
 
 Hitable::Ptr CreateScene(){
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
 		float t = 0.5*(rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
@@ -117,19 +116,4 @@ Hitable::Ptr CreateScene(){
 	(*group) << sphereBottom << sphereMid << sphereLeftOuter << sphereLeftInner << sphereRight << sky;
 
 	return group;
-}
-
-rgb RayTracer(const Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth) {
-	if(depth == 0)
-		return rgb(10e-6);
-
-	auto hitRst = scene->RayIn(ray);
-	if (hitRst.hit) {
-		if (hitRst.hitable->RayOut(hitRst.record))
-			return RayTracer(scene, ray, depth-1);
-		else
-			return ray->GetColor();
-	}
-	else
-		return rgb(10e-6);
 }

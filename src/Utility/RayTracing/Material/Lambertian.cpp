@@ -16,7 +16,7 @@ Lambertian::Lambertian(const rgb & albedo) {
 	this->albedo = OpTexture::ConstantTexture(albedo);
 }
 
-bool Lambertian::Scatter(HitRecord & rec) const {
+bool Lambertian::Scatter(const HitRecord & rec) const {
 	vec3 dir = rec.vertex.normal + Math::RandInSphere();
 	rec.ray->Update(rec.vertex.pos, dir, albedo->Value(rec.vertex.u,rec.vertex.v,rec.vertex.pos));
 	return true;

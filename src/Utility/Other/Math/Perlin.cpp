@@ -17,7 +17,9 @@ float Perlin::Noise(const vec3 & p){
 	for (int dx = 0; dx < 2; dx++) {
 		for (int dy = 0; dy < 2; dy++) {
 			for (int dz = 0; dz < 2; dz++) {
-				size_t idx = permuteX[(pi.x + dx) & 255] ^ permuteY[(pi.y + dy) & 255] ^ permuteZ[(pi.z + dz) & 255];
+				size_t idx = permuteX[(pi.x + dx) & 255]
+					^ permuteY[(pi.y + dy) & 255]
+					^ permuteZ[(pi.z + dz) & 255];
 				c[dx][dy][dz] = randVec[idx];
 			}
 		}

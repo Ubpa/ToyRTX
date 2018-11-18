@@ -3,7 +3,7 @@
 using namespace RayTracing;
 using namespace glm;
 
-rgb RayTracer::Trace(Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth) {
+rgb RayTracer::Trace(const Hitable::CPtr & scene, Ray::Ptr & ray, size_t depth) {
 	if (depth == 0)
 		return rgb(1.0001f / 255.0f);
 

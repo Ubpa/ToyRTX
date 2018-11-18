@@ -16,30 +16,30 @@ rgb OpTexture::Value(float u, float v, const vec3 & p) const {
 	return op(u, v, p);
 }
 
-Texture::CPtr OpTexture::ConstantTexture(const rgb & color) {
+const Texture::CPtr OpTexture::ConstantTexture(const rgb & color) {
 	return ToPtr(new OpTexture([=](float u, float v, const vec3 & p) -> rgb {
 		return color;
 	}));
 }
 
-Texture::CPtr OpTexture::CheckerTexture(const glm::rgb & color0, const glm::rgb & color1, float scale) {
+const Texture::CPtr OpTexture::CheckerTexture(const glm::rgb & color0, const glm::rgb & color1, float scale) {
 	return ToPtr(new OpTexture([=](float u, float v, const vec3 & p) -> rgb {
 		float sines = sinf(scale * p.x) * sinf(scale * p.y) * sinf(scale * p.z);
 		return sines < 0 ? color0 : color1;
 	}));
 }
 
-Texture::CPtr OpTexture::NoiseTexture(size_t mode, const glm::rgb & color, float scale) {
+const Texture::CPtr OpTexture::NoiseTexture(size_t mode, const glm::rgb & color, float scale) {
 	return ToPtr(new OpTexture([=](float u, float v, const vec3 & p) -> rgb {
 		vec3 rst;
 		switch (mode)
 		{
 		default:
 		case 0:
-			rst = color * 0.5f * (1.0f + sin(scale * p.z + 20.0f * Math::Perlin::Turb(p)));
+			rst = color *0.5f*(1.0f + sin(scale*p.x + 5 * Math::Perlin::Turb(scale*p)));
 			break;
 		case 1:
-			rst = color * 0.5f * (1.0f + sin(Math::Perlin::Turb(scale * p)));
+			rst = color *0.5f*(1.0f + Math::Perlin::Turb(scale * p));
 			break;
 		case 2:
 			rst = color * Math::Perlin::Turb(scale * p);

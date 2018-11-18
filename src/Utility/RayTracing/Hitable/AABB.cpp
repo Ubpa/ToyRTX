@@ -28,8 +28,8 @@ bool AABB::Hit(const Ray::Ptr & ray) const {
 	float tMax = ray->GetTMax();
 	for (size_t i = 0; i < 3; i++) {
 		float invD = 1.0f / dir[i];
-		float t0 = (minP[i] - origin[i]) / dir[i];
-		float t1 = (maxP[i] - origin[i]) / dir[i];
+		float t0 = (minP[i] - origin[i]) * invD;
+		float t1 = (maxP[i] - origin[i]) * invD;
 		if (invD < 0.0f)
 			std::swap(t0, t1);
 
@@ -41,7 +41,7 @@ bool AABB::Hit(const Ray::Ptr & ray) const {
 	return true;
 }
 
-AABB AABB::operator+(const AABB & aabb) const{
+const AABB AABB::operator+(const AABB & aabb) const{
 	if (isValid) {
 		if (aabb.isValid) {
 			vec3 minP = min(this->minP, aabb.minP);

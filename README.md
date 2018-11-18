@@ -4,7 +4,7 @@
 
 - Ray Tracing in One Weekend
 - Ray Tracing the Next Week
-- Ray Tracing the Rest of Your Life
+- Ray Tracing the Rest of Your Life (暂时不写)
 
 > 作者的源码网址
 >
@@ -14,11 +14,13 @@
 >
 > https://github.com/petershirley/raytracingtherestofyourlife
 
-对内容进行了一定的修改，包括类设计等
+对内容进行了大量的修改，优化，新增
+
+详细内容参考 notes 和 源码
 
 图形接口使用的是 OpenGL
 
-# 2. 内容
+# 2. 代码框架
 
 ```
 /01_in_One_Weekend
@@ -32,6 +34,11 @@
   -02_01_MotionBlur
   -02_02_AABB
   -02_03_Texture
+  -02_04_Light
+  -02_05_TriMesh
+  -02_06_Transform
+  -02_07_Volume
+  -02_08_All
 /Utility
   /OpenGL
     -Camera
@@ -56,12 +63,11 @@
     -Shape: Shape, Cube, Sphere
     -Timer
   /RayTracing
-    -Hitable: AABB, BVH_Node, Group, Hitable, MoveSphere, Sky, Sphere
+    -Hitable: AABB, BVH_Node, Group, Hitable, MoveSphere, Sky, Sphere, Transform, Triangle, TriMesh, Volume
     -ImgWindow
     -Material: Dielectric, Lambertian, Material, Metal, OpMaterial
-    -Ray: 
     -RayCamera: Ray, RayCamera, TRay, TRayCamera
-    -RT_Texture: OpTexture(Const, Checker, Noise), Texture
+    -RT_Texture: ImgTexture, OpTexture(Const, Checker, Noise), Texture
     -Scene
 ```
 
@@ -96,3 +102,17 @@ cmake ..
 ## 2.4 配置
 
 在运行exe前，可以对 `config.out` 进行修改来配置，在调试时在 `config.in` 进行修改来配置
+
+## 3. 出图
+
+### 01_06_Scene
+
+![01_in_a_Weekend_06_Scene](assets/01_in_a_Weekend_06_Scene.png)
+
+### 02_the_Next_Week_07_Volume
+
+![02_the_Next_Week_07_Volume](assets/02_the_Next_Week_07_Volume.png)
+
+### 02_the_Next_Week_08_All
+
+![02_the_Next_Week_08_All](assets/02_the_Next_Week_08_All.png)

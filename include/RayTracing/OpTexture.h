@@ -13,11 +13,11 @@ namespace RayTracing {
 
 		virtual glm::rgb Value(float u = 0, float v = 0, const glm::vec3 & p = glm::vec3(0)) const;
 
-		static Texture::CPtr ConstantTexture(const glm::rgb & color);
-		static Texture::CPtr CheckerTexture(const glm::rgb & color0, const glm::rgb & color1, float scale = 10.0f);
-		static Texture::CPtr NoiseTexture(size_t mode = 0, const glm::rgb & color = glm::rgb(1), float scale = 10.0f);
+		static const Texture::CPtr ConstantTexture(const glm::rgb & color);
+		static const Texture::CPtr CheckerTexture(const glm::rgb & color0, const glm::rgb & color1, float scale = 10.0f);
+		static const Texture::CPtr NoiseTexture(size_t mode = 0, const glm::rgb & color = glm::rgb(1), float scale = 10.0f);
 	protected:
-		std::function<glm::rgb(float u, float v, const glm::vec3 & p)> op;
+		const std::function<glm::rgb(float u, float v, const glm::vec3 & p)> op;
 	};
 }
 

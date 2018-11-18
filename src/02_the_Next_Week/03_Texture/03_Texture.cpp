@@ -64,7 +64,7 @@ int main(int argc, char ** argv){
 	Timer timer;
 	timer.Start();
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
-		size_t loopMax = glm::max(imgWindow.GetScale(), 1.0);
+		size_t loopMax = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
 		pixelSet.RandPick(loopMax, pixels);
 
 		int pixelsNum = pixels.size();
@@ -72,7 +72,7 @@ int main(int argc, char ** argv){
 		for (int pixelIdx = 0; pixelIdx < pixelsNum; pixelIdx++) {
 			const uvec2 & pixel = pixels[pixelIdx];
 			rgb color(0);
-			for (size_t k = 0; k < sampleNum; k++) {
+			for (int k = 0; k < sampleNum; k++) {
 				float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
 				float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
 				color += RayTracer::Trace(scene->obj, scene->camera->GenRay(u, v));
@@ -100,8 +100,8 @@ int main(int argc, char ** argv){
 }
 
 Scene::Ptr CreateScene(float ratioWH){
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
 		rgb lightColor = (1 - t) * white + t * blue;
@@ -113,7 +113,7 @@ Scene::Ptr CreateScene(float ratioWH){
 	float t0 = 0.0f;
 	float t1 = 1.0f;
 	
-	vector<Hitable::Ptr> bvhData;
+	vector<Hitable::CPtr> bvhData;
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
 			float choose_mat = Math::Rand_F();
@@ -125,7 +125,7 @@ Scene::Ptr CreateScene(float ratioWH){
 					bvhData.push_back(sphere);
 				}
 				else if (choose_mat < 0.95) { // metal
-					auto mat = ToPtr(new Metal(vec3(0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F())), 0.5*Math::Rand_F()));
+					auto mat = ToPtr(new Metal(vec3(0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F())), 0.5f*Math::Rand_F()));
 					auto sphere = ToPtr(new Sphere(center, 0.2, mat));
 					bvhData.push_back(sphere);
 				}

@@ -12,7 +12,7 @@ namespace RayTracing {
 	public:
 		TriMesh(const std::vector<Vertex> & vertexs, const Material::CPtr & material = NULL);
 
-		bool IsValid() const { return isValid; };
+		inline bool IsValid() const { return isValid; };
 	protected:
 		bool isValid;
 	};

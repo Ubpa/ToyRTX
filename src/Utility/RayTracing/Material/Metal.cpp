@@ -14,11 +14,9 @@ Metal::Metal(float r, float g, float b, float fuzz)
 	: Metal(rgb(r,g,b), fuzz) { }
 
 Metal::Metal(const glm::rgb & specular, float fuzz)
-	: fuzz(fuzz) {
-	this->specular = OpTexture::ConstantTexture(specular);
-}
+	: Metal(OpTexture::ConstantTexture(specular), fuzz) { }
 
-bool Metal::Scatter(HitRecord & rec) const {
+bool Metal::Scatter(const HitRecord & rec) const {
 	vec3 dir = reflect(rec.ray->GetDir(), rec.vertex.normal);
 	vec3 dirFuzz = dir + fuzz * Math::RandInSphere();
 

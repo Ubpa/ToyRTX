@@ -19,7 +19,8 @@ namespace RayTracing {
 		float v;
 		
 		void Transform(const glm::mat4 & transform);
-		static Vertex Interpolate_Tri(const glm::vec3 & abg, const Vertex & A, const Vertex & B, const Vertex & C);
+		void Transform(const glm::mat4 & transform, const glm::mat3 & normalTransform);
+		static const Vertex Interpolate_Tri(const glm::vec3 & abg, const Vertex & A, const Vertex & B, const Vertex & C);
 	};
 
 	struct HitRecord {
@@ -34,7 +35,7 @@ namespace RayTracing {
 	public:
 		// 返回值为 true 说明光线继续传播
 		// 返回值为 false 说明光线不再传播
-		virtual bool Scatter(HitRecord & rec) const = 0;
+		virtual bool Scatter(const HitRecord & rec) const = 0;
 	};
 }
 

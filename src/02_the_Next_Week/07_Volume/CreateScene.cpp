@@ -34,8 +34,8 @@ using namespace glm;
 using namespace std;
 
 Scene::Ptr CreateScene0(float ratioWH) {
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
 		rgb lightColor = (1 - t) * white + t * blue;
@@ -51,21 +51,21 @@ Scene::Ptr CreateScene0(float ratioWH) {
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
 			float choose_mat = Math::Rand_F();
-			vec3 center(a + 0.9*Math::Rand_F(), 0.2, b + 0.9*Math::Rand_F());
-			if ((center - vec3(4, 0.2, 0)).length() > 0.9) {
+			vec3 center(a + 0.9f*Math::Rand_F(), 0.2f, b + 0.9f*Math::Rand_F());
+			if ((center - vec3(4, 0.2f, 0)).length() > 0.9f) {
 				if (choose_mat < 0.8) {  // diffuse
 					auto mat = ToPtr(new Lambertian(vec3(Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F())));
-					auto sphere = ToPtr(new MoveSphere(t0, t1, center, center + vec3(0, Math::Rand_F()*0.5, 0), 0.2, mat));
+					auto sphere = ToPtr(new MoveSphere(t0, t1, center, center + vec3(0, Math::Rand_F()*0.5f, 0), 0.2f, mat));
 					bvhData.push_back(sphere);
 				}
 				else if (choose_mat < 0.95) { // metal
-					auto mat = ToPtr(new Metal(vec3(0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F()), 0.5*(1 + Math::Rand_F())), 0.5*Math::Rand_F()));
-					auto sphere = ToPtr(new Sphere(center, 0.2, mat));
+					auto mat = ToPtr(new Metal(vec3(0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F()), 0.5f*(1.0f + Math::Rand_F())), 0.5f*Math::Rand_F()));
+					auto sphere = ToPtr(new Sphere(center, 0.2f, mat));
 					bvhData.push_back(sphere);
 				}
 				else {  // glass
 					auto mat = ToPtr(new Dielectric(1.5));
-					auto sphere = ToPtr(new Sphere(center, 0.2, mat));
+					auto sphere = ToPtr(new Sphere(center, 0.2f, mat));
 					bvhData.push_back(sphere);
 				}
 			}
@@ -105,8 +105,8 @@ Scene::Ptr CreateScene0(float ratioWH) {
 }
 
 Scene::Ptr CreateScene1(float ratioWH) {
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb c0 = rgb(0.005f);
 		rgb c1 = c0 * rgb(0.75f, 0.5f, 0.375f);
 		rgb lightColor = (1 - t) * c0 + t * c1;

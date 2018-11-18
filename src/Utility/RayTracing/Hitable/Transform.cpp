@@ -8,7 +8,11 @@ using namespace glm;
 using namespace std;
 
 Transform::Transform(const mat4 & transform, const Hitable::CPtr & hitable, const Material::CPtr & material)
-	: transform(transform), hitable(hitable), Hitable(material) {
+	: transform(transform),
+	inverseTransform(inverse(transform)),
+	normalTransform(transpose(inverse(mat3(transform)))),
+	hitable(hitable),
+	Hitable(material) {
 	if (hitable == NULL) {
 		box = AABB::InValid;
 		return;
@@ -38,7 +42,7 @@ HitRst Transform::RayIn(Ray::Ptr & ray) const {
 	if (hitable == NULL)
 		return HitRst::FALSE;
 
-	ray->Transform(inverse(transform));
+	ray->Transform(inverseTransform);
 
 	auto hitRst = hitable->RayIn(ray);
 
@@ -48,17 +52,10 @@ HitRst Transform::RayIn(Ray::Ptr & ray) const {
 			hitRst.isMatCoverable = isMatCoverable;
 		}
 
-		hitRst.record.vertex.Transform(transform);
+		hitRst.record.vertex.Transform(transform, normalTransform);
 	}
 
 	ray->Transform(transform);
 
 	return hitRst;
-}
-
-AABB Transform::GetBoundingBox() const {
-	if (!box.IsValid()) {
-		printf("hehe\n");
-	}
-	return box;
 }

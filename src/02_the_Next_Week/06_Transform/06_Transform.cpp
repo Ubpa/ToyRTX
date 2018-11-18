@@ -39,8 +39,6 @@ int main(int argc, char ** argv){
 	const size_t val_ImgHeight = img.GetHeight();
 
 	ImgPixelSet pixelSet(val_ImgWidth, val_ImgHeight);
-	//ImgPixelSet pixelSet;
-	//pixelSet << vec2(val_ImgWidth / 2*0.8, val_ImgHeight / 2 * 0.8);
 
 	auto config = *GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
 	int sampleNum;
@@ -53,7 +51,7 @@ int main(int argc, char ** argv){
 	Timer timer;
 	timer.Start();
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
-		size_t loopMax = glm::max(imgWindow.GetScale(), 1.0);
+		size_t loopMax = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
 		pixelSet.RandPick(loopMax, pixels);
 
 		int pixelsNum = pixels.size();
@@ -61,7 +59,7 @@ int main(int argc, char ** argv){
 		for (int pixelIdx = 0; pixelIdx < pixelsNum; pixelIdx++) {
 			const uvec2 & pixel = pixels[pixelIdx];
 			rgb color(0);
-			for (size_t k = 0; k < sampleNum; k++) {
+			for (int k = 0; k < sampleNum; k++) {
 				float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
 				float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
 				color += RayTracer::Trace(scene->obj, scene->camera->GenRay(u, v));

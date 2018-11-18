@@ -1,3 +1,6 @@
+#include <RayTracing/RayTracer.h>
+#include <RayTracing/Sky.h>
+#include <RayTracing/Group.h>
 #include <RayTracing/ImgWindow.h>
 #include <RayTracing/RayCamera.h>
 
@@ -53,7 +56,7 @@ int main(int argc, char ** argv){
 			float u = i / (float)val_ImgWidth;
 			float v = j / (float)val_ImgHeight;
 			Ray::Ptr ray = camera->GenRay(u, v);
-			rgb color = RayTracer(scene, ray);
+			rgb color = RayTracer::Trace(scene, ray);
 			float r = color.r;
 			float g = color.g;
 			float b = color.b;
@@ -70,31 +73,25 @@ int main(int argc, char ** argv){
 }
 
 Hitable::Ptr CreateScene() {
-	auto posMaterial = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
+		rgb white = rgb(1.0f, 1.0f, 1.0f);
+		rgb blue = rgb(0.5f, 0.7f, 1.0f);
+		rgb lightColor = (1 - t) * white + t * blue;
+		rec.ray->SetLightColor(lightColor);
+		return false;
+	}));
+	auto sky = ToPtr(new Sky(skyMat));
+
+	auto posMaterial = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
 		vec3 lightColor = 0.5f * (normalize(rec.vertex.normal) + 1.0f);
 		rec.ray->SetLightColor(lightColor);
 		return false;
 	}));
 	auto sphere = ToPtr(new Sphere(vec3(0, 0, -1), 0.5f, posMaterial));
 
+	auto group = ToPtr(new Group);
+	(*group) << sphere << sky;
+
 	return sphere;
-}
-
-rgb RayTracer(Ptr<Hitable> scene, Ray::Ptr & ray) {
-	auto hitRst = scene->RayIn(ray);
-	if (hitRst.hit) {
-		if (hitRst.hitable->RayOut(hitRst.record))
-			return RayTracer(scene, ray);
-		else
-			return ray->GetColor();
-	}
-	else
-		return Background(ray);
-}
-
-rgb Background(const Ray::Ptr & ray) {
-	float t = 0.5*(normalize(ray->GetDir()).y + 1.0f);
-	rgb white = rgb(1.0f, 1.0f, 1.0f);
-	rgb blue = rgb(0.5f, 0.7f, 1.0f);
-	return (1 - t)*white + t * blue;
 }

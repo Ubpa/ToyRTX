@@ -11,9 +11,13 @@ namespace RayTracing {
 		Transform(const glm::mat4 & transform, const Hitable::CPtr & hitable, const Material::CPtr & material = NULL);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
-		virtual AABB GetBoundingBox() const;
+		virtual const AABB GetBoundingBox() const { return box; }
 	private:
+		//如果要修改transform, 则要同时设置 inverseTransform 和 normalTransform
 		glm::mat4 transform;
+		glm::mat4 inverseTransform;
+		glm::mat3 normalTransform;
+
 		Hitable::CPtr hitable;
 		AABB box;
 	};

@@ -7,7 +7,17 @@ using namespace glm;
 
 
 Triangle::Triangle(const Vertex & A, const Vertex & B, const Vertex & C, const Material::CPtr & material)
-	: A(A), B(B), C(C), Hitable(material) { }
+	: A(A), B(B), C(C), Hitable(material) {
+	vec3 minP = min(min(A.pos, B.pos), C.pos);
+	vec3 maxP = max(max(A.pos, B.pos), C.pos);
+	for (size_t i = 0; i < 3; i++) {
+		if (minP[i] == maxP[i]) {
+			minP[i] -= 0.001f;
+			maxP[i] += 0.001f;
+		}
+	}
+	box = AABB(minP, maxP);
+}
 
 HitRst Triangle::RayIn(Ray::Ptr & ray) const {
 	vec4 abgt = Math::Intersect_RayTri(ray->GetOrigin(), ray->GetDir(), A.pos, B.pos, C.pos);
@@ -26,16 +36,4 @@ HitRst Triangle::RayIn(Ray::Ptr & ray) const {
 	hitRst.isMatCoverable = isMatCoverable;
 	ray->SetTMax(abgt[3]);
 	return hitRst;
-}
-
-AABB Triangle::GetBoundingBox() const {
-	vec3 minP = min(min(A.pos, B.pos), C.pos);
-	vec3 maxP = max(max(A.pos, B.pos), C.pos);
-	for (size_t i = 0; i < 3; i++) {
-		if (minP[i] == maxP[i]) {
-			minP[i] -= 0.001f;
-			maxP[i] += 0.001f;
-		}
-	}
-	return AABB(minP, maxP);
 }

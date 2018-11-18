@@ -28,7 +28,7 @@ namespace RayTracing {
 		Hitable(const Material::CPtr & material = NULL);
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const = 0;
-		virtual AABB GetBoundingBox() const = 0;
+		virtual const AABB GetBoundingBox() const = 0;
 	protected:
 		Material::CPtr material;
 		bool isMatCoverable;

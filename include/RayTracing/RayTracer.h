@@ -7,7 +7,7 @@
 namespace RayTracing {
 	class RayTracer {
 	public:
-		static glm::rgb Trace(Hitable::Ptr & scene, Ray::Ptr & ray, size_t depth = 50);
+		static glm::rgb Trace(const Hitable::CPtr & scene, Ray::Ptr & ray, size_t depth = 50);
 	};
 }
 

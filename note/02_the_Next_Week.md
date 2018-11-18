@@ -1,126 +1,273 @@
-# 1. Ray Tracing in One Weekend
+# 2. Ray Tracing: The Next Week
 
-## 1.1 Output an Image
+## 2.1 Motion Blur
 
-**PPM格式**
+让 相机、光线、物体 带有时间的概念
 
-```
-P3
-# The P3 means colors are in ASCII, then 3 columns and 2 rows,
-# width == 3, height == 2
-# then 255 for max color, then RGB triplets
-3 2
-255
-255	0	0
-0	255	0
-0	0	255
-255	255	0
-255	255	255
-0	0	0
-```
+## 2.2 BVH
 
-**图像库**
+**步骤**
 
-`ppm`格式以`ASCII`存储，文件较大，考虑采用图像的无损压缩格式`png`来存储图像。
+1. 每次分割选取一个维度，该维度为所有维度中**空间离散度**(即中心点的在那一维度的方差)最大的一维。
+2. 在所选维度对物体进行排序(根据他们的中心点)
+3. 分成两半，放入左子树和右子树
 
-可使用开源库 `stb_image` 和 `stb_image_write` 来读写图像
-
-> https://github.com/nothings/stb
-
-**图像实时显示**
-
-如果只使用图像来检查结果，则需等待计算完毕；而光线追踪算法耗时较长，故考虑实时显示。
-
-为了优化显示效果，增加了插值和高斯模糊。
-
-图形接口使用的是OpenGL，我将功能封装在了 `Utility/RayTracing/ImgWindow` 中。
-
-**示例**
+**光线与包围盒相交**
 
 ```c++
-int main(int argc, char ** argv) {
-	ImgWindow imgWindow(str_WindowTitle);
-	Image & img = imgWindow.GetImg();
-	const size_t val_ImgWidth = img.GetWidth();
-	const size_t val_ImgHeight = img.GetHeight();
-	const size_t val_ImgChannel = img.GetChannel();
+bool AABB::Hit(const Ray::Ptr & ray) const {
+	if (!IsValid())
+		return false;
 
-	auto imgUpdate = Operation::ToPtr(new LambdaOp([&]() {
-		static int f = 0;
-		for (size_t i = 0; i < img.GetWidth(); i++) {
-			for (size_t j = 0; j < img.GetHeight(); j++) {
-				float r = 0.5 * i / (float)img.GetWidth();
-				float g = 0.5 * j / (float)img.GetHeight();
-				float b = 0.2 + 0.2*sinf(0.01f * f);
-				img.SetPixel(i, j, Image::Pixel<float>(r, g, b));
-			}
-		}
-		f++;
-	}));
+	const vec3 origin = ray->GetOrigin();
+	const vec3 dir = ray->GetDir();
+	float tMin = Ray::tMin;
+	float tMax = ray->GetTMax();
+	for (size_t i = 0; i < 3; i++) {
+		float invD = 1.0f / dir[i];
+		float t0 = (minP[i] - origin[i]) * invD;
+		float t1 = (maxP[i] - origin[i]) * invD;
+		if (invD < 0.0f)
+			std::swap(t0, t1);
 
-	imgWindow.Run(imgUpdate);
-
-	return 0;
+		tMin = max(t0, tMin);
+		tMax = min(t1, tMax);
+		if (tMax <= tMin)
+			return false;
+	}
+	return true;
 }
 ```
 
-结果输出在 `data/out` 中
+**相交策略**
 
-图像的(0,0)在左上角，右为x轴，下为y轴
+```c++
+HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
+	if (!box.Hit(ray))
+		return false;
 
-OpenGL中，图像的(0,0)在左下角，右为x轴，上为y轴
+	HitRst hitRstLeft = left != NULL ? left->RayIn(ray) : HitRst::FALSE;
+	HitRst hitRstRight = right != NULL ? right->RayIn(ray) : HitRst::FALSE;
 
-故需要调整图像起点
+	//先进行左边的测试, 则测试后 ray.tMax 被更新(在有碰撞的情况下)
+	//此时如果 hitRstRight 有效, 则可知其 ray.tMax 更小
+	//故只要 hitRstRight 有效, 则说明 right 更近
+	if (hitRstRight.hit)
+		return hitRstRight;
+	else if(hitRstLeft.hit)
+		return &hitRstLeft;
+	else
+		return HitRst::FALSE;
+}
+```
 
-## 1.2 光线，相机
+## 2.3 Perlin Noise
 
-**光线**
+```c++
+class Perlin {
+public:
+	static float Noise(const glm::vec3 & p);
+	static float Turb(const glm::vec3 & p, size_t depth = 7);
+private:
+	static float PerlinInterp(const glm::vec3 c[2][2][2], float u, float v, float w);
+	static std::vector<size_t> GenPermute(size_t n);
+	static std::vector<glm::vec3> GenRandVec(size_t n);
 
-不同于书，我给射线定义了颜色和`tMax`
+	static std::vector<glm::vec3> randVec;
 
-在遇到光源前，颜色的物理意义是衰减；在遇到光源后，该值即为该光线到达相机的颜色。
+	// 0, 1, ... , 255 变更顺序后的序列
+	static std::vector<size_t> permuteX;
+	static std::vector<size_t> permuteY;
+	static std::vector<size_t> permuteZ;
+};
+```
 
-`tMax` 指示了光所能到达的最远处，在与 `hitable`(后面的概念) 进行碰撞检测时更新
+```c++
+float Perlin::Noise(const vec3 & p){
+	// pf 为小数部分
+	vec3 pf = p - floor(p);
+	// pi 为整数部分
+	ivec3 pi = floor(p);
+	// 8个位置的向量
+	// 单位立方体8个顶点, 每个顶点一个随机向量
+	vec3 c[2][2][2];
+	for (int dx = 0; dx < 2; dx++) {
+		for (int dy = 0; dy < 2; dy++) {
+			for (int dz = 0; dz < 2; dz++) {
+				size_t idx = permuteX[(pi.x + dx) & 255]
+					^ permuteY[(pi.y + dy) & 255]
+					^ permuteZ[(pi.z + dz) & 255];
+				c[dx][dy][dz] = randVec[idx];
+			}
+		}
+	}
+	return PerlinInterp(c, pf.x, pf.y, pf.z);
+}
 
-**相机**
+float Perlin::PerlinInterp(const vec3 c[2][2][2], float u, float v, float w) {
+	float uu = u * u*(3 - 2 * u);
+	float vv = v * v*(3 - 2 * v);
+	float ww = w * w*(3 - 2 * w);
+	float sum = 0;
+	for (size_t i = 0; i < 2; i++) {
+		for (size_t j = 0; j < 2; j++) {
+			for (size_t k = 0; k < 2; k++) {
+				// 顶点 到 插值点 的向量
+				vec3 weightVec(u - i, v - j, w - k);
+				// 权值 为 插值点 到 [顶点对角] 的 xyz轴向 的 距离(非负) 的乘积
+				//vec3 absWeightVec = abs(vec3(u-(1-i),v-(1-j),w-(1-k)));
+				//float weight = absWeightVec.x * absWeightVec.y * absWeightVec.z;
+				float weight = (i*uu + (1 - i)*(1 - uu))
+					* (j*vv + (1 - j)*(1 - vv))
+					* (k*ww + (1 - k)*(1 - ww));
+				// 加权求和, 项为点乘, 从而达到了最值转移的作用(不在整数点上)
+				sum += weight * dot(c[i][j][k], weightVec);
+			}
+		}
+	}
+	return sum;
+}
 
-相机朝向像平面的中心，相机的位置处于焦点处
+float Perlin::Turb(const vec3 & p, size_t depth){
+	float sum = 0;
+	vec3 curP = p;
+	float weight = 1.0;
+	for (size_t i = 0; i < depth; i++) {
+		sum += weight * Noise(curP);
+		// weight = pow(0.5, i);
+		weight *= 0.5;
+		// curP = p * pow(2, i);
+		curP *= 2;
+	}
+	//float abs --> fabs
+	return fabs(sum);
+}
 
-相机到成像平面的距离为焦距
+vector<size_t> Perlin::GenPermute(size_t n) {
+	vector<size_t> rst(n);
+	for (size_t i = 0; i < n; i++)
+		rst[i] = i;
 
-相机的右轴为像平面的横轴，相机的上轴为像平面的纵轴
+	Math::Permute(rst);
+	return rst;
+}
 
-## 1.3 球
+vector<vec3> Perlin::GenRandVec(size_t n) {
+	vector<vec3> rst(n);
+	for (size_t i = 0; i < n; ++i)
+		rst[i] = RandInSphere();
 
-**相交**
+	return rst;
+}
+
+
+vector<vec3> Perlin::randVec = Perlin::GenRandVec(256);
+vector<size_t> Perlin::permuteX = Perlin::GenPermute(256);
+vector<size_t> Perlin::permuteY = Perlin::GenPermute(256);
+vector<size_t> Perlin::permuteZ = Perlin::GenPermute(256);
+```
+
+## 2.4 Light
+
+```c++
+bool Light::Scatter(HitRecord & rec) const {
+    vec3 color = lightTex->Value(rec.vertex.u, rec.vertex.v, rec.vertex.pos);
+	rec.ray->SetLightColor(color);
+	return false;
+}
+```
+
+## 2.5 TriMesh
+
+为了能够实现高灵活度的物体，自行编写了关于三角网格的模块
+
+首先是三角形，然后三角网格继承自`BVH_Node`，可以达到对复杂模型快速确定其中一个三角形的目的
+
+### 2.5.1 Triangle
+
+三角形有三个顶点，每个顶点具有一些属性，如法向、参数坐标等。当光线与三角形相交时，需要计算出相交处的法向、参数坐标等。
+
+**Ray-Triangle Intersection**
 $$
-|\mathbf{P}-\mathbf{C}|=R\\
-\mathbf{P}=\mathbf{A}+t\mathbf{B}\\
-(t\mathbf{B}+\mathbf{A}-\mathbf{C})^2=R^2\\
-|\mathbf{B}|^2t^2+2\ dot(\mathbf{B},\ \mathbf{A}-\mathbf{C})\ t+|\mathbf{A}-\mathbf{C}|^2-R^2=0
+\mathbf{e} + t\mathbf{d} = \mathbf{f}(u, v)= \mathbf{a} + β(\mathbf{b} − \mathbf{a}) + γ(\mathbf{c} − \mathbf{a})
 $$
 
-## 1.4 材质
+因此
+$$
+β(\mathbf{a} − \mathbf{b})+γ(\mathbf{a} − \mathbf{c})+ t\mathbf{d}=\mathbf{a}-\mathbf{e}
+$$
 
-**漫反射**
+这是一个线性方程，可以求解出 $\beta$, $\gamma$ 和 $t$，从而 $\alpha=1-\beta-\gamma$，如果 $0\le\alpha,\beta,\gamma\le1$ 且 $tMin < t <tMax$，则相交。
 
-![1541991329610](assets/1541991329610.png)
+**三角线性插值**
+$$
+\mathbf{n}=\alpha\mathbf{n_A}+\beta\mathbf{n_B}+\gamma\mathbf{n_C}
+$$
 
-**镜面反射**
+### 2.5.2 TriMesh
 
-![1541991354287](assets/1541991354287.png)
+简单继承于 `BVH_Node` 即可
 
-![1541991364589](assets/1541991364589.png)
+## 2.6 Transform
 
-**折射**
+有了`TriMesh`，那么我们就能实现很多模型了。接下来自然就要考虑模型的旋转，缩放，平移的问题了。因此我自行编写了 Transform 模块。
 
-//empty
+核心思想很简单，就是对光线进行一个逆变换，与模型交互，然后再将光线变换回来，另外在将碰撞信息也进行变换
 
-## 1.5 景深
+```c++
+HitRst Transform::RayIn(Ray::Ptr & ray) const {
+	ray->Transform(inverse(transform));
+    
+	auto hitRst = hitable->RayIn(ray);
+	if (hitRst.hit)
+		hitRst.record.vertex.Transform(transform);
+	
+	ray->Transform(transform);
+	
+	return hitRst;
+}
+```
 
-![1541991629970](assets/1541991629970.png)
+其中对光线的变换如下
 
-透镜半径越大，非焦平面附近的物体就会越模糊
+```c++
+void Ray::Transform(const mat4 & transform) {
+	dir = mat3(transform) * dir;
+	auto originQ = transform * vec4(origin, 1.0f);
+	origin = vec3(originQ) / originQ.w;
+}
+```
 
-![1541991687480](assets/1541991687480.png)
+对顶点的变换如下
 
+```c++
+void Vertex::Transform(const mat4 & transform) {
+	auto posQ = transform * vec4(pos,1.0);
+	pos = vec3(posQ) / posQ.w;
+	normal = normalize(transpose(inverse(mat3(transform))) * normal);
+}
+```
+
+## 2.7 Volumes
+
+光线在一个物质内部会发生随机的反射
+
+![1542527274241](assets/1542527274241.png)
+
+反射的遵循的规律为
+$$
+dP=C*dL
+$$
+考虑事件：**光线经过 $L$ 长度而不发生反射**
+
+其概率为
+$$
+P=\lim\limits_{n\to\infty}(1-C\frac{L}{n})^n=e^{-CL}
+$$
+则有
+$$
+L=-\frac{\ln P}{C}
+$$
+在实现时需要特别注意光线在体积内的长度
+
+> 现在实现中存在一个错误，就是当一个模型经过Transform发生了缩放时，上述长度并没有去考虑这一点，规避的方法就是Transform不进行缩放

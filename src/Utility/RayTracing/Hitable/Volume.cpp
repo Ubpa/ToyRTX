@@ -18,23 +18,33 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 	if (!boundaryHitRst.hit)
 		return HitRst::FALSE;
 
-	auto reverseRay = ToPtr(new Ray(ray->At(Ray::tMin*1.001f), - ray->GetDir()));
+	auto reverseRay = ToPtr(new Ray(ray->At(Ray::tMin*1.5f), - ray->GetDir()));
 	auto reverseHitRst = boundary->RayIn(reverseRay);
 	
-	// 反向光线撞击到边界, 说明光线在内部, 则此时体积内部的起点为 光线起点
-	// 否则说明光线在外部, 则此时体积内部的起点为 光线撞击处
-	float t0 = /*Ray::tMin +*/ ( reverseHitRst.hit ? 0 : boundaryHitRst.record.ray->GetTMax() );
+	HitRst * t0HitRst;
+	float t0;
+	if (reverseHitRst.hit) {
+		// 反向光线撞击到边界, 说明光线在内部, 则此时体积内部的起点为 光线起点
+		// 此时以该起点的撞击结果即为前边的 boundaryHitRst
+		t0 = 0;
+		t0HitRst = &boundaryHitRst;
+	}
+	else {
+		// 否则说明光线在外部, 则此时体积内部的起点为 光线撞击处
+		// 此时以该起点的撞击结果需计算
+		t0 = boundaryHitRst.record.ray->GetTMax();
+		auto t0Ray = ToPtr(new Ray(ray->At(t0), ray->GetDir()));
+		t0HitRst = &(boundary->RayIn(t0Ray));
 
-	auto t0Ray = ToPtr(new Ray(ray->At(t0), ray->GetDir()));
-	auto t0HitRst = boundary->RayIn(t0Ray);
-
-	//太薄
-	if (!t0HitRst.hit) {
-		ray->SetTMax(originTMax);
-		return HitRst::FALSE;
+		//太薄
+		if (!t0HitRst->hit) {
+			ray->SetTMax(originTMax);
+			return HitRst::FALSE;
+		}
 	}
 
-	float t1 = min(originTMax, t0 + t0HitRst.record.ray->GetTMax());
+	float t1 = min(originTMax, t0 + t0HitRst->record.ray->GetTMax());
+	//此处的 len 未考虑 transform 的 scale
 	float lenInVolume = (t1 - t0) * length(ray->GetDir());
 
 	// p = C * dL
@@ -56,11 +66,4 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 	hitRst.material = material;
 	hitRst.isMatCoverable = isMatCoverable;
 	return hitRst;
-}
-
-AABB Volume::GetBoundingBox() const {
-	if (boundary == NULL)
-		return AABB::InValid;
-
-	return boundary->GetBoundingBox();
 }

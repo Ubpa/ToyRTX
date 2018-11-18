@@ -114,9 +114,52 @@ $$
 
 **折射**
 
-//empty
+Snell's Law
+$$
+n\sin\theta=n_t\sin\phi
+$$
+则有
+$$
+\cos^2\phi=1-\frac{n^2(1-\cos^2\theta)}{n_t^2}
+$$
+![1542463578453](assets/1542463578453.png)
+$$
+\mathbf{t}=\mathbf{b}\sin\phi-\mathbf{n}\cos\phi\\
+\mathbf{d}=\mathbf{b}\sin\theta-\mathbf{n}\cos\theta\\
+\mathbf{b}=\frac{\mathbf{d}+\mathbf{n}\cos\theta}{\sin\theta}
+$$
+因此可得
+$$
+\begin{align*}
+\mathbf{t}&=\frac{n(\mathbf{d}+\mathbf{n}\cos\theta)}{n_t}-\mathbf{n}\cos\phi\\
+&=\frac{n(\mathbf{d}+\mathbf{n}(-\mathbf{d}\cdot\mathbf{n}))}{n_t}-\mathbf{n}\sqrt{1-\frac{n^2(1-(\mathbf{d}\cdot\mathbf{n})^2)}{n_t^2}}\\
+\end{align*}
+$$
+当根号下的值为负数时为**全反射**
 
-## 1.5 景深
+折射的同时会有反射，反射率遵循 Fresnel equations。一个好的近似是 Schlick approximation，公式为
+$$
+R(\theta)=R_0+(1-R_0)(1-\cos\theta)^5\\
+R_0=(\frac{n_t-1}{n_t+1})^2
+$$
+上边的 $\cos \theta$ 永远是空气中的角
+
+另外，光在穿过时会发生颜色衰减，遵循 Beer's Law
+$$
+\begin{align*}
+dI&=-CIdx\\
+I&=ke^{-Cx}\\
+I(0)&=I_0\\
+I(1)&=aI(0)\\
+I(s)&=I(0)e^{\ln(a)s}
+\end{align*}
+$$
+
+## 1.5 相机
+
+![1542464775208](assets/1542464775208.png)
+
+## 1.6 景深
 
 ![1541991629970](assets/1541991629970.png)
 

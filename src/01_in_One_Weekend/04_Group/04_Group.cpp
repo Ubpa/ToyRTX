@@ -1,3 +1,4 @@
+#include <RayTracing/RayTracer.h>
 #include <RayTracing/ImgWindow.h>
 #include <RayTracing/RayCamera.h>
 
@@ -20,8 +21,6 @@ using namespace std;
 typedef vec3 rgb;
 
 Hitable::Ptr CreateScene();
-rgb RayTracer(Ptr<Hitable> scene, Ray::Ptr & ray);
-rgb Background(const Ray::Ptr & ray);
 
 int main(int argc, char ** argv){
 	ImgWindow imgWindow(str_WindowTitle);
@@ -57,11 +56,11 @@ int main(int argc, char ** argv){
 			size_t j = pixel.y;
 			rgb color(0);
 			const size_t sampleNum = 4;
-			for (size_t k = 0; k < sampleNum; k++) {
+			for (int k = 0; k < sampleNum; k++) {
 				float u = (i + randMap(engine)) / (float)val_ImgWidth;
 				float v = (j + randMap(engine)) / (float)val_ImgHeight;
 				Ray::Ptr ray = camera->GenRay(u, v);
-				color += RayTracer(scene, ray);
+				color += RayTracer::Trace(scene, ray);
 			}
 			color /= sampleNum;
 			float r = color.r;
@@ -80,14 +79,14 @@ int main(int argc, char ** argv){
 }
 
 Hitable::Ptr CreateScene() {
-	auto normalMaterial = ToPtr(new OpMaterial([](HitRecord & rec)->bool{
+	auto normalMaterial = ToPtr(new OpMaterial([](const HitRecord & rec)->bool{
 		vec3 lightColor = 0.5f * (rec.vertex.normal + 1.0f);
 		rec.ray->SetLightColor(lightColor);
 		return false;
 	}));
 
-	auto skyMat = ToPtr(new OpMaterial([](HitRecord & rec)->bool {
-		float t = 0.5 * (rec.vertex.pos.y + 1.0f);
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
 		rgb blue = rgb(0.5f, 0.7f, 1.0f);
 		rgb lightColor = (1 - t) * white + t * blue;
@@ -102,23 +101,4 @@ Hitable::Ptr CreateScene() {
 	(*group) << sphere << sphereBottom << sky;
 
 	return group;
-}
-
-rgb RayTracer(Ptr<Hitable> scene, Ray::Ptr & ray) {
-	auto hitRst = scene->RayIn(ray);
-	if (hitRst.hit) {
-		if (hitRst.hitable->RayOut(hitRst.record))
-			return RayTracer(scene, ray);
-		else
-			return ray->GetColor();
-	}
-	else
-		return rgb(0);
-}
-
-rgb Background(const Ray::Ptr & ray) {
-	float t = 0.5*(normalize(ray->GetDir()).y + 1.0f);
-	rgb white = rgb(1.0f, 1.0f, 1.0f);
-	rgb blue = rgb(0.5f, 0.7f, 1.0f);
-	return (1 - t)*white + t * blue;
 }

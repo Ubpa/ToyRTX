@@ -2,11 +2,12 @@
 
 using namespace RayTracing;
 using namespace glm;
+using namespace std;
 
-OpMaterial::OpMaterial(const std::function<bool(HitRecord & rec)> & op)
+OpMaterial::OpMaterial(const function<bool(const HitRecord & rec)> & op)
 	: op(op){ }
 
-bool OpMaterial::Scatter(HitRecord & rec) const {
+bool OpMaterial::Scatter(const HitRecord & rec) const {
 	if (op == NULL)
 		return false;
 
