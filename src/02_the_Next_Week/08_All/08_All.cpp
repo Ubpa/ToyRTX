@@ -49,12 +49,13 @@ int main(int argc, char ** argv){
 
 	vector<uvec2> pixels;
 
-	auto scene = CreateScene3((float)val_ImgWidth / (float)val_ImgHeight);
+	auto scene = CreateScene4((float)val_ImgWidth / (float)val_ImgHeight);
 
 	Timer timer;
 	timer.Start();
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
-		size_t loopMax = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
+		//size_t loopMax = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
+		size_t loopMax = 1000;
 		pixelSet.RandPick(loopMax, pixels);
 
 		int pixelsNum = pixels.size();

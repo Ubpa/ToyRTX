@@ -14,7 +14,7 @@ namespace CppUtility {
 			void Init(size_t width = 800, size_t height = 600, const std::string & title = "Title");
 			void Terminate();
 			void Run(Other::Operation * op = NULL);
-			void Run(Other::Ptr<Other::Operation> & op);
+			void Run(Other::Ptr<Other::Operation> op);
 			GLFWwindow * GetWindow();
 			void CloseWindow();
 			void LockCursor();

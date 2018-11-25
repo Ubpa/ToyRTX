@@ -52,6 +52,10 @@ FBO::FBO(size_t width, size_t height, ENUM_TYPE type)
 		if (!GenFBO_GBUFFER(width, height))
 			printf("GenFBO_GBUFFER fail\n");
 		break;
+	case OpenGL::FBO::ENUM_TYPE_RAYTRACING:
+		if (!GenFBO_RAYTRACING(width, height))
+			printf("GenFBO_RAYTRACING fail\n");
+		break;
 	default:
 		printf("ERROR: FBO type not know\n");
 		isValid = false;
@@ -334,6 +338,52 @@ bool FBO::GenFBO_GBUFFER(size_t width, size_t height) {
 	return true;
 }
 
+bool FBO::GenFBO_RAYTRACING(size_t width, size_t height) {
+	glGenFramebuffers(1, &ID);
+	glBindFramebuffer(GL_FRAMEBUFFER, ID);
+
+	const size_t colorBufferNum = 4;
+	for (size_t i = 0; i < colorBufferNum - 1; i++) {
+		size_t colorBufferID;
+		glGenTextures(1, &colorBufferID);
+		glBindTexture(GL_TEXTURE_2D, colorBufferID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBufferID, 0);
+		colorTextures.push_back(Texture(colorBufferID));
+	}
+	{
+		size_t colorBufferID;
+		glGenTextures(1, &colorBufferID);
+		glBindTexture(GL_TEXTURE_2D, colorBufferID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, colorBufferID, 0);
+		colorTextures.push_back(Texture(colorBufferID));
+	}
+
+	size_t attachments[colorBufferNum] = {
+		GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3
+	};
+	glDrawBuffers(colorBufferNum, attachments);
+
+	UseDefault();
+
+	isValid = IsComplete();
+	if (!isValid) {
+		printf("Framebuffer is not complete!\n");
+		colorTextures.clear();
+		return false;
+	}
+
+	return true;
+}
 
 size_t FBO::GetID() const {
 	if (!isValid)
@@ -404,7 +454,8 @@ const Texture & FBO::GetColorTexture(size_t idx) const {
 		&& type != ENUM_TYPE_RGBF1_DEPTH
 		&& type != ENUM_TYPE_RGBF2_DEPTH
 		&& type != ENUM_TYPE_RGBF3_DEPTH
-		&& type != ENUM_TYPE_GBUFFER)
+		&& type != ENUM_TYPE_GBUFFER
+		&& type != ENUM_TYPE_RAYTRACING)
 		return Texture::InValid;
 
 	return colorTextures[idx];

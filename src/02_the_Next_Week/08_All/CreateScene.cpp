@@ -33,7 +33,7 @@ using namespace Define;
 using namespace glm;
 using namespace std;
 
-Scene::Ptr CreateScene0(float ratioWH) {
+Scene::CPtr CreateScene0(float ratioWH) {
 	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
 		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb white = rgb(1.0f, 1.0f, 1.0f);
@@ -104,7 +104,7 @@ Scene::Ptr CreateScene0(float ratioWH) {
 	return ToPtr(new Scene(group, camera));
 }
 
-Scene::Ptr CreateScene1(float ratioWH) {
+Scene::CPtr CreateScene1(float ratioWH) {
 	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
 		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
 		rgb c0 = rgb(0.005f);
@@ -153,7 +153,7 @@ Scene::Ptr CreateScene1(float ratioWH) {
 	return ToPtr(new Scene(group, camera));
 }
 
-Scene::Ptr CreateScene2(float ratioWH) {
+Scene::CPtr CreateScene2(float ratioWH) {
 	// Mesh
 	vector<Vertex> squareVertexs;
 	for (size_t i = 0; i < sizeof(data_SquareVertexPos) / sizeof(float); i += 6) {
@@ -256,7 +256,7 @@ Scene::Ptr CreateScene2(float ratioWH) {
 	return ToPtr(new Scene(group, camera));
 }
 
-Scene::Ptr CreateScene3(float ratioWH) {
+Scene::CPtr CreateScene3(float ratioWH) {
 	// Camera
 	float t0 = 0.0f;
 	float t1 = 1.0f;
@@ -383,4 +383,83 @@ Scene::Ptr CreateScene3(float ratioWH) {
 		<< boxBVH << tfmBallBVH;
 
 	return ToPtr(new Scene(group, camera));
+}
+
+Scene::CPtr CreateScene4(float ratioWH) {
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
+		rgb c0 = rgb(0.2f);
+		rgb c1 = c0 * rgb(0.75f, 0.5f, 0.375f);
+		rgb lightColor = (1 - t) * c0 + t * c1;
+		rec.ray->SetLightColor(lightColor);
+		return false;
+	}));
+	auto sky = ToPtr(new Sky(skyMat));
+
+	vector<Hitable::CPtr> balls;
+	for (int i = -10; i <= 10; i+=2) {
+		for (int j = -10; j <= 10; j+=2) {
+			for (int k = -10; k <= 10; k+=2) {
+				float q = pow(Math::Rand_F()*abs(i) + Math::Rand_F()*abs(j) + Math::Rand_F()*abs(k),2)/900;
+				if (q < 0.09)
+					continue;
+
+				float p = Math::Rand_F();
+				vec3 center = vec3(i, j, k) + (1.0f * vec3(Math::Rand_F(), Math::Rand_F(), Math::Rand_F())-0.5f);
+				float radius = 0.5f + Math::Rand_F()*0.5f;
+				rgb color = vec3(Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F(), Math::Rand_F()*Math::Rand_F());
+				if (p < 0.2) {
+					// glass
+					auto mat = ToPtr(new Dielectric(1.1f + Math::Rand_F()*0.9f));
+					auto sphere = ToPtr(new Sphere(center, radius, mat));
+					balls.push_back(sphere);
+				}
+				else if (p < 0.4) {
+					// inner empty glass
+					auto mat = ToPtr(new Dielectric(1.1f + Math::Rand_F()*0.9f));
+					auto sphereOut = ToPtr(new Sphere(center, radius, mat));
+					auto sphereInner = ToPtr(new Sphere(center, radius*0.8f, mat));
+					balls.push_back(sphereOut);
+					balls.push_back(sphereInner);
+				}
+				else if (p < 0.8) {
+					// Sphere Volume with Dielelctric Boundary
+					auto sphereBoundary = ToPtr(new Sphere(center, radius, ToPtr(new Dielectric(1.1f + Math::Rand_F()*0.9f))));
+					auto sphereVolume = ToPtr(new Volume(sphereBoundary, 0.2f, ToPtr(new Isotropic(color))));
+					balls.push_back(sphereBoundary);
+					balls.push_back(sphereVolume);
+				}
+				else if (p < 0.9) {
+					// inner empty glass
+					auto mat = ToPtr(new Dielectric(1.1f + Math::Rand_F()*0.9f));
+					auto sphereOut = ToPtr(new Sphere(center, radius, mat));
+					auto sphereInner = ToPtr(new Sphere(center, radius*0.8f, mat));
+					// Light
+					float lightness = Math::Rand_F()*3.0f + 1.0f;
+					auto light = ToPtr(new Sphere(center, 0.75f*radius, ToPtr(new Light(lightness*vec3(vec3(color))))));
+					balls.push_back(sphereOut);
+					balls.push_back(sphereInner);
+					balls.push_back(light);
+				}
+				else{
+					// Light
+					float lightness = Math::Rand_F()*3.0f + 1.0f;
+					auto mat = ToPtr(new Light(lightness*vec3(vec3(color))));
+					auto light = ToPtr(new Sphere(center, 0.7f*radius, mat));
+					balls.push_back(light);
+				}
+			}
+		}
+	}
+	auto ballsBVH = ToPtr(new BVH_Node(balls));
+
+	vec3 origin(30, 30, 30);
+	vec3 viewPoint(0, 0, 0);
+	float fov = 37.0f;
+	float lenR = 0.00f;
+	//float distToFocus = 10.0f;
+	auto camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, fov, lenR));
+	
+	auto scene = ToPtr(new Scene(ballsBVH, camera));
+	return scene;
 }

@@ -20,6 +20,8 @@
 
 图形接口使用的是 OpenGL
 
+近日开始着手 **GPU的实现方案**
+
 # 2. 代码框架
 
 ```
@@ -39,6 +41,9 @@
   -02_06_Transform
   -02_07_Volume
   -02_08_All
+/03_GPU_RayTracing
+  -03_01_Basic
+  -03_02_RayTracingBasicSystem
 /Utility
   /OpenGL
     -Camera
@@ -64,7 +69,7 @@
     -Timer
   /RayTracing
     -Hitable: AABB, BVH_Node, Group, Hitable, MoveSphere, Sky, Sphere, Transform, Triangle, TriMesh, Volume
-    -ImgWindow
+    -ImgWindow: ImgWindow, TexWindow
     -Material: Dielectric, Lambertian, Material, Metal, OpMaterial
     -RayCamera: Ray, RayCamera, TRay, TRayCamera
     -RT_Texture: ImgTexture, OpTexture(Const, Checker, Noise), Texture
@@ -116,3 +121,8 @@ cmake ..
 ### 02_the_Next_Week_08_All
 
 ![02_the_Next_Week_08_All](assets/02_the_Next_Week_08_All.png)
+
+### Glass Cube
+
+![02_the_Next_Week_08_All](assets/02_the_Next_Week_08_All-1543124633192.png)
+

@@ -15,14 +15,10 @@ namespace RayTracing {
 			const glm::vec3 & worldUp = glm::vec3(0, 1, 0));
 
 		virtual Ray::Ptr GenRay(float s, float t) const;
-	private:
 
-		glm::vec3 pos;
-		glm::vec3 BL_Corner;
-		glm::vec3 horizontal;
-		glm::vec3 vertical;
-		glm::vec3 right, up, front;
-		float lenR;
+		float GetT0() const { return t0; }
+		float GetT1() const { return t1; }
+	private:
 		float t0, t1;
 	};
 }

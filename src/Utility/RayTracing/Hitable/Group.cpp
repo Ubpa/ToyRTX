@@ -28,7 +28,7 @@ HitRst Group::RayIn(Ray::Ptr & ray) const {
 
 Group & Group::operator <<(const Hitable::CPtr & hitable) {
 	if (hitable != NULL) {
-		push_back(hitable);
+		vector<Hitable::CPtr>::push_back(hitable);
 		box += hitable->GetBoundingBox();
 	}
 	

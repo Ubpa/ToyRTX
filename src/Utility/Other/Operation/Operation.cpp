@@ -7,7 +7,7 @@ Operation::Operation(bool isHold): isHold(isHold) { };
 
 //------------
 
-bool Operation::IsHold() { return isHold; }
+bool Operation::IsHold() const { return isHold; }
 
 void Operation::SetIsHold(bool isHold) { this->isHold = isHold; }
 

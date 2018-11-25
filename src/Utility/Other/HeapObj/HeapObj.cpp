@@ -2,6 +2,6 @@
 
 using namespace CppUtility::Other;
 
-void HeapObj::ProtectedDelete(HeapObj * op) {
+void HeapObj::ProtectedDelete(const HeapObj * op) {
 	delete op;
 }

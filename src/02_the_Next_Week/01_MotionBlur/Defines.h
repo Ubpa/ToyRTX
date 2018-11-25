@@ -1,6 +1,8 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 
+#include <string>
+
 namespace Define {
 	const std::string str_Chapter = "02_the_Next_Week";
 	const std::string str_Subchapter = "01_MotionBlur";

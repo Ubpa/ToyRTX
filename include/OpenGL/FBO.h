@@ -20,6 +20,7 @@ namespace CppUtility {
 				ENUM_TYPE_DEPTH,
 				ENUM_TYPE_CUBE_DEPTH,
 				ENUM_TYPE_GBUFFER,
+				ENUM_TYPE_RAYTRACING,
 			};
 			enum ENUM_PASS_TYPE {
 				ENUM_PASS_COLOR,
@@ -46,6 +47,7 @@ namespace CppUtility {
 			bool GenFBO_DEPTH(size_t width, size_t height);
 			bool GenFBO_CUBE_DEPTH(size_t width, size_t height);
 			bool GenFBO_GBUFFER(size_t width, size_t height);
+			bool GenFBO_RAYTRACING(size_t width, size_t height);
 
 			bool IsComplete() const;
 			static size_t PassType2GL(ENUM_PASS_TYPE passType);

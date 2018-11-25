@@ -66,7 +66,7 @@ void Glfw::Terminate() { glfwTerminate(); }
 
 GLFWwindow * Glfw::GetWindow() { return window; }
 
-void Glfw::Run(Ptr<Operation> & op) {
+void Glfw::Run(Ptr<Operation> op) {
 	if (window == NULL)
 		Init();
 	//------------

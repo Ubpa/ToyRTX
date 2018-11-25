@@ -150,7 +150,7 @@ bool Texture::SetImg(const Image & img) {
 		printf("ERROR: type[%s] can't set image\n", Type2Str(type).c_str());
 		return false;
 	}
-
+	
 	if (ID == 0)
 		glGenTextures(1, &ID);
 

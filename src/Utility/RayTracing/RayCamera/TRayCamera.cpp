@@ -10,7 +10,7 @@ TRayCamera::TRayCamera(const glm::vec3 & pos, const glm::vec3 & viewPoint, float
 	float fov, float lenR, float focus_dist,
 	const glm::vec3 & worldUp)
 	: RayCamera(pos, viewPoint, ratioWH, fov, lenR, focus_dist, worldUp),
-	t0(t0), t1(t1), lenR(lenR){
+	t0(t0), t1(t1){
 }
 
 Ray::Ptr TRayCamera::GenRay(float s, float t) const{

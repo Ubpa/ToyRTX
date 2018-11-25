@@ -46,7 +46,7 @@
 #     ENUM_OPTION_SAVE_ALL_IMG = ENUM_OPTION_SAVE_SRC_IMG | ENUM_OPTION_SAVE_POST_PROCESS_IMG,
 #     ENUM_OPTION_ALL = ENUM_OPTION_POST_PROCESS_ALL | ENUM_OPTION_SAVE_ALL_IMG,
 # };
-bin option = 11111;
+bin option = 11110;
 
 # 根目录
 string RootPath = "${CMAKE_SOURCE_DIR}";
@@ -56,10 +56,10 @@ int val_Default_ImgWidth = 1280;
 int val_Default_ImgHeight = 768;
 
 # 图像更新帧率
-int FPS = 2;
+int FPS = 10;
 
 # 采样率
-int sampleNum = 400;
+int sampleNum = 100;
 
 # 高斯模糊次数
 int blurNum = 1;
@@ -117,5 +117,9 @@ int val_02_the_Next_Week_07_Volume_ImgWidth = 768;
 int val_02_the_Next_Week_07_Volume_ImgHeight = 768;
 
 # 02_the_Next_Week / 08_All 输出图像大小
-int val_02_the_Next_Week_08_All_ImgWidth = 768;
-int val_02_the_Next_Week_08_All_ImgHeight = 768;
+int val_02_the_Next_Week_08_All_ImgWidth = 128;
+int val_02_the_Next_Week_08_All_ImgHeight = 128;
+
+# 03_GPU_RayTracing / 02_RayTracingBasicSystem 输出图像大小
+int val_03_GPU_RayTracing_02_RayTracingBasicSystem_ImgWidth = 1280;
+int val_03_GPU_RayTracing_02_RayTracingBasicSystem_ImgHeight = 640;

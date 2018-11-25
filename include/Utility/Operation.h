@@ -11,7 +11,7 @@ namespace CppUtility {
 		public:
 			Operation(bool isHold = true);
 
-			bool IsHold();
+			bool IsHold() const;
 			void SetIsHold(bool isHold);
 			void operator()();
 			//------------

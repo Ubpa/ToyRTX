@@ -18,13 +18,20 @@ namespace CppUtility {
 			return Ptr<T>(op, T::ProtectedDelete);
 		}
 
+		template <typename T>
+		CPtr<T> ToCPtr(const T * op) {
+			return CPtr<T>(op, T::ProtectedDelete);
+		}
+
 		class HeapObj {
 			template <typename T>
 			friend Ptr<T> ToPtr(T * op);
+			template <typename T>
+			friend CPtr<T> ToCPtr(const T * op);
 
 		protected:
 			virtual ~HeapObj() = default;
-			static void ProtectedDelete(HeapObj * op);
+			static void ProtectedDelete(const HeapObj * op);
 		};
 	}
 }
