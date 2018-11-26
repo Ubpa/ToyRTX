@@ -8,12 +8,12 @@
 
 namespace Define {
 	const std::string str_Chapter = "03_GPU_RayTracing";
-	const std::string str_Subchapter = "03_Material";
+	const std::string str_Subchapter = "04_FS_Generator";
 	const std::string str_WindowTitle = str_Chapter + "_" + str_Subchapter;
 
 	const std::string str_ShaderPrefix = "/data/shaders/" + str_Chapter + "/" + str_Subchapter + "/";
 
-	const std::string str_Material = "03_Material";
+	const std::string str_Material = "FS_Generator";
 	const std::string str_Material_vs = str_Basic_P2T2_vs;
 	const std::string str_Material_fs = str_ShaderPrefix + str_Material + str_FsPostfix;
 }

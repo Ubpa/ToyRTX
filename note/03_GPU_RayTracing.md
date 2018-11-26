@@ -305,8 +305,8 @@ float FresnelSchlick(const glm::vec3 & viewDir, const glm::vec3 & halfway, float
 **数据结构**
 
 ```c++
-struct Dielectric{//2
-    float type = 2.0;
+struct Dielectric{// 2
+    int type = 2;
     float refractIndex;
 };
 ```
@@ -316,4 +316,51 @@ struct Dielectric{//2
 为了达到程序生成场景、材质的目的，需要 CPU 来生成Shader。
 
 故考虑实现一个 Shader Generator
+
+### 3.5.1 物体
+
+```c++
+struct Sphere{// 6
+    int type = 0;
+    float matIdx;
+    vec3 center;
+    float radius;
+};
+
+struct Group{// 3 + len
+    int type = 1;
+    int matIdx = -1;
+    int len;
+    int childrenIdx[len];
+}
+```
+
+### 3.5.2 材质
+
+```c++
+struct Lambertian{// 2
+    int type = 0;
+    int texIdx;
+}
+
+struct Metal{// 3
+    int type = 1;
+    int texIdx;
+    float fuzz;
+}
+
+struct Dielectric{// 2
+    int type = 2;
+    float refractIndex;
+}
+```
+
+### 3.5.3 纹理
+
+```c++
+struct ConstTexture{// 4
+    int type = 0;
+    vec3 color;
+}
+```
 

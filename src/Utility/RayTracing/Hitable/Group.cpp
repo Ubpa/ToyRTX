@@ -9,8 +9,8 @@ Group::Group(const Material::CPtr & material)
 HitRst Group::RayIn(Ray::Ptr & ray) const {
 	HitRst finalHitRst = HitRst::FALSE;
 
-	for (size_t i = 0; i < size(); i++) {
-		Hitable::CPtr hitable = at(i);
+	for (size_t i = 0; i < children.size(); i++) {
+		Hitable::CPtr hitable = children[i];
 		HitRst hitRst = hitable->RayIn(ray);
 
 		if (hitRst.hit)
@@ -28,7 +28,7 @@ HitRst Group::RayIn(Ray::Ptr & ray) const {
 
 Group & Group::operator <<(const Hitable::CPtr & hitable) {
 	if (hitable != NULL) {
-		vector<Hitable::CPtr>::push_back(hitable);
+		children.push_back(hitable);
 		box += hitable->GetBoundingBox();
 	}
 	

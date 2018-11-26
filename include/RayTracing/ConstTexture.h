@@ -9,6 +9,7 @@ namespace RayTracing {
 	public:
 		ConstTexture(const glm::rgb & color);
 		virtual glm::rgb Value(float u = 0, float v = 0, const glm::vec3 & p = glm::vec3(0)) const;
+		const glm::rgb & GetColor() const { return color; }
 	private:
 		glm::rgb color;
 	};

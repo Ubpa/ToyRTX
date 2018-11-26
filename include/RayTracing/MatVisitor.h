@@ -1,8 +1,6 @@
 #ifndef _MAT_VISITOR_H_
 #define _MAT_VISITOR_H_
 
-#include <Utility/HeapObj.h>
-
 namespace RayTracing {
 	class Lambertian;
 	class Metal;
@@ -11,8 +9,7 @@ namespace RayTracing {
 	class OpMaterial;
 	class Isotropic;
 
-	class MatVisitor : public CppUtility::Other::HeapObj{
-		HEAP_OBJ_SETUP(MatVisitor)
+	class MatVisitor{
 	public:
 		virtual void Visit(const Lambertian * Lambertian);
 		virtual void Visit(const Metal * Metal);

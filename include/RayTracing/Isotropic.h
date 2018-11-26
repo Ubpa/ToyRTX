@@ -13,6 +13,7 @@ namespace RayTracing {
 		// 返回值为 true 说明光线继续传播
 		// 返回值为 false 说明光线不再传播
 		virtual bool Scatter(const HitRecord & rec) const;
+		const Texture::CPtr GetTexture() const { return tex; }
 	protected:
 		Texture::CPtr tex;
 	};

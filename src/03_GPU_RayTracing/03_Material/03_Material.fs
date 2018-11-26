@@ -16,6 +16,7 @@ struct Camera{
     float t0;
     float t1;
 };
+void Camera_GenRay();
 
 struct Ray{
     vec3 origin;
@@ -56,6 +57,11 @@ const float MatType_Lambertian	= 0.0;
 const float MatType_Metal		= 1.0;
 const float MatType_Dielectric	= 2.0;
 const int HitableNum = 5;
+
+int rdCnt = 0;
+in vec2 TexCoords;
+struct Ray gRay;
+
 const float Scene[30] = float[](
 	HitableType_Sphere,	13, -1,      0, -1,   0.5,
 	HitableType_Sphere,	13, -1,      0, -1, -0.45,
@@ -70,10 +76,6 @@ const float Material[15] = float[](
 	MatType_Dielectric,	1.5//13
 );
 
-int rdCnt = 0;
-in vec2 TexCoords;
-struct Ray gRay;
-
 float RandXY(float x, float y);// [0.0, 1.0)
 float Rand(vec2 TexCoords, float frameTime, int rdCnt);// [0.0, 1.0)
 vec2 RandInSquare();
@@ -82,7 +84,6 @@ vec3 RandInSphere();
 float atan2(float y, float x);
 vec2 Sphere2UV(vec3 normal);
 float FresnelSchlick(vec3 viewDir, vec3 halfway, float ratioNtNi);
-void GenRay();
 void SetRay();
 void WriteRay(int mode);
 struct HitRst RayIn_Sphere(int idx);
@@ -170,7 +171,7 @@ float FresnelSchlick(vec3 viewDir, vec3 halfway, float ratioNtNi){
 	return R;
 }
 
-void GenRay(){
+void Camera_GenRay(){
 	vec2 st = TexCoords + RandInSquare() / textureSize(origin_curRayNum, 0);
 	vec2 rd = camera.lenR * RandInCircle();
 
@@ -188,7 +189,7 @@ void SetRay(){
 		return;
 	vec4 val_dir_tMax = texture(dir_tMax, TexCoords);
 	if(val_dir_tMax.w == 0){
-		GenRay();
+		Camera_GenRay();
 	}else{
 		gRay.origin = val_origin_curRayNum.xyz;
 		gRay.dir = val_dir_tMax.xyz;

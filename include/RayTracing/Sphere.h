@@ -11,6 +11,9 @@ namespace RayTracing {
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 		virtual const AABB GetBoundingBox() const { return box; }
+
+		const glm::vec3 & GetCenter() const { return center; }
+		float GetRadius() const { return radius; }
 	protected:
 
 		glm::vec3 center;

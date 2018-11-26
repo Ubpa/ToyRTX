@@ -1,8 +1,6 @@
 #ifndef _HITABLE_VISITOR_H_
 #define _HITABLE_VISITOR_H_
 
-#include <Utility/HeapObj.h>
-
 namespace RayTracing {
 	class Sphere;
 	class Sky;
@@ -14,8 +12,7 @@ namespace RayTracing {
 	class BVH_Node;
 	class TriMesh;
 
-	class HitableVisitor : public CppUtility::Other::HeapObj {
-		HEAP_OBJ_SETUP(HitableVisitor)
+	class HitableVisitor{
 	public:
 		virtual void Visit(const Sphere * sphere);
 		virtual void Visit(const Sky * sky);

@@ -3,22 +3,30 @@
 
 #include <RayTracing/HitableVisitor.h>
 
+#include <Utility/Ptr.h>
+
 #include <vector>
 #include <map>
 
 namespace RayTracing {
 	class Material;
+	class MatVisitor;
 
-	class GenFS_HV : private HitableVisitor{
-		HEAP_OBJ_SETUP(GenFS_HV)
+	// Generate Fragmen Shader -- Hitable Visitor
+	class GenFS_HV : public HitableVisitor{
 	public:
-		virtual void Visit(const Group * group);
+		typedef std::map<const Material *, size_t> MatIdxMap;
+
+		void SetMat(const MatIdxMap & mat2idx);
+		const std::vector<float> & GetSceneData() const { return sceneData; };
+		void Accept(MatVisitor * matVisitor);
 	private:
+		virtual void Visit(const Group * group);
 		virtual void Visit(const Sphere * sphere);
-		virtual void Visit(const Sky * sky);
+		using HitableVisitor::Visit;
 
 		std::vector<float> sceneData;
-		std::map<CppUtility::Other::CPtr<Material>, size_t> mat2idx;
+		std::map<CppUtility::Other::CPtr<Material>, std::vector<size_t>> mat2idxVec;
 	};
 }
 

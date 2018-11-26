@@ -2,6 +2,6 @@
 
 using namespace RayTracing;
 
-void Visit(const ConstTexture * constTexture) { }
-void Visit(const OpTexture * opTexture) { }
-void Visit(const ImgTexture * imgTexture) { }
+void TexVisitor::Visit(const ConstTexture * constTexture) { }
+void TexVisitor::Visit(const OpTexture * opTexture) { }
+void TexVisitor::Visit(const ImgTexture * imgTexture) { }
