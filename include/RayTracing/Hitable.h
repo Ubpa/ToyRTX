@@ -5,18 +5,25 @@
 #include <RayTracing/Ray.h>
 #include <RayTracing/Material.h>
 
-#include <Utility/HeapObj.h>
+#include <RayTracing/HitableVisitor.h>
+
+#define HITABLE_SETUP(CLASS) \
+HEAP_OBJ_SETUP(CLASS)\
+public:\
+virtual void Accept(const HitableVisitor::Ptr & hitableVisitor) const{\
+	hitableVisitor->Visit(this);\
+}
+
 
 namespace RayTracing {
 	class Hitable;
 
 	struct HitRst {
-		HitRst(bool hit = false) : hit(hit)/*, hitable(NULL)*/, isMatCoverable(true), material(NULL) { }
+		HitRst(bool hit = false) : hit(hit), isMatCoverable(true), material(NULL) { }
 
 		bool hit;
 		HitRecord record;
 		CppUtility::Other::CPtr<Material> material;
-		//const Hitable * hitable;
 		bool isMatCoverable;
 		//------------
 		static const HitRst FALSE;
@@ -27,8 +34,11 @@ namespace RayTracing {
 	public:
 		Hitable(const Material::CPtr & material = NULL);
 
+		const Material::CPtr GetMat() const { return material; };
+
 		virtual HitRst RayIn(Ray::Ptr & ray) const = 0;
 		virtual const AABB GetBoundingBox() const = 0;
+		virtual void Accept(const HitableVisitor::Ptr & hitableVisitor) const = 0;
 	protected:
 		Material::CPtr material;
 		bool isMatCoverable;

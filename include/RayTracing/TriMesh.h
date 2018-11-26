@@ -8,7 +8,7 @@
 
 namespace RayTracing {
 	class TriMesh : public BVH_Node{
-		HEAP_OBJ_SETUP(TriMesh)
+		HITABLE_SETUP(TriMesh)
 	public:
 		TriMesh(const std::vector<Vertex> & vertexs, const Material::CPtr & material = NULL);
 

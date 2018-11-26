@@ -6,7 +6,7 @@
 
 namespace RayTracing {
 	class BVH_Node : public Hitable{
-		HEAP_OBJ_SETUP(BVH_Node)
+		HITABLE_SETUP(BVH_Node)
 	public:
 		BVH_Node(const Material::CPtr & material = NULL);
 		BVH_Node(std::vector<Hitable::CPtr> & hitables, const Material::CPtr & material = NULL);

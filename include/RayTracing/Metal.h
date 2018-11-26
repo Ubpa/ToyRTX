@@ -6,7 +6,7 @@
 
 namespace RayTracing {
 	class Metal : public Material{
-		HEAP_OBJ_SETUP(Metal)
+		MATERIAL_SETUP(Metal)
 	public:
 		Metal(float r, float g, float b, float fuzz = 0.0f);
 		Metal(const glm::rgb & specular, float fuzz = 0.0f);

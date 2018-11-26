@@ -7,7 +7,7 @@
 
 namespace RayTracing {
 	class ImgTexture : public Texture{
-		HEAP_OBJ_SETUP(ImgTexture)
+		TEXTURE_SETUP(ImgTexture)
 	public:
 		ImgTexture(const std::string & fileName, bool flip = false);
 

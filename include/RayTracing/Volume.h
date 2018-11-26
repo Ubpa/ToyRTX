@@ -5,7 +5,7 @@
 
 namespace RayTracing {
 	class Volume : public Hitable{
-		HEAP_OBJ_SETUP(Volume)
+		HITABLE_SETUP(Volume)
 	public:
 		Volume(const Hitable::CPtr & boundary = NULL, float density = 1.0f, const Material::CPtr & material = NULL);
 

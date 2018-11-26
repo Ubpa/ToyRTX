@@ -6,7 +6,7 @@
 
 namespace RayTracing {
 	class Isotropic : public Material{
-		HEAP_OBJ_SETUP(Isotropic)
+		MATERIAL_SETUP(Isotropic)
 	public:
 		Isotropic(const glm::rgb & color);
 

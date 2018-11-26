@@ -6,7 +6,7 @@
 
 namespace RayTracing {
 	class Group : public Hitable, private std::vector<Hitable::CPtr>{
-		HEAP_OBJ_SETUP(Group)
+		HITABLE_SETUP(Group)
 	public:
 		Group(const Material::CPtr & material = NULL);
 

@@ -78,7 +78,6 @@ HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
 	return *front;
 }
 
-
 size_t BVH_Node::GetAxis(vector<Hitable::CPtr>::const_iterator begin, const vector<Hitable::CPtr>::const_iterator end) const {
 	size_t num = end - begin;
 	vector<float> X, Y, Z;

@@ -5,7 +5,7 @@
 
 namespace RayTracing {
 	class Dielectric : public Material {
-		HEAP_OBJ_SETUP(Dielectric)
+		MATERIAL_SETUP(Dielectric)
 	public:
 		Dielectric(float refractIndex, glm::vec3 attenuationConst = glm::vec3(0));
 		

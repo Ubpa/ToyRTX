@@ -5,6 +5,15 @@
 
 #include <glm/glm.hpp>
 
+#include <RayTracing/TexVisitor.h>
+
+#define TEXTURE_SETUP(CLASS) \
+HEAP_OBJ_SETUP(CLASS)\
+public:\
+virtual void Accept(const TexVisitor::Ptr & texVisitor) const{\
+	texVisitor->Visit(this);\
+}
+
 namespace RayTracing {
 	class Texture : public CppUtility::Other::HeapObj {
 		HEAP_OBJ_SETUP(Texture)

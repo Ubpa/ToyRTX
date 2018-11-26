@@ -9,6 +9,15 @@
 
 #include <vector>
 
+#include <RayTracing/MatVisitor.h>
+
+#define MATERIAL_SETUP(CLASS) \
+HEAP_OBJ_SETUP(CLASS)\
+public:\
+virtual void Accept(const MatVisitor::Ptr & matVisitor) const{\
+	matVisitor->Visit(this);\
+}
+
 namespace RayTracing {
 	
 	struct Vertex {

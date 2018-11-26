@@ -25,6 +25,7 @@ struct Ray{
 	float time;
     highp float curRayNum;//这里使用float以统一
 };
+void Ray_Update(vec3 origin, vec3 dir, vec3 attenuation);
 
 struct Vertex{
 	vec3 pos;
@@ -48,17 +49,25 @@ uniform float RayNumMax;
 
 const float PI = 3.1415926;
 const float tMin = 0.001;
-const float FLTMAX = 99999999999999999999999999999999999999.0;
+const float FLT_MAX = 99999999999999999999999999999999999999.0;
 const float rayP = 50.0/51.0;// depth = p/(1-p) --> p = depth/(depth+1)
-const int sphereNum = 2;
-const float Scene[12] = float[](
-	//type	//matIdx	//center		//radius
-	0,		0,			0,		0, -1,	0.5,
-	0,		0,			0, -100.5, -1,	100
+const float HitableType_Sphere	= 0.0;
+const float MatType_Lambertian	= 0.0;
+const float MatType_Metal		= 1.0;
+const float MatType_Dielectric	= 2.0;
+const int HitableNum = 5;
+const float Scene[30] = float[](
+	HitableType_Sphere,	13, -1,      0, -1,   0.5,
+	HitableType_Sphere,	13, -1,      0, -1, -0.45,
+	HitableType_Sphere,	 4,  0,      0, -1,   0.5,
+	HitableType_Sphere,  8,  1,      0, -1,   0.5,
+	HitableType_Sphere,  0,  0, -100.5, -1,   100
 );
-const float Material[4] = float[](
-	//type	//color
-	0,		0.5, 0.5, 0.5
+const float Material[15] = float[](
+	MatType_Lambertian,	0.5, 0.5, 0.5,//0
+	MatType_Lambertian,	0.8, 0.8, 0.0,//4
+	MatType_Metal,		0.1, 0.2, 0.5, 0.0,//8
+	MatType_Dielectric,	1.5//13
 );
 
 int rdCnt = 0;
@@ -72,15 +81,26 @@ vec2 RandInCircle();
 vec3 RandInSphere();
 float atan2(float y, float x);
 vec2 Sphere2UV(vec3 normal);
+float FresnelSchlick(vec3 viewDir, vec3 halfway, float ratioNtNi);
 void GenRay();
 void SetRay();
 void WriteRay(int mode);
 struct HitRst RayIn_Sphere(int idx);
+bool Scatter_Material(struct Vertex vertex, int matIdx);
 bool Scatter_Lambertian(struct Vertex vertex, int matIdx);
+bool Scatter_Metal(struct Vertex vertex, int matIdx);
+bool Scatter_Dielectric(struct Vertex vertex, int matIdx);
 void RayTracer();
 
 void main(){
 	RayTracer();
+}
+
+void Ray_Update(vec3 origin, vec3 dir, vec3 attenuation){
+	gRay.origin = origin;
+	gRay.dir = dir;
+	gRay.color *= attenuation;
+	gRay.tMax = FLT_MAX;
 }
 
 float RandXY(float x, float y){
@@ -143,6 +163,13 @@ vec2 Sphere2UV(vec3 normal) {
 	return uv;
 }
 
+float FresnelSchlick(vec3 viewDir, vec3 halfway, float ratioNtNi){
+	float cosTheta = dot(viewDir, halfway);
+	float R0 = pow((ratioNtNi - 1) / (ratioNtNi + 1), 2);
+	float R = R0 + (1 - R0)*pow(1 - cosTheta, 5);
+	return R;
+}
+
 void GenRay(){
 	vec2 st = TexCoords + RandInSquare() / textureSize(origin_curRayNum, 0);
 	vec2 rd = camera.lenR * RandInCircle();
@@ -150,7 +177,7 @@ void GenRay(){
 	gRay.origin = camera.pos + rd.x * camera.right + rd.y * camera.up;
 	gRay.dir = camera.BL_Corner + st.s * camera.horizontal + st.t * camera.vertical - gRay.origin;
 	gRay.color = vec3(1);
-	gRay.tMax = FLTMAX;
+	gRay.tMax = FLT_MAX;
 	gRay.time = mix(camera.t0, camera.t1, Rand());
 }
 
@@ -199,13 +226,74 @@ void WriteRay(int mode){
 	out_rayTracingRst = color;
 }
 
+bool Scatter_Material(struct Vertex vertex, int matIdx){
+	float matType = Material[matIdx];
+
+	if(matType == MatType_Lambertian)
+		return Scatter_Lambertian(vertex, matIdx);
+	else if(matType == MatType_Metal)
+		return Scatter_Metal(vertex, matIdx);
+	else if(matType == MatType_Dielectric)
+		return Scatter_Dielectric(vertex, matIdx);
+	else{
+		gRay.color = vec3(1,0,1);//以此提示材质存在问题
+		return false;
+	}
+}
+
 bool Scatter_Lambertian(struct Vertex vertex, int matIdx){
 	vec3 albedo = vec3(Material[matIdx+1], Material[matIdx+2], Material[matIdx+3]);
 
 	gRay.dir = vertex.normal + RandInSphere();
 	gRay.origin = vertex.pos;
 	gRay.color *= albedo;
-	gRay.tMax = FLTMAX;
+	gRay.tMax = FLT_MAX;
+	return true;
+}
+
+bool Scatter_Metal(struct Vertex vertex, int matIdx){
+	vec3 specular = vec3(Material[matIdx+1],Material[matIdx+2],Material[matIdx+3]);
+	float fuzz = Material[matIdx+4];
+
+	vec3 dir = reflect(gRay.dir, vertex.normal);
+	vec3 dirFuzz = dir + fuzz * RandInSphere();
+
+	// 反射光线在表面之下
+	if (dot(dirFuzz, vertex.normal) < 0) {
+		gRay.color = vec3(0);
+		return false;
+	}
+
+	Ray_Update(vertex.pos, dirFuzz, specular);
+	return true;
+}
+
+bool Scatter_Dielectric(struct Vertex vertex, int matIdx){
+	float refractIndex = Material[matIdx+1];
+
+	vec3 refractDir;
+	vec3 reflectDir = reflect(gRay.dir, vertex.normal);
+
+	vec3 ud = normalize(gRay.dir);
+	vec3 un = normalize(vertex.normal);
+	vec3 airViewDir;
+	if (dot(ud,un) < 0) {//外部
+		refractDir = refract(ud, un, 1.0f / refractIndex);
+		airViewDir = -ud;
+	}
+	else {//内部
+		refractDir = refract(ud, -un, refractIndex);
+		if (refractDir == vec3(0)) {
+			Ray_Update(vertex.pos, reflectDir, vec3(1));
+			return true;
+		}
+		
+		airViewDir = refractDir;
+	}
+	
+	float fresnelFactor = FresnelSchlick(airViewDir, un, refractIndex);
+	vec3 dir = Rand() > fresnelFactor ? refractDir : reflectDir;
+	Ray_Update(vertex.pos, dir, vec3(1));
 	return true;
 }
 
@@ -259,11 +347,11 @@ void RayTracer(){
 	struct HitRst finalHitRst;
 	finalHitRst.hit = false;
 	int curIdx = 0;
-	for(int i=0; i<sphereNum; i++){
+	for(int i = 0; i< HitableNum; i++){
 		int hitableType = int(Scene[curIdx]);//32b float 在 1677w 时出现误差, 故可接受
 		struct HitRst hitRst;
 		hitRst.hit = false;
-		if(hitableType == 0){//球
+		if(hitableType == HitableType_Sphere){
 			hitRst = RayIn_Sphere(curIdx);
 			curIdx += 6;
 		}
@@ -274,20 +362,12 @@ void RayTracer(){
 	}
 
 	if(finalHitRst.hit){
-		if(finalHitRst.matIdx == -1){
-			gRay.color = vec3(1,0,1);//以此提示材质存在问题
-			WriteRay(1);//击中光源
-			return;
-		}
-
-		float matType = Material[finalHitRst.matIdx];
-		if(matType == 0){// Lambertian
-			bool rayOut = Scatter_Lambertian(finalHitRst.vertex, finalHitRst.matIdx);
-			if(rayOut)
-				WriteRay(2);//继续追踪
-			else
-				WriteRay(1);
-		}
+		bool rayOut = Scatter_Material(finalHitRst.vertex, finalHitRst.matIdx);
+		
+		if(rayOut)
+			WriteRay(2);//继续追踪
+		else
+			WriteRay(1);
 	}else{// sky
 		float t = 0.5f * (normalize(gRay.dir).y + 1.0f);
 		vec3 white = vec3(1.0f, 1.0f, 1.0f);

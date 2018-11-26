@@ -5,7 +5,7 @@
 
 namespace RayTracing {
 	class Sky : public Hitable {
-		HEAP_OBJ_SETUP(Sky)
+		HITABLE_SETUP(Sky)
 	public:
 		using Hitable::Hitable;
 

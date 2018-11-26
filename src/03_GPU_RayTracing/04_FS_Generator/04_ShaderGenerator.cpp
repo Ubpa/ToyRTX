@@ -12,7 +12,7 @@
 #include <Utility/Math.h>
 
 #include <glm/glm.hpp>
- 
+
 using namespace RayTracing;
 using namespace CppUtility::OpenGL;
 using namespace CppUtility::Other;
@@ -34,11 +34,11 @@ int main(int argc, char ** argv) {
 	VAO VAO_Screen(&(data_ScreenVertices[0]), sizeof(data_ScreenVertices), { 2,2 });
 	 
 	//------------ RayTracing Basic Shader
-	string rayTracingBasicSystem_vs = rootPath + str_RayTracingBasicSystem_vs;
-	string rayTracingBasicSystem_fs = rootPath + str_RayTracingBasicSystem_fs;
-	Shader rayTracingBasicSystemShader(rayTracingBasicSystem_vs, rayTracingBasicSystem_fs);
-	if (!rayTracingBasicSystemShader.IsValid()) {
-		printf("ERROR: rayTracingBasicSystemShader load fail.\n");
+	string material_vs = rootPath + str_Material_vs;
+	string material_fs = rootPath + str_Material_fs;
+	Shader materialShader(material_vs, material_fs);
+	if (!materialShader.IsValid()) {
+		printf("ERROR: materialShader load fail.\n");
 		return 1;
 	}
 	const float RayNumMax = 10000.0f;
@@ -47,21 +47,21 @@ int main(int argc, char ** argv) {
 	const float ratioWH = width / height;
 	const float fov = 90.0f;
 	auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
-	rayTracingBasicSystemShader.SetInt("origin_curRayNum", 0);
-	rayTracingBasicSystemShader.SetInt("dir_tMax", 1);
-	rayTracingBasicSystemShader.SetInt("color_time", 2);
-	rayTracingBasicSystemShader.SetInt("rayTracingRst", 3);
-	rayTracingBasicSystemShader.SetFloat("RayNumMax", RayNumMax);
-	rayTracingBasicSystemShader.SetVec3f("camera.pos", camera->GetPos());
-	rayTracingBasicSystemShader.SetVec3f("camera.BL_Corner", camera->GetBL_Corner());
-	rayTracingBasicSystemShader.SetVec3f("camera.horizontal", camera->GetHorizontal());
-	rayTracingBasicSystemShader.SetVec3f("camera.vertical", camera->GetVertical());
-	rayTracingBasicSystemShader.SetVec3f("camera.right", camera->GetRight());
-	rayTracingBasicSystemShader.SetVec3f("camera.up", camera->GetUp());
-	rayTracingBasicSystemShader.SetVec3f("camera.front", camera->GetFront());
-	rayTracingBasicSystemShader.SetFloat("camera.lenR", camera->GetLenR());
-	rayTracingBasicSystemShader.SetFloat("camera.t0", camera->GetT1());
-	rayTracingBasicSystemShader.SetFloat("camera.t1", camera->GetT0());
+	materialShader.SetInt("origin_curRayNum", 0);
+	materialShader.SetInt("dir_tMax", 1);
+	materialShader.SetInt("color_time", 2);
+	materialShader.SetInt("rayTracingRst", 3);
+	materialShader.SetFloat("RayNumMax", RayNumMax);
+	materialShader.SetVec3f("camera.pos", camera->GetPos());
+	materialShader.SetVec3f("camera.BL_Corner", camera->GetBL_Corner());
+	materialShader.SetVec3f("camera.horizontal", camera->GetHorizontal());
+	materialShader.SetVec3f("camera.vertical", camera->GetVertical());
+	materialShader.SetVec3f("camera.right", camera->GetRight());
+	materialShader.SetVec3f("camera.up", camera->GetUp());
+	materialShader.SetVec3f("camera.front", camera->GetFront());
+	materialShader.SetFloat("camera.lenR", camera->GetLenR());
+	materialShader.SetFloat("camera.t0", camera->GetT1());
+	materialShader.SetFloat("camera.t1", camera->GetT0());
 
 	//------------ RayTracing FBO 
 	bool curReadFBO = false;
@@ -82,11 +82,11 @@ int main(int argc, char ** argv) {
 			FBO_RayTracing[curReadFBO].GetColorTexture(1).Use(1);
 			FBO_RayTracing[curReadFBO].GetColorTexture(2).Use(2);
 			FBO_RayTracing[curReadFBO].GetColorTexture(3).Use(3);
-			rayTracingBasicSystemShader.SetFloat("rdSeed[0]", Math::Rand_F());
-			rayTracingBasicSystemShader.SetFloat("rdSeed[1]", Math::Rand_F());
-			rayTracingBasicSystemShader.SetFloat("rdSeed[2]", Math::Rand_F());
-			rayTracingBasicSystemShader.SetFloat("rdSeed[3]", Math::Rand_F());
-			VAO_Screen.Draw(rayTracingBasicSystemShader);
+			materialShader.SetFloat("rdSeed[0]", Math::Rand_F());
+			materialShader.SetFloat("rdSeed[1]", Math::Rand_F());
+			materialShader.SetFloat("rdSeed[2]", Math::Rand_F());
+			materialShader.SetFloat("rdSeed[3]", Math::Rand_F());
+			VAO_Screen.Draw(materialShader);
 
 			curReadFBO = curWriteFBO;
 			curWriteFBO = !curReadFBO;

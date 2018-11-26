@@ -95,12 +95,11 @@ Ray::Ptr GenRay(float s, float t){
 $$
 \begin{aligned}
 E &= \sum_{i=0}^\infty{i*p^i(1-p)}\\
-  &= \sum_{i=0}^\infty{i*p^i} - \sum_{i=0}^\infty{i*p^{i+1}}\\
-  &= \frac{p}{(1-p)^2} - \frac{p^2}{(1-p)^2}\\
+  &= （1-p)*\sum_{i=0}^\infty{i*p^i}\\
   &= \frac{p}{1-p}
 \end{aligned}
 $$
-令`E=50`，则`P=50/51≈0.9804`
+令`E=50`，则`P=50/51`
 
 故总共12个变量，可以放在3张 `texture` 里，简单安排如下
 
@@ -240,10 +239,10 @@ struct Camera{
     float lenR;
     float t0;
     float t1;
-}
+};
 ```
 
-### 3.3.4光线
+### 3.3.4 光线
 
 ```c++
 struct Ray{
@@ -252,26 +251,69 @@ struct Ray{
     vec3 color;
     float tMax;
     float curRayNum;
-}
+};
 ```
 
-### 3.3.5 材质
+### 3.3.5 漫反射
 
 ```c++
-struct Lambertian{
+struct Lambertian{// 4
     float type = 0.0f;
     vec3 color;
-}
+};
 ```
 
 ### 3.3.6 球
 
 ```c++
-struct Sphere{
+struct Sphere{// 6
     float type = 0.0f;
     float matIdx;
     vec3 center;
-    vec3 radius;
-}
+    float radius;
+};
 ```
+
+## 3.4 Material
+
+### 3.4.1 Metal
+
+```c++
+struct Metal{// 5
+    float type = 1.0;
+    vec3 color;
+    float fuzz;
+};
+```
+
+### 3.4.2 Dielectric
+
+不再实现其中的attenuation，原因是`attenuationConst`参数不好设置，一般其总是`(0,0,0)`，这样就浪费了计算资源。后边可通过Volume的方式模拟玻璃有颜色的类似效果。
+
+**相关函数**
+
+```c++
+// 反射率
+// viewDir 为 视线方向(从物点到视点的方向)
+// halfway 为 视线方向与光线方向的平均
+// rationNtNi 折射率之比 == Nt / Ni
+//     Ni 为 入射光线所在介质的折射率
+//     Nt 为 折射光线所在介质的折射率
+float FresnelSchlick(const glm::vec3 & viewDir, const glm::vec3 & halfway, float ratioNtNi);
+```
+
+**数据结构**
+
+```c++
+struct Dielectric{//2
+    float type = 2.0;
+    float refractIndex;
+};
+```
+
+## 3.5 Fragment Shader Generator
+
+为了达到程序生成场景、材质的目的，需要 CPU 来生成Shader。
+
+故考虑实现一个 Shader Generator
 

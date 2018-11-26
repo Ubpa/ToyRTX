@@ -7,7 +7,7 @@
 
 namespace RayTracing {
 	class OpTexture : public Texture {
-		HEAP_OBJ_SETUP(OpTexture)
+		TEXTURE_SETUP(OpTexture)
 	public:
 		OpTexture(const std::function<glm::rgb(float u, float v, const glm::vec3 & p)> & op);
 

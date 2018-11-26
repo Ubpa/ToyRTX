@@ -7,7 +7,7 @@
 
 namespace RayTracing {
 	class OpMaterial : public Material{
-		HEAP_OBJ_SETUP(OpMaterial)
+		MATERIAL_SETUP(OpMaterial)
 	public:
 		OpMaterial(const std::function<bool(const HitRecord & rec)> & op);
 

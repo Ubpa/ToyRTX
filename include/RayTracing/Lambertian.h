@@ -8,7 +8,7 @@
 
 namespace RayTracing {
 	class Lambertian : public Material {
-		HEAP_OBJ_SETUP(Lambertian)
+		MATERIAL_SETUP(Lambertian)
 	public:
 		Lambertian(float r, float g, float b);
 		Lambertian(const glm::rgb & albedo);

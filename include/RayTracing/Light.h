@@ -6,7 +6,7 @@
 
 namespace RayTracing {
 	class Light : public Material{
-		HEAP_OBJ_SETUP(Light)
+		MATERIAL_SETUP(Light)
 	public:
 		Light(const glm::rgb & color);
 
