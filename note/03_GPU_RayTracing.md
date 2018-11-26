@@ -320,18 +320,20 @@ struct Dielectric{// 2
 ### 3.5.1 物体
 
 ```c++
-struct Sphere{// 6
+struct Sphere{// 7
     int type = 0;
     float matIdx;
+    bool isMatCoveralbe;
     vec3 center;
     float radius;
 };
 
-struct Group{// 3 + len
+struct Group{// 3 + childrenNum
     int type = 1;
     int matIdx = -1;
-    int len;
-    int childrenIdx[len];
+    bool isMatCoveralbe;
+    int childrenNum;
+    int childrenIdx[childrenNum];
 }
 ```
 

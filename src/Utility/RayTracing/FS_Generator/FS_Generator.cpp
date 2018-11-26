@@ -50,7 +50,7 @@ const string FS_Generator::BuildFS() {
 
 void FS_Generator::Data(stringstream & shaderSS) {
 	auto const & sceneData = hitableVisitor->GetSceneData();
-	shaderSS << "const float Scene[" << sceneData.size() << "] = float[](" << endl;
+	shaderSS << "const float SceneData[" << sceneData.size() << "] = float[](" << endl;
 	shaderSS << sceneData[0];
 	for (size_t i = 0; i < sceneData.size(); i++)
 		shaderSS << "," << endl << hitableVisitor->GetSceneData().at(i);
@@ -59,7 +59,7 @@ void FS_Generator::Data(stringstream & shaderSS) {
 
 
 	auto const & matData = matVisitor->GetMatData();
-	shaderSS << "const float Material[" << matData.size() << "] = float[](" << endl;
+	shaderSS << "const float MaterialData[" << matData.size() << "] = float[](" << endl;
 	shaderSS << matData[0];
 	for (size_t i = 0; i < matData.size(); i++)
 		shaderSS << "," << endl << matVisitor->GetMatData().at(i);
@@ -68,7 +68,7 @@ void FS_Generator::Data(stringstream & shaderSS) {
 
 
 	auto const & texData = texVisitor->GetTexData();
-	shaderSS << "const float Material[" << texData.size() << "] = float[](" << endl;
+	shaderSS << "const float TextureData[" << texData.size() << "] = float[](" << endl;
 	shaderSS << texData[0];
 	for (size_t i = 0; i < texData.size(); i++)
 		shaderSS << "," << endl << texVisitor->GetTexData().at(i);
@@ -331,10 +331,23 @@ void FS_Generator::Scatter(stringstream & shaderSS) {
 
 void FS_Generator::RayIn(stringstream & shaderSS) {
 	shaderSS
+		<< "struct HitRst RayIn_Hitable(int idx){" << endl
+		<< "    int type = int(SceneData[idx+1]);//32b float 在 1677w 时出现误差, 故可接受" << endl
+		<< "    if(type == HT_Sphere)" << endl
+		<< "        return RayIn_Sphere(idx);" << endl
+		<< "    else if(type == HT_Group)" << endl
+		<< "        return RayIn_Group(idx);" << endl
+		<< "    else{" << endl
+		<< "        HitRst hitRst;" << endl
+		<< "        hitRst.hit = false;" << endl
+		<< "        return hitRst;" << endl
+		<< "    }" << endl
+		<< "}" << endl
+		<< " " << endl
 		<< "struct HitRst RayIn_Sphere(int idx){" << endl
-		<< "    int matIdx = int(Scene[idx+1]);//32b float 在 1677w 时出现误差, 故可接受" << endl
-		<< "    vec3 center = vec3(Scene[idx+2], Scene[idx+3], Scene[idx+4]);" << endl
-		<< "    float radius = Scene[idx+5];" << endl
+		<< "    int matIdx = int(SceneData[idx+1]);//32b float 在 1677w 时出现误差, 故可接受" << endl
+		<< "    vec3 center = vec3(SceneData[idx+2], SceneData[idx+3], SceneData[idx+4]);" << endl
+		<< "    float radius = SceneData[idx+5];" << endl
 		<< "    " << endl
 		<< "    struct HitRst hitRst;" << endl
 		<< "    hitRst.hit = false;" << endl
@@ -364,6 +377,22 @@ void FS_Generator::RayIn(stringstream & shaderSS) {
 		<< "    hitRst.matIdx = matIdx;" << endl
 		<< "    " << endl
 		<< "    return hitRst;" << endl
+		<< "}" << endl
+		<< " " << endl
+		<< "struct HitRst RayIn_Group(int idx){" << endl
+		<< "    int matIdx = SceneData[idx+1];" << endl
+		<< "    int childrenNum = SceneData[idx+2];" << endl
+		<< "    HitRst finalHitRst;" << endl
+		<< "    finalHitRst.hit = false;" << endl
+		<< "    for(int i=0; i < childrenNum; i++){" << endl
+		<< "        int childIdx = SceneData[idx+3+i];" << endl
+		<< "        HitRst hitRst = RayIn_Hitable(childIdx);" << endl
+		<< "        " << endl
+		<< "        if(hitRst.hit)" << endl
+		<< "            finalHitRst = hitRst;" << endl
+		<< "    }" << endl
+		<< "	" << endl
+		<< "    return finalHitRst; " << endl
 		<< "}" << endl;
 }
 

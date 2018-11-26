@@ -33,6 +33,8 @@ int main(int argc, char ** argv) {
 	//------------ Ä£ÐÍ . Screen
 	VAO VAO_Screen(&(data_ScreenVertices[0]), sizeof(data_ScreenVertices), { 2,2 });
 	 
+	//------------ Scene
+
 	//------------ RayTracing Basic Shader
 	string material_vs = rootPath + str_Material_vs;
 	string material_fs = rootPath + str_Material_fs;

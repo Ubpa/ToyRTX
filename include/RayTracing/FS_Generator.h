@@ -21,7 +21,6 @@ namespace RayTracing {
 
 		static void Version(std::stringstream & shaderSS);
 		static void LayOut(std::stringstream & shaderSS);
-		static void Camera(std::stringstream & shaderSS);
 		static void Struct(std::stringstream & shaderSS);
 		static void Uniform(std::stringstream & shaderSS);
 		static void Variable(std::stringstream & shaderSS);
