@@ -39,7 +39,7 @@ struct Vertex Vertex_InValid = struct Vertex(vec3(0), vec3(0), vec2(0));
 struct HitRst{
     bool hit;
     struct Vertex vertex;
-    int matIdx;
+    float matIdx;
 };
 struct HitRst HitRst_InValid = struct HitRst(false, Vertex_InValid, -1);
 
@@ -60,12 +60,12 @@ const float PI = 3.1415926;
 const float tMin = 0.001;
 const float FLT_MAX = 99999999999999999999999999999999999999.0;
 const float rayP = 50.0/51.0;// depth = p/(1-p) --> p = depth/(depth+1)
-const int HT_Sphere         = 0;
-const int HT_Group          = 1;
-const int MatT_Lambertian   = 0;
-const int MatT_Metal        = 1;
-const int MatT_Dielectric   = 2;
-const int TexT_ConstTexture = 0;
+const float HT_Sphere         = 0.0;
+const float HT_Group          = 1.0;
+const float MatT_Lambertian   = 0.0;
+const float MatT_Metal        = 1.0;
+const float MatT_Dielectric   = 2.0;
+const float TexT_ConstTexture = 0.0;
 
 int rdCnt = 0;
 in vec2 TexCoords;
@@ -76,29 +76,35 @@ float Rand();// [0.0, 1.0)
 vec2 RandInSquare();
 vec2 RandInCircle();
 vec3 RandInSphere();
-float At(sampler2D data, int idx);
+float At(sampler2D data, float idx);
 float atan2(float y, float x);
 vec2 Sphere2UV(vec3 normal);
 float FresnelSchlick(vec3 viewDir, vec3 halfway, float ratioNtNi);
 void SetRay();
 void WriteRay(int mode);
 struct HitRst RayIn_Scene();
-struct HitRst RayIn_Sphere(int idx);
-bool Scatter_Material(struct Vertex vertex, int matIdx);
-bool Scatter_Lambertian(struct Vertex vertex, int matIdx);
-bool Scatter_Metal(struct Vertex vertex, int matIdx);
-bool Scatter_Dielectric(struct Vertex vertex, int matIdx);
-vec3 Value_Texture(vec2 uv, vec3 p, int texIdx);
-vec3 Value_ConstTexture(int texIdx);
+struct HitRst RayIn_Sphere(float idx);
+bool Scatter_Material(struct Vertex vertex, float matIdx);
+bool Scatter_Lambertian(struct Vertex vertex, float matIdx);
+bool Scatter_Metal(struct Vertex vertex, float matIdx);
+bool Scatter_Dielectric(struct Vertex vertex, float matIdx);
+vec3 Value_Texture(vec2 uv, vec3 p, float texIdx);
+vec3 Value_ConstTexture(float texIdx);
 void RayTracer();
 
 void main(){
 	if(false){
-		int val = int(At(SceneData, 3)) + 1;
-		if(TexCoords.x<0.5)
-			out_rayTracingRst = vec3(val,0,0);
-		else
-			out_rayTracingRst = vec3(val+1,0,0);
+	float val;
+	if(TexCoords.y<0.33)
+		val = At(SceneData, TexCoords.x*16);
+	else if(TexCoords.y<0.66)
+		val = At(TexData, TexCoords.x*16);
+	else
+		val = At(MatData, TexCoords.x*16);
+		//if(TexCoords.x<0.5)
+		//	out_rayTracingRst = vec3(val,0,0);
+		//else
+			out_rayTracingRst = vec3(At(SceneData, 4.0)/12.0,At(SceneData, 5.0)/26.0,0);
 	}
     else
 		RayTracer();
@@ -138,10 +144,10 @@ vec3 RandInSphere(){
     } while (dot(rst, rst) >= 1.0);
     return rst;
 }
-float At(sampler2D data, int idx){
+
+float At(sampler2D data, float idx){
     vec2 texCoords = vec2((idx+0.5)/textureSize(data, 0).x, 0.5);
-    float val = texture2D(data, texCoords).x;
-    return val;
+    return texture2D(data, texCoords).x;
 }
  
 float atan2(float y, float x){
@@ -172,12 +178,12 @@ vec2 Sphere2UV(vec3 normal) {
 float FresnelSchlick(vec3 viewDir, vec3 halfway, float ratioNtNi){
     float cosTheta = dot(viewDir, halfway);
     float R0 = pow((ratioNtNi - 1) / (ratioNtNi + 1), 2);
-    float R = R0 + (1 - R0)*pow(1 - cosTheta, 5);
+    float R = R0 + (1 - R0) * pow(1 - cosTheta, 5);
     return R;
 }
 
-bool Scatter_Material(struct Vertex vertex, int matIdx){
-    int matType = int(At(MatData, matIdx));
+bool Scatter_Material(struct Vertex vertex, float matIdx){
+    float matType = At(MatData, matIdx);
     
     if(matType == MatT_Lambertian)
         return Scatter_Lambertian(vertex, matIdx);
@@ -191,8 +197,8 @@ bool Scatter_Material(struct Vertex vertex, int matIdx){
     }
 }
 
-bool Scatter_Lambertian(struct Vertex vertex, int matIdx){
-    int texIdx = int(At(MatData, matIdx+1));
+bool Scatter_Lambertian(struct Vertex vertex, float matIdx){
+    float texIdx = At(MatData, matIdx+1);
     vec3 albedo = Value_Texture(vertex.uv, vertex.pos, texIdx);
     
     gRay.dir = vertex.normal + RandInSphere();
@@ -202,8 +208,8 @@ bool Scatter_Lambertian(struct Vertex vertex, int matIdx){
     return true;
 }
 
-bool Scatter_Metal(struct Vertex vertex, int matIdx){
-    int texIdx = int(At(MatData, matIdx+1));
+bool Scatter_Metal(struct Vertex vertex, float matIdx){
+    float texIdx = At(MatData, matIdx+1);
     vec3 specular = Value_Texture(vertex.uv, vertex.pos, texIdx);
     float fuzz = At(MatData, matIdx+2);
     
@@ -220,7 +226,7 @@ bool Scatter_Metal(struct Vertex vertex, int matIdx){
     return true;
 }
 
-bool Scatter_Dielectric(struct Vertex vertex, int matIdx){
+bool Scatter_Dielectric(struct Vertex vertex, float matIdx){
     float refractIndex = At(MatData, matIdx+1);
     
     vec3 refractDir;
@@ -250,25 +256,25 @@ bool Scatter_Dielectric(struct Vertex vertex, int matIdx){
 }
 
 struct HitRst RayIn_Scene(){
-    int idxStack[100];
+    float idxStack[20];
+	for(int i=0;i<20;i++)
+		idxStack[i] = 0;
     int idxStackSize = 0;
     struct HitRst finalHitRst = HitRst_InValid;
-    
-    idxStack[idxStackSize++] = 0;
+    idxStack[idxStackSize++] = 0.0;
     while(idxStackSize > 0){
-        int idx = idxStack[--idxStackSize];
+        float idx = idxStack[--idxStackSize];
         
-        int type = int(At(SceneData, idx));//32b float 在 1677w 时出现误差, 故可接受
+        float type = At(SceneData, idx);
         if(type == HT_Sphere){
             struct HitRst hitRst = RayIn_Sphere(idx);
             if(hitRst.hit)
                 finalHitRst = hitRst;
         }
         else if(type == HT_Group){
-            int childrenNum = 1;clamp(int(At(SceneData, idx+3)),1,1);
-            for(int i=0; i < childrenNum; i++){
-                idxStack[idxStackSize++] = int(At(SceneData, idx+4+i));
-			}
+			int childrenNum = int(At(SceneData, idx+3));
+			for(int i=0; i<childrenNum; i++)
+				idxStack[idxStackSize++] = At(SceneData, idx+4+i);
         }
         //else
         //    ;// do nothing
@@ -277,8 +283,8 @@ struct HitRst RayIn_Scene(){
     return finalHitRst;
 }
 
-struct HitRst RayIn_Sphere(int idx){
-    int matIdx = int(At(SceneData, idx+1));//32b float 在 1677w 时出现误差, 故可接受
+struct HitRst RayIn_Sphere(float idx){
+    float matIdx = At(SceneData, idx+1);
     vec3 center = vec3(At(SceneData, idx+3), At(SceneData, idx+4), At(SceneData, idx+5));
     float radius = At(SceneData, idx+6);
     
@@ -312,15 +318,15 @@ struct HitRst RayIn_Sphere(int idx){
     return hitRst;
 }
  
-vec3 Value_Texture(vec2 uv, vec3 p, int texIdx){
-	int type = int(At(TexData, texIdx));
+vec3 Value_Texture(vec2 uv, vec3 p, float texIdx){
+	float type = At(TexData, texIdx);
 	if(type == TexT_ConstTexture){
 		return Value_ConstTexture(texIdx);
 	}else
 		return vec3(1,0,1);
 }
  
-vec3 Value_ConstTexture(int texIdx){
+vec3 Value_ConstTexture(float texIdx){
 	vec3 color = vec3(At(TexData, texIdx+1), At(TexData, texIdx+2), At(TexData, texIdx+3));
 	return color;
 }
@@ -389,6 +395,7 @@ void WriteRay(int mode){
 }
 
 void RayTracer(){
+
     SetRay();
     if(gRay.curRayNum >= RayNumMax){
         WriteRay(3);
@@ -400,7 +407,9 @@ void RayTracer(){
         return;
     }
     
-    struct HitRst finalHitRst = RayIn_Scene();
+    struct HitRst finalHitRst;
+	finalHitRst = RayIn_Scene();
+	//return;
 	//if(false){
     if(finalHitRst.hit){
         bool rayOut = Scatter_Material(finalHitRst.vertex, finalHitRst.matIdx);

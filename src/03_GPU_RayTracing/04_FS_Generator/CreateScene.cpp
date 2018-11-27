@@ -12,7 +12,7 @@
 
 #include "Defines.h"
 #include <OpenGL/CommonDefine.h>
-
+ 
 using namespace RayTracing;
 using namespace CppUtility::Other;
 using namespace Define;
@@ -25,15 +25,17 @@ Scene::CPtr CreateScene0(float ratioWH){
 	Sphere::Ptr sphereLeftOut = ToPtr(new Sphere(vec3(-1, 0, -1), 0.5, ToPtr(new Dielectric(1.5))));
 	Sphere::Ptr sphereLeftIn = ToPtr(new Sphere(vec3(-1, 0, -1), -0.45, ToPtr(new Dielectric(1.5))));
 	Sphere::Ptr sphereRight = ToPtr(new Sphere(vec3(1, 0, -1), 0.5, ToPtr(new Metal(rgb(0.1, 0.2, 0.5), 0.0))));
-	Group::Ptr group = ToPtr(new Group);
+	Group::Ptr group0 = ToPtr(new Group);
+	Group::Ptr group1 = ToPtr(new Group);
+	(*group1) << sphereLeftOut << sphereLeftIn;
 
 	const vec3 pos(0, 0, 0);
 	const vec3 viewPoint(0, 0, -1);
 	const float fov = 90.0f;
 	auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
-	(*group) << sphereMid;// << sphereBottom;// << sphereMid << sphereLeftOut << sphereLeftIn << sphereRight;
+	(*group0) << sphereBottom << sphereMid << group1 << sphereRight;
 
-	return ToPtr(new Scene(group, camera));
+	return ToPtr(new Scene(group0, camera));
 }
 
 Scene::CPtr CreateScene1(float ratioWH) {
@@ -80,3 +82,4 @@ Scene::CPtr CreateScene1(float ratioWH) {
 
 	return ToPtr(new Scene(group, camera));
 }
+          

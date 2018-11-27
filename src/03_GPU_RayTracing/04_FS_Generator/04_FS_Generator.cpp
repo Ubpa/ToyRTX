@@ -52,18 +52,18 @@ int main(int argc, char ** argv) {
 	FS_Generator fsGenerator(scene->obj);
 	vector<float> sceneData(fsGenerator.GetSceneData());
 	printf("size: %d\n", sceneData.size());
-	for (size_t i = 0; i < sceneData.size(); i++)
-		printf("%f, ", sceneData[i]);
+	//for (size_t i = 0; i < sceneData.size(); i++)
+	//	printf("%f, ", sceneData[i]);
 	printf("\n");
 	vector<float> matData(fsGenerator.GetMatData());
 	printf("size: %d\n", matData.size());
-	for (size_t i = 0; i < matData.size(); i++)
-		printf("%f, ", matData[i]);
+	//for (size_t i = 0; i < matData.size(); i++)
+	//	printf("%f, ", matData[i]);
 	printf("\n");
 	vector<float> texData(fsGenerator.GetTexData());
 	printf("size: %d\n", texData.size());
-	for (size_t i = 0; i < texData.size(); i++)
-		printf("%f, ", texData[i]);
+	//for (size_t i = 0; i < texData.size(); i++)
+	//	printf("%f, ", texData[i]);      
 	printf("\n");
 	size_t i;
 	i = 1;
@@ -87,9 +87,6 @@ int main(int argc, char ** argv) {
 	CppUtility::OpenGL::Texture texDataTex(texData.size(), 1, texData.data(), GL_FLOAT, GL_RED, GL_R32F);
 	CppUtility::OpenGL::Texture sceneDataTex(sceneData.size(), 1, sceneData.data(), GL_FLOAT, GL_RED, GL_R32F);
 	CppUtility::OpenGL::Texture matDataTex(matData.size(), 1, matData.data(), GL_FLOAT, GL_RED, GL_R32F);
-	sceneDataTex.Use(6);
-	matDataTex.Use(5);
-	texDataTex.Use(4);
 	//------------ RayTracing Basic Shader
 	string RTX_vs = rootPath + str_RTX_vs;
 	string RTX_fs = rootPath + str_RTX_fs;
@@ -114,9 +111,9 @@ int main(int argc, char ** argv) {
 	RTX_Shader.SetInt("dir_tMax", 1);
 	RTX_Shader.SetInt("color_time", 2);
 	RTX_Shader.SetInt("rayTracingRst", 3);
-	RTX_Shader.SetInt("SceneData", 6);
+	RTX_Shader.SetInt("SceneData", 4);
 	RTX_Shader.SetInt("MatData", 5);
-	RTX_Shader.SetInt("TexData", 4);
+	RTX_Shader.SetInt("TexData", 6);
 	RTX_Shader.SetFloat("RayNumMax", RayNumMax);
 	RTX_Shader.SetVec3f("camera.pos", camera->GetPos());
 	RTX_Shader.SetVec3f("camera.BL_Corner", camera->GetBL_Corner());
@@ -138,10 +135,10 @@ int main(int argc, char ** argv) {
 		FBO(width, height, FBO::ENUM_TYPE_RAYTRACING),
 	};
 
-	//------------ ²Ù×÷
-	Timer timer;
+	//------------ ²Ù×÷             d      f   f   fdfdff     ddddddd  dfdfd 
+	Timer timer; 
 	timer.Start();
-	auto rayTracingOp = ToPtr(new LambdaOp([&]() {
+	LambdaOp::Ptr rayTracingOp = ToPtr(new LambdaOp([&]() {
 		size_t loopNum = static_cast<size_t>(glm::max(texWindow.GetScale(),1.0));
 		for (size_t i = 0; i < loopNum; i++) {
 			FBO_RayTracing[curWriteFBO].Use();
@@ -149,16 +146,21 @@ int main(int argc, char ** argv) {
 			FBO_RayTracing[curReadFBO].GetColorTexture(1).Use(1);
 			FBO_RayTracing[curReadFBO].GetColorTexture(2).Use(2);
 			FBO_RayTracing[curReadFBO].GetColorTexture(3).Use(3);
+			sceneDataTex.Use(4); 
+			matDataTex.Use(5);
+			texDataTex.Use(6); 
 			RTX_Shader.SetFloat("rdSeed[0]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[1]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[2]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[3]", Math::Rand_F());
-			VAO_Screen.Draw(RTX_Shader);
-
+			VAO_Screen.Draw(RTX_Shader);  
+			  
 			curReadFBO = curWriteFBO;
 			curWriteFBO = !curReadFBO;
-		}
+		} 
 		texWindow.SetTex(FBO_RayTracing[curReadFBO].GetColorTexture(3));
+		 
+		//rayTracingOp->SetIsHold(false); ddddddfffddd ddd d  dddd dddddddd ddddddddddfdddd
 
 		static size_t allLoopNum = 0;
 		allLoopNum += loopNum;
