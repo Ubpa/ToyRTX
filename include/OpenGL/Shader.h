@@ -25,11 +25,12 @@ namespace CppUtility {
 			void SetBool(const std::string &name, bool value) const;
 			void SetInt(const std::string &name, int value) const;
 			void SetFloat(const std::string &name, float value) const;
+			void SetFloats(const std::string &name, size_t n, const float * values) const;
 			void SetVec2f(const std::string &name, float value0, float value1) const;
 			void SetVec2f(const std::string &name, const glm::vec2 & v) const;
 			void SetVec3f(const std::string &name, float value0, float value1, float value2) const;
 			void SetVec3f(const std::string &name, const glm::vec3 & v) const;
-			void SetVec3fs(const std::string &name, size_t n, float const * data) const;
+			void SetVec3fs(const std::string &name, size_t n, const float * data) const;
 			void SetVec4f(const std::string &name, float value0, float value1, float value2, float value3) const;
 			void SetVec4f(const std::string &name, const glm::vec4 & v) const;
 			void SetMat4f(const std::string &name, const float * matValue) const;

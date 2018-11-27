@@ -23,6 +23,19 @@ FS_Generator::FS_Generator(const CppUtility::Other::CPtr<Hitable> & scene)
 	matVisitor->Accept(texVisitor);
 }
 
+
+const vector<float> FS_Generator::GetSceneData() const {
+	return hitableVisitor->GetSceneData();
+}
+
+const vector<float> FS_Generator::GetMatData() const {
+	return matVisitor->GetMatData();
+}
+
+const vector<float> FS_Generator::GetTexData() const {
+	return texVisitor->GetTexData();
+}
+
 const string FS_Generator::BuildFS() {
 	stringstream shaderSS;
 
@@ -31,7 +44,6 @@ const string FS_Generator::BuildFS() {
 	Struct(shaderSS);
 	Uniform(shaderSS);
 	Variable(shaderSS);
-	Data(shaderSS);
 	FuncDefine(shaderSS);
 
 	Main(shaderSS);
@@ -46,6 +58,7 @@ const string FS_Generator::BuildFS() {
 	return shaderSS.str();
 }
 
+/*
 void FS_Generator::Data(stringstream & shaderSS) {
 	auto const & sceneData = hitableVisitor->GetSceneData();
 	shaderSS << "const float SceneData[" << sceneData.size() << "] = float[](" << endl;
@@ -90,6 +103,7 @@ void FS_Generator::Data(stringstream & shaderSS) {
 	}
 	shaderSS << endl << ");" << endl << "" << endl;
 }
+*/
 
 void FS_Generator::Version(stringstream & shaderSS) {
 	shaderSS << "#version 330 core" << endl
@@ -153,6 +167,11 @@ void FS_Generator::Uniform(stringstream & shaderSS) {
 		<< "uniform sampler2D dir_tMax;//若tMax为0, 则表示该光线无效" << endl
 		<< "uniform sampler2D color_time;" << endl
 		<< "uniform sampler2D rayTracingRst;" << endl
+		<< "" << endl
+		<< "uniform sampler2D SceneData;" << endl
+		<< "uniform sampler2D MatData;" << endl
+		<< "uniform sampler2D TexData;" << endl
+		<< "" << endl
 		<< "uniform struct Camera camera;" << endl
 		<< "uniform float rdSeed[4];" << endl
 		<< "uniform float RayNumMax;" << endl
@@ -185,6 +204,7 @@ void FS_Generator::FuncDefine(stringstream & shaderSS) {
 		<< "vec2 RandInSquare();" << endl
 		<< "vec2 RandInCircle();" << endl
 		<< "vec3 RandInSphere();" << endl
+		<< "float At(sampler2D data, int idx);" << endl
 		<< "float atan2(float y, float x);" << endl
 		<< "vec2 Sphere2UV(vec3 normal);" << endl
 		<< "float FresnelSchlick(vec3 viewDir, vec3 halfway, float ratioNtNi);" << endl
@@ -257,6 +277,14 @@ void FS_Generator::RandFunc(stringstream & shaderSS) {
 }
 
 void FS_Generator::MathFunc(stringstream & shaderSS) {
+	shaderSS // At
+		<< "float At(sampler2D data, int idx){" << endl
+		<< "    vec2 texCoords = vec2(float(idx)/textureSize(data, 0).x, 0);" << endl
+		<< "    float val = texture2D(data, texCoords).x;" << endl
+		<< "    return val;" << endl
+		<< "}" << endl
+		<< " " << endl;
+
 	shaderSS // atan2
 		<< "float atan2(float y, float x){" << endl
 		<< "    if(x>0){" << endl
@@ -299,7 +327,7 @@ void FS_Generator::MathFunc(stringstream & shaderSS) {
 void FS_Generator::Scatter(stringstream & shaderSS) {
 	shaderSS // Scatter_Material
 		<< "bool Scatter_Material(struct Vertex vertex, int matIdx){" << endl
-		<< "    int matType = int(MatData[matIdx]);" << endl
+		<< "    int matType = int(At(MatData, matIdx+1));" << endl
 		<< "    " << endl
 		<< "    if(matType == MatT_Lambertian)" << endl
 		<< "        return Scatter_Lambertian(vertex, matIdx);" << endl
@@ -316,7 +344,7 @@ void FS_Generator::Scatter(stringstream & shaderSS) {
 
 	shaderSS // Scatter_Lambertian
 		<< "bool Scatter_Lambertian(struct Vertex vertex, int matIdx){" << endl
-		<< "    int texIdx = int(MatData[matIdx+1]);" << endl
+		<< "    int texIdx = int(At(MatData, matIdx+1));" << endl
 		<< "    vec3 albedo = Value_Texture(vertex.uv, vertex.pos, texIdx);" << endl
 		<< "    " << endl
 		<< "    gRay.dir = vertex.normal + RandInSphere();" << endl
@@ -329,9 +357,9 @@ void FS_Generator::Scatter(stringstream & shaderSS) {
 
 	shaderSS // Scatter_Metal
 		<< "bool Scatter_Metal(struct Vertex vertex, int matIdx){" << endl
-		<< "    int texIdx = int(MatData[matIdx+1]);" << endl
+		<< "    int texIdx = int(At(MatData, matIdx+1));" << endl
 		<< "    vec3 specular = Value_Texture(vertex.uv, vertex.pos, texIdx);" << endl
-		<< "    float fuzz = MatData[matIdx+4];" << endl
+		<< "    float fuzz = At(MatData, matIdx+4);" << endl
 		<< "    " << endl
 		<< "    vec3 dir = reflect(gRay.dir, vertex.normal);" << endl
 		<< "    vec3 dirFuzz = dir + fuzz * RandInSphere();" << endl
@@ -349,7 +377,7 @@ void FS_Generator::Scatter(stringstream & shaderSS) {
 
 	shaderSS // Scatter_Dielectric
 		<< "bool Scatter_Dielectric(struct Vertex vertex, int matIdx){" << endl
-		<< "    float refractIndex = MatData[matIdx+1];" << endl
+		<< "    float refractIndex = At(MatData, matIdx+1);" << endl
 		<< "    " << endl
 		<< "    vec3 refractDir;" << endl
 		<< "    vec3 reflectDir = reflect(gRay.dir, vertex.normal);" << endl
@@ -390,16 +418,16 @@ void FS_Generator::RayIn(stringstream & shaderSS) {
 		<< "    while(idxStackSize > 0){" << endl
 		<< "        int idx = idxStack[--idxStackSize];" << endl
 		<< "        " << endl
-		<< "        int type = int(SceneData[idx]);//32b float 在 1677w 时出现误差, 故可接受" << endl
+		<< "        int type = int(At(SceneData, idx));//32b float 在 1677w 时出现误差, 故可接受" << endl
 		<< "        if(type == HT_Sphere){" << endl
 		<< "            struct HitRst hitRst = RayIn_Sphere(idx);" << endl
 		<< "            if(hitRst.hit)" << endl
 		<< "                finalHitRst = hitRst;" << endl
 		<< "        }" << endl
 		<< "        else if(type == HT_Group){" << endl
-		<< "            int childrenNum = int(SceneData[idx+3]);" << endl
+		<< "            int childrenNum = int(At(SceneData, idx+3));" << endl
 		<< "            for(int i=0; i < childrenNum; i++)" << endl
-		<< "                idxStack[idxStackSize++] = int(SceneData[idx+4+i]);" << endl
+		<< "                idxStack[idxStackSize++] = int(At(SceneData, idx+4+i));" << endl
 		<< "        }" << endl
 		<< "        //else" << endl
 		<< "        //    ;// do nothing" << endl
@@ -412,9 +440,9 @@ void FS_Generator::RayIn(stringstream & shaderSS) {
 
 	shaderSS // RayIn_Sphere
 		<< "struct HitRst RayIn_Sphere(int idx){" << endl
-		<< "    int matIdx = int(SceneData[idx+1]);//32b float 在 1677w 时出现误差, 故可接受" << endl
-		<< "    vec3 center = vec3(SceneData[idx+3], SceneData[idx+4], SceneData[idx+5]);" << endl
-		<< "    float radius = SceneData[idx+6];" << endl
+		<< "    int matIdx = int(At(SceneData, idx+1));//32b float 在 1677w 时出现误差, 故可接受" << endl
+		<< "    vec3 center = vec3(At(SceneData, idx+3), At(SceneData, idx+4), At(SceneData, idx+5));" << endl
+		<< "    float radius = At(SceneData, idx+6);" << endl
 		<< "    " << endl
 		<< "    struct HitRst hitRst;" << endl
 		<< "    hitRst.hit = false;" << endl
@@ -451,7 +479,7 @@ void FS_Generator::RayIn(stringstream & shaderSS) {
 void FS_Generator::Value(stringstream & shaderSS) {
 	shaderSS // Value_Texture
 		<< "vec3 Value_Texture(vec2 uv, vec3 p, int texIdx){" << endl
-		<< "	int type = int(TexData[texIdx]);" << endl
+		<< "	int type = int(At(SceneData, texIdx));" << endl
 		<< "	if(type == TexT_ConstTexture){" << endl
 		<< "		return Value_ConstTexture(texIdx);" << endl
 		<< "	}else" << endl
@@ -461,7 +489,7 @@ void FS_Generator::Value(stringstream & shaderSS) {
 	
 	shaderSS // Value_ConstTexture
 		<< "vec3 Value_ConstTexture(int texIdx){" << endl
-		<< "	vec3 color = vec3(TexData[texIdx+1], TexData[texIdx+2], TexData[texIdx+3]);" << endl
+		<< "	vec3 color = vec3(At(SceneData, texIdx+1), At(SceneData, texIdx+2), At(SceneData, texIdx+3));" << endl
 		<< "	return color;" << endl
 		<< "}" << endl
 		<< "" << endl;
@@ -553,6 +581,7 @@ void FS_Generator::RayFunc(stringstream & shaderSS) {
 		<< "    }" << endl
 		<< "    " << endl
 		<< "    struct HitRst finalHitRst = RayIn_Scene();" << endl
+		//<< "    if(false){" << endl
 		<< "    if(finalHitRst.hit){" << endl
 		<< "        bool rayOut = Scatter_Material(finalHitRst.vertex, finalHitRst.matIdx);" << endl
 		<< "        " << endl

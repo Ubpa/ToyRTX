@@ -48,9 +48,9 @@ uniform sampler2D dir_tMax;//若tMax为0, 则表示该光线无效
 uniform sampler2D color_time;
 uniform sampler2D rayTracingRst;
 
-uniform sampler2D TexData;
 uniform sampler2D SceneData;
 uniform sampler2D MatData;
+uniform sampler2D TexData;
 
 uniform struct Camera camera;
 uniform float rdSeed[4];
@@ -93,13 +93,12 @@ vec3 Value_ConstTexture(int texIdx);
 void RayTracer();
 
 void main(){
-	if(true){
-		float val = texture2D(SceneData, TexCoords).x;
-		//float val = At(TexData, int(TexCoords.x*4));
-		//if(TexCoords.x<0.5)
-		//	out_rayTracingRst = vec3(val,0,0);
-		//else
+	if(false){
+		int val = int(At(SceneData, 3)) + 1;
+		if(TexCoords.x<0.5)
 			out_rayTracingRst = vec3(val,0,0);
+		else
+			out_rayTracingRst = vec3(val+1,0,0);
 	}
     else
 		RayTracer();

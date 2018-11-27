@@ -1,4 +1,5 @@
 #include "Defines.h"
+#include "CreateScene.h"
 
 #include <RayTracing/FS_Generator.h>
 #include <RayTracing/ConstTexture.h>
@@ -10,6 +11,7 @@
 #include <RayTracing/TexWindow.h>
 #include <RayTracing/TRayCamera.h>
 
+#include <OpenGL/Texture.h>
 #include <OpenGL/VAO.h>
 #include <OpenGL/FBO.h>
 #include <OpenGL/CommonDefine.h>
@@ -36,44 +38,85 @@ int main(int argc, char ** argv) {
 		return 1;
 	}
 	string rootPath = texWindow.GetRootPath();
-	int width = texWindow.GetWidth();
-	int height = texWindow.GetHeight();
+	const int width = texWindow.GetWidth();
+	const int height = texWindow.GetHeight();
+	const float ratioWH = width / (float)height;
 
 	//------------ Ä£ÐÍ . Screen
 	VAO VAO_Screen(&(data_ScreenVertices[0]), sizeof(data_ScreenVertices), { 2,2 });
 	
 	//------------ Scene
-	Sphere::Ptr sphereBottom = ToPtr(new Sphere(vec3(0, -100.5, -1), 100, ToPtr(new Lambertian(rgb(0.5, 0.5, 0.5)))));
-	Sphere::Ptr sphereMid = ToPtr(new Sphere(vec3(0, 0, -1), 0.5, ToPtr(new Lambertian(rgb(0.8, 0.8, 0)))));
-	Sphere::Ptr sphereLeftOut = ToPtr(new Sphere(vec3(-1, 0, -1), 0.5, ToPtr(new Dielectric(1.5))));
-	Sphere::Ptr sphereLeftIn = ToPtr(new Sphere(vec3(-1, 0, -1), -0.45, ToPtr(new Dielectric(1.5))));
-	Sphere::Ptr sphereRight = ToPtr(new Sphere(vec3(1, 0, -1), 0.5, ToPtr(new Metal(rgb(0.1,0.2,0.5), 0.0))));
-	Group::Ptr group = ToPtr(new Group);
-	(*group) << sphereBottom << sphereMid << sphereLeftOut << sphereLeftIn << sphereRight;
-
+	Scene::CPtr scene = CreateScene0(ratioWH);
+	
+	//------------ Fragment Shader Generator
+	FS_Generator fsGenerator(scene->obj);
+	vector<float> sceneData(fsGenerator.GetSceneData());
+	printf("size: %d\n", sceneData.size());
+	for (size_t i = 0; i < sceneData.size(); i++)
+		printf("%f, ", sceneData[i]);
+	printf("\n");
+	vector<float> matData(fsGenerator.GetMatData());
+	printf("size: %d\n", matData.size());
+	for (size_t i = 0; i < matData.size(); i++)
+		printf("%f, ", matData[i]);
+	printf("\n");
+	vector<float> texData(fsGenerator.GetTexData());
+	printf("size: %d\n", texData.size());
+	for (size_t i = 0; i < texData.size(); i++)
+		printf("%f, ", texData[i]);
+	printf("\n");
+	size_t i;
+	i = 1;
+	while (i < sceneData.size())
+		i <<= 1;
+	sceneData.resize(i);
+	printf("size: %d\n", sceneData.size());
+	i = 1;
+	while (i < matData.size())
+		i <<= 1;
+	matData.resize(i);
+	printf("size: %d\n", matData.size());
+	i = 1;
+	while (i < texData.size())
+		i <<= 1;
+	texData.resize(i);
+	printf("size: %d\n", texData.size());
+	for (size_t i = 0; i < texData.size(); i++)
+		printf("%f, ", texData[i]);
+	printf("\n");
+	CppUtility::OpenGL::Texture texDataTex(texData.size(), 1, texData.data(), GL_FLOAT, GL_RED, GL_R32F);
+	CppUtility::OpenGL::Texture sceneDataTex(sceneData.size(), 1, sceneData.data(), GL_FLOAT, GL_RED, GL_R32F);
+	CppUtility::OpenGL::Texture matDataTex(matData.size(), 1, matData.data(), GL_FLOAT, GL_RED, GL_R32F);
+	sceneDataTex.Use(6);
+	matDataTex.Use(5);
+	texDataTex.Use(4);
 	//------------ RayTracing Basic Shader
 	string RTX_vs = rootPath + str_RTX_vs;
-	FS_Generator fsGenerator(group);
-	string RTX_fs_src = fsGenerator.BuildFS();
 	string RTX_fs = rootPath + str_RTX_fs;
-	File RTX_fs_file(RTX_fs, File::WRITE);
-	RTX_fs_file.Printf("%s", RTX_fs_src.c_str());
-	RTX_fs_file.Close();
+	//string RTX_fs_src = fsGenerator.BuildFS();
+	//File RTX_fs_file(RTX_fs, File::WRITE);
+	//RTX_fs_file.Printf("%s", RTX_fs_src.c_str());
+	//RTX_fs_file.Close();
 	Shader RTX_Shader(RTX_vs, RTX_fs);
 	if (!RTX_Shader.IsValid()) {
 		printf("ERROR: RTX_Shader load fail.\n");
 		return 1;
 	}
+	//const vec3 pos(0, 0, 0);
+	//const vec3 viewPoint(0, 0, -1);
+	//const float fov = 90.0f;
+	//auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
+	auto camera = scene->camera;
+	TRayCamera::CPtr tCamera = std::dynamic_pointer_cast<const TRayCamera>(camera);
 	const float RayNumMax = 10000.0f;
-	const vec3 pos(0, 0, 0);
-	const vec3 viewPoint(0, 0, -1);
-	const float ratioWH = width / height;
-	const float fov = 90.0f;
-	auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
+
 	RTX_Shader.SetInt("origin_curRayNum", 0);
 	RTX_Shader.SetInt("dir_tMax", 1);
 	RTX_Shader.SetInt("color_time", 2);
 	RTX_Shader.SetInt("rayTracingRst", 3);
+	RTX_Shader.SetInt("SceneData", 6);
+	RTX_Shader.SetInt("MatData", 5);
+	RTX_Shader.SetInt("TexData", 4);
 	RTX_Shader.SetFloat("RayNumMax", RayNumMax);
 	RTX_Shader.SetVec3f("camera.pos", camera->GetPos());
 	RTX_Shader.SetVec3f("camera.BL_Corner", camera->GetBL_Corner());
@@ -83,9 +126,10 @@ int main(int argc, char ** argv) {
 	RTX_Shader.SetVec3f("camera.up", camera->GetUp());
 	RTX_Shader.SetVec3f("camera.front", camera->GetFront());
 	RTX_Shader.SetFloat("camera.lenR", camera->GetLenR());
-	RTX_Shader.SetFloat("camera.t0", camera->GetT1());
-	RTX_Shader.SetFloat("camera.t1", camera->GetT0());
+	RTX_Shader.SetFloat("camera.t0", tCamera ? tCamera->GetT0():0);
+	RTX_Shader.SetFloat("camera.t1", tCamera ? tCamera->GetT1():0);
 
+	
 	//------------ RayTracing FBO 
 	bool curReadFBO = false;
 	bool curWriteFBO = !curReadFBO;

@@ -2,6 +2,7 @@
 #define _FS_GENERATOR_H_
 
 #include <Utility/Ptr.h>
+#include <vector>
 #include <string>
 #include <sstream>
 
@@ -15,13 +16,19 @@ namespace RayTracing {
 	public:
 		FS_Generator(const CppUtility::Other::CPtr<Hitable> & scene);
 		const std::string BuildFS();
+		
+		const std::vector<float> GetSceneData() const;
+		const std::vector<float> GetMatData() const;
+		const std::vector<float> GetTexData() const;
+
 	private:
-		void Data(std::stringstream & shaderSS);
+		//void Data(std::stringstream & shaderSS);
+		void Uniform(std::stringstream & shaderSS);
 
 		static void Version(std::stringstream & shaderSS);
 		static void LayOut(std::stringstream & shaderSS);
 		static void Struct(std::stringstream & shaderSS);
-		static void Uniform(std::stringstream & shaderSS);
+		//static void Uniform(std::stringstream & shaderSS);
 		static void Variable(std::stringstream & shaderSS);
 		static void FuncDefine(std::stringstream & shaderSS);
 		static void Main(std::stringstream & shaderSS);

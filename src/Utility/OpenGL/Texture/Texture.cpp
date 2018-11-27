@@ -15,15 +15,15 @@ Texture::Texture(size_t ID, ENUM_TYPE type)
 Texture::Texture(ENUM_TYPE type)
 	: Texture(0, type) { }
 
-Texture::Texture(size_t width, size_t height, float const * data, size_t dataType, size_t srcFormat, size_t internalFormat) {
+Texture::Texture(size_t width, size_t height, const float * data, size_t dataType, size_t srcFormat, size_t internalFormat) {
 	glGenTextures(1, &ID);
 	glBindTexture(GL_TEXTURE_2D, ID);
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, srcFormat, dataType, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	type = ENUM_TYPE_2D;
 }
 
