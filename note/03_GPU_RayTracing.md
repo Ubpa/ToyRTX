@@ -317,27 +317,32 @@ struct Dielectric{// 2
 
 故考虑实现一个 Shader Generator
 
-### 3.5.1 物体
+### 3.5.1 数据大小
+
+#### 3.5.1.1 物体
 
 ```c++
-struct Sphere{// 7
-    int type = 0;
+struct Hitable{// 2
     float matIdx;
     bool isMatCoveralbe;
-    vec3 center;
+}
+
+struct Sphere{// 7
+    int type = 0;
+    struct Hitable;
+    vec3 center;// @3
     float radius;
 };
 
-struct Group{// 3 + childrenNum
+struct Group{// 4 + childrenNum
     int type = 1;
-    int matIdx = -1;
-    bool isMatCoveralbe;
-    int childrenNum;
+    struct Hitable;
+    int childrenNum;// @3
     int childrenIdx[childrenNum];
 }
 ```
 
-### 3.5.2 材质
+#### 3.5.1.2 材质
 
 ```c++
 struct Lambertian{// 2
@@ -357,12 +362,63 @@ struct Dielectric{// 2
 }
 ```
 
-### 3.5.3 纹理
+#### 3.5.1.3 纹理
 
 ```c++
 struct ConstTexture{// 4
     int type = 0;
     vec3 color;
+}
+```
+
+### 3.5.2 访问者模式
+
+生成数据需要遍历场景收集Hitable、Material 和 Texture的数据，故考虑使用访问者模式
+
+```c++
+sceneHitable->Accept(hitableVisitor);//收集Hitable的数据和涉及的Material
+hitableVisitor->Accept(matVisitor);//访问hitableVisitor中的Material
+matVisitor->Accept(texVisitor);//访问materialVisitor中的Texture
+```
+
+### 3.5.3 RayIn 递归问题
+
+GLSL 不允许函数发生递归（循环调用）。故需要采取“递归展开”技术。
+
+场景，总的来说是一棵节点树，叶子结点是可绘制体（`Sphere`、`Triangle`），而中间节点是`Group`、`BVH_Node`、`TriMesh`。搜索过程是深度搜索。
+
+所以这里的递归展开其实就是对一个多叉树进行栈展开（如果是广度搜索就是采用队列）。
+
+栈展开时需要 `Push` 子节点的指针，前边提到在GLSL中没有指针，相对应的是数组下标。
+
+每次与可绘制体进行碰撞检测时，如果发生碰撞，则说明 `Ray` 的 `tMax` 更小，则直接更新 `finalHitRst`。故，只需要保存 `finalHitRst` 即可。虽然当前只有 `Sphere` 和 `Group`，但两者具有代表性，之后扩展 `Triangle` 、`BVH_Node`、`TriMesh` 也是没有问题的。
+
+```c
+struct HitRst RayIn_Scene(){
+    int idxStack[100];
+    int idxStackSize = 0;
+    struct HitRst finalHitRst = HitRst_InValid;
+    
+    idxStack[idxStackSize++] = 0;
+    while(idxStackSize > 0){
+        int idx = idxStack[--idxStackSize];
+        
+        int type = int(SceneData[idx]);
+        if(type == HT_Sphere){
+            struct HitRst hitRst = RayIn_Sphere(idx);
+            if(hitRst.hit)
+                finalHitRst = hitRst;
+        }
+        else if(type == HT_Group){
+            int childrenNum = int(SceneData[idx+3]);
+            for(int i=0; i < childrenNum; i++)
+                idxStack[idxStackSize++] = int(SceneData[idx+4+i]);
+        }
+        //else
+        //    ;// do nothing
+    }
+    
+    return finalHitRst;
 }
 ```
 

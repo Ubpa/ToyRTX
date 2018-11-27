@@ -1,4 +1,4 @@
-#include <RayTracing/OpTexture.h>
+#include <RayTracing/ConstTexture.h>
 #include <RayTracing/Metal.h>
 #include <Utility/Math.h>
 
@@ -14,7 +14,7 @@ Metal::Metal(float r, float g, float b, float fuzz)
 	: Metal(rgb(r,g,b), fuzz) { }
 
 Metal::Metal(const glm::rgb & specular, float fuzz)
-	: Metal(OpTexture::ConstantTexture(specular), fuzz) { }
+	: Metal(ToPtr(new ConstTexture(specular)), fuzz) { }
 
 bool Metal::Scatter(const HitRecord & rec) const {
 	vec3 dir = reflect(rec.ray->GetDir(), rec.vertex.normal);

@@ -1,4 +1,5 @@
 #include "GenFS_MV.h"
+#include "GenFS_TV.h"
 
 #include <RayTracing/TexVisitor.h>
 #include <RayTracing/Lambertian.h>
@@ -17,27 +18,29 @@ const size_t MatSize_Lambertian = 2;
 const size_t MatSize_Metal = 3;
 const size_t MatSize_Dielectric = 2;
 
-void GenFS_MV::Visit(const Lambertian * lambertian) {
+void GenFS_MV::Visit(const Lambertian::CPtr & lambertian) {
 	mat2idx[lambertian] = matData.size();
 
 	matData.push_back(MatT_Lambertian);
 
-	tex2idxVec[lambertian->GetTexture()].push_back(matData.size());
+	if (lambertian->GetTexture())
+		tex2idxVec[lambertian->GetTexture()].push_back(matData.size());
 	matData.push_back(-1);
 }
 
-void GenFS_MV::Visit(const Metal * metal) {
+void GenFS_MV::Visit(const Metal::CPtr & metal) {
 	mat2idx[metal] = matData.size();
 
 	matData.push_back(MatT_Metal);
 
-	tex2idxVec[metal->GetTexture()].push_back(matData.size());
+	if(metal->GetTexture())
+		tex2idxVec[metal->GetTexture()].push_back(matData.size());
 	matData.push_back(-1);
 
 	matData.push_back(metal->GetFuzz());
 }
 
-void GenFS_MV::Visit(const Dielectric * dielectric) {
+void GenFS_MV::Visit(const Dielectric::CPtr & dielectric) {
 	mat2idx[dielectric] = matData.size();
 
 	matData.push_back(MatT_Dielectric);
@@ -47,8 +50,7 @@ void GenFS_MV::Visit(const Dielectric * dielectric) {
 
 void GenFS_MV::SetTex(const TexIdxMap & tex2idx) {
 	for (auto & pair : tex2idx) {
-		auto tmpTexPtr = shared_ptr<const Texture>(pair.first, [](const Texture *) {});
-		auto target = tex2idxVec.find(tmpTexPtr);
+		auto target = tex2idxVec.find(pair.first);
 		if (target != tex2idxVec.end()) {
 			for (auto const & idx : target->second)
 				matData[idx] = pair.second;
@@ -56,7 +58,9 @@ void GenFS_MV::SetTex(const TexIdxMap & tex2idx) {
 	}
 }
 
-void GenFS_MV::Accept(TexVisitor * texVisitor) {
+void GenFS_MV::Accept(const GenFS_TV::Ptr & genFS_TV) {
 	for (auto const & pair : tex2idxVec)
-		pair.first->Accept(texVisitor);
+		pair.first->Accept(genFS_TV);
+
+	SetTex(genFS_TV->GetTexIdxMap());
 }

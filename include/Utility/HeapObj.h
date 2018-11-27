@@ -8,6 +8,8 @@ public:\
 	typedef CppUtility::Other::Ptr<CLASS> Ptr;\
 	typedef CppUtility::Other::CPtr<CLASS> CPtr;\
 	virtual char * GetClassName(){ return "#CLASS"; }\
+	Ptr This(){ return std::dynamic_pointer_cast<CLASS>(shared_from_this()); }\
+	CPtr CThis() const { return std::dynamic_pointer_cast<const CLASS>(shared_from_this()); }\
 protected:\
 	virtual ~CLASS() = default;
 
@@ -23,15 +25,16 @@ namespace CppUtility {
 			return CPtr<T>(op, T::ProtectedDelete);
 		}
 
-		class HeapObj {
+		class HeapObj : public std::enable_shared_from_this<HeapObj>{
+		public:
 			template <typename T>
 			friend Ptr<T> ToPtr(T * op);
 			template <typename T>
 			friend CPtr<T> ToCPtr(const T * op);
-
 		protected:
 			virtual ~HeapObj() = default;
 			static void ProtectedDelete(const HeapObj * op);
+			using std::enable_shared_from_this<HeapObj>::shared_from_this;
 		};
 	}
 }

@@ -1,5 +1,5 @@
 #include <RayTracing/Isotropic.h>
-#include <RayTracing/OpTexture.h>
+#include <RayTracing/ConstTexture.h>
 #include <Utility/Math.h>
 
 using namespace RayTracing;
@@ -8,7 +8,7 @@ using namespace glm;
 
 
 Isotropic::Isotropic(const rgb & color)
-	: tex(OpTexture::ConstantTexture(color)) { }
+	: tex(ToPtr(new ConstTexture(color))) { }
 
 bool Isotropic::Scatter(const HitRecord & rec) const {
 	auto attenuation = tex->Value(rec.vertex.u, rec.vertex.v, rec.vertex.pos);

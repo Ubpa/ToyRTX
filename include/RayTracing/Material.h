@@ -14,8 +14,8 @@
 #define MATERIAL_SETUP(CLASS) \
 HEAP_OBJ_SETUP(CLASS)\
 public:\
-virtual void Accept(MatVisitor * matVisitor) const{\
-	matVisitor->Visit(this);\
+virtual void Accept(const MatVisitor::Ptr & matVisitor) const{\
+	matVisitor->Visit(CThis());\
 }
 
 namespace RayTracing {
@@ -46,7 +46,7 @@ namespace RayTracing {
 		// 返回值为 true 说明光线继续传播
 		// 返回值为 false 说明光线不再传播
 		virtual bool Scatter(const HitRecord & rec) const = 0;
-		virtual void Accept(MatVisitor * matVisitor) const = 0;
+		virtual void Accept(const MatVisitor::Ptr & matVisitor) const = 0;
 	};
 }
 

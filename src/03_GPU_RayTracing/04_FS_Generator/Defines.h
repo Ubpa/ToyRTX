@@ -13,9 +13,9 @@ namespace Define {
 
 	const std::string str_ShaderPrefix = "/data/shaders/" + str_Chapter + "/" + str_Subchapter + "/";
 
-	const std::string str_Material = "FS_Generator";
-	const std::string str_Material_vs = str_Basic_P2T2_vs;
-	const std::string str_Material_fs = str_ShaderPrefix + str_Material + str_FsPostfix;
+	const std::string str_RTX = "RTX";
+	const std::string str_RTX_vs = str_Basic_P2T2_vs;
+	const std::string str_RTX_fs = str_ShaderPrefix + str_RTX + str_FsPostfix;
 }
 
 #endif // !_DEFINES_H_

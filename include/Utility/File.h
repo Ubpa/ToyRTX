@@ -17,7 +17,7 @@ namespace CppUtility {
 
 			~File();
 
-			bool Check(Mode mode);
+			bool Check(Mode mode) const;
 
 			int Printf(const char * format, ...);
 
@@ -27,10 +27,11 @@ namespace CppUtility {
 
 			std::string ReadAll();
 
-			bool IsEnd();
+			bool IsEnd() const;
 
-			bool IsValid();
+			bool IsValid() const;
 
+			void Close();
 		private:
 			std::string ModeToStr(Mode mode);
 

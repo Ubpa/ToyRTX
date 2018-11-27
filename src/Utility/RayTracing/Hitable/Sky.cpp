@@ -13,8 +13,8 @@ HitRst Sky::RayIn(Ray::Ptr & ray) const {
 	HitRst hitRst(true);
 	vec3 normal = normalize(ray->GetDir());
 	hitRst.record = HitRecord(ray, normal, -normal);
-	hitRst.material = material;
-	hitRst.isMatCoverable = isMatCoverable;
+	hitRst.material = GetMat();
+	hitRst.isMatCoverable = IsMatCoverable();
 
 	return hitRst;
 }

@@ -1,5 +1,5 @@
 #include <RayTracing/Lambertian.h>
-#include <RayTracing/OpTexture.h>
+#include <RayTracing/ConstTexture.h>
 #include <Utility/Math.h>
 
 using namespace RayTracing;
@@ -13,7 +13,7 @@ Lambertian::Lambertian(float r, float g, float b)
 	: Lambertian(rgb(r, g, b)) { }
 
 Lambertian::Lambertian(const rgb & albedo) {
-	this->albedo = OpTexture::ConstantTexture(albedo);
+	this->albedo = ToPtr(new ConstTexture(albedo));
 }
 
 bool Lambertian::Scatter(const HitRecord & rec) const {

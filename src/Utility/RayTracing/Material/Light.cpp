@@ -1,12 +1,12 @@
 #include <RayTracing/Light.h>
-#include <RayTracing/OpTexture.h>
+#include <RayTracing/ConstTexture.h>
 
 using namespace RayTracing;
 using namespace glm;
 
 
 Light::Light(const rgb & color) {
-	lightTex = OpTexture::ConstantTexture(color);
+	lightTex = ToPtr(new ConstTexture(color));
 }
 
 

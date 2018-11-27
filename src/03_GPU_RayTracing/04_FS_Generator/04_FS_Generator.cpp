@@ -1,7 +1,15 @@
 #include "Defines.h"
 
+#include <RayTracing/FS_Generator.h>
+#include <RayTracing/ConstTexture.h>
+#include <RayTracing/Dielectric.h>
+#include <RayTracing/Metal.h>
+#include <RayTracing/Lambertian.h>
+#include <RayTracing/Sphere.h>
+#include <RayTracing/Group.h>
 #include <RayTracing/TexWindow.h>
 #include <RayTracing/TRayCamera.h>
+
 #include <OpenGL/VAO.h>
 #include <OpenGL/FBO.h>
 #include <OpenGL/CommonDefine.h>
@@ -10,6 +18,7 @@
 #include <Utility/LambdaOp.h>
 #include <Utility/Timer.h>
 #include <Utility/Math.h>
+#include <Utility/File.h>
 
 #include <glm/glm.hpp>
 
@@ -32,15 +41,27 @@ int main(int argc, char ** argv) {
 
 	//------------ Ä£ÐÍ . Screen
 	VAO VAO_Screen(&(data_ScreenVertices[0]), sizeof(data_ScreenVertices), { 2,2 });
-	 
+	
 	//------------ Scene
+	Sphere::Ptr sphereBottom = ToPtr(new Sphere(vec3(0, -100.5, -1), 100, ToPtr(new Lambertian(rgb(0.5, 0.5, 0.5)))));
+	Sphere::Ptr sphereMid = ToPtr(new Sphere(vec3(0, 0, -1), 0.5, ToPtr(new Lambertian(rgb(0.8, 0.8, 0)))));
+	Sphere::Ptr sphereLeftOut = ToPtr(new Sphere(vec3(-1, 0, -1), 0.5, ToPtr(new Dielectric(1.5))));
+	Sphere::Ptr sphereLeftIn = ToPtr(new Sphere(vec3(-1, 0, -1), -0.45, ToPtr(new Dielectric(1.5))));
+	Sphere::Ptr sphereRight = ToPtr(new Sphere(vec3(1, 0, -1), 0.5, ToPtr(new Metal(rgb(0.1,0.2,0.5), 0.0))));
+	Group::Ptr group = ToPtr(new Group);
+	(*group) << sphereBottom << sphereMid << sphereLeftOut << sphereLeftIn << sphereRight;
 
 	//------------ RayTracing Basic Shader
-	string material_vs = rootPath + str_Material_vs;
-	string material_fs = rootPath + str_Material_fs;
-	Shader materialShader(material_vs, material_fs);
-	if (!materialShader.IsValid()) {
-		printf("ERROR: materialShader load fail.\n");
+	string RTX_vs = rootPath + str_RTX_vs;
+	FS_Generator fsGenerator(group);
+	string RTX_fs_src = fsGenerator.BuildFS();
+	string RTX_fs = rootPath + str_RTX_fs;
+	File RTX_fs_file(RTX_fs, File::WRITE);
+	RTX_fs_file.Printf("%s", RTX_fs_src.c_str());
+	RTX_fs_file.Close();
+	Shader RTX_Shader(RTX_vs, RTX_fs);
+	if (!RTX_Shader.IsValid()) {
+		printf("ERROR: RTX_Shader load fail.\n");
 		return 1;
 	}
 	const float RayNumMax = 10000.0f;
@@ -49,21 +70,21 @@ int main(int argc, char ** argv) {
 	const float ratioWH = width / height;
 	const float fov = 90.0f;
 	auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
-	materialShader.SetInt("origin_curRayNum", 0);
-	materialShader.SetInt("dir_tMax", 1);
-	materialShader.SetInt("color_time", 2);
-	materialShader.SetInt("rayTracingRst", 3);
-	materialShader.SetFloat("RayNumMax", RayNumMax);
-	materialShader.SetVec3f("camera.pos", camera->GetPos());
-	materialShader.SetVec3f("camera.BL_Corner", camera->GetBL_Corner());
-	materialShader.SetVec3f("camera.horizontal", camera->GetHorizontal());
-	materialShader.SetVec3f("camera.vertical", camera->GetVertical());
-	materialShader.SetVec3f("camera.right", camera->GetRight());
-	materialShader.SetVec3f("camera.up", camera->GetUp());
-	materialShader.SetVec3f("camera.front", camera->GetFront());
-	materialShader.SetFloat("camera.lenR", camera->GetLenR());
-	materialShader.SetFloat("camera.t0", camera->GetT1());
-	materialShader.SetFloat("camera.t1", camera->GetT0());
+	RTX_Shader.SetInt("origin_curRayNum", 0);
+	RTX_Shader.SetInt("dir_tMax", 1);
+	RTX_Shader.SetInt("color_time", 2);
+	RTX_Shader.SetInt("rayTracingRst", 3);
+	RTX_Shader.SetFloat("RayNumMax", RayNumMax);
+	RTX_Shader.SetVec3f("camera.pos", camera->GetPos());
+	RTX_Shader.SetVec3f("camera.BL_Corner", camera->GetBL_Corner());
+	RTX_Shader.SetVec3f("camera.horizontal", camera->GetHorizontal());
+	RTX_Shader.SetVec3f("camera.vertical", camera->GetVertical());
+	RTX_Shader.SetVec3f("camera.right", camera->GetRight());
+	RTX_Shader.SetVec3f("camera.up", camera->GetUp());
+	RTX_Shader.SetVec3f("camera.front", camera->GetFront());
+	RTX_Shader.SetFloat("camera.lenR", camera->GetLenR());
+	RTX_Shader.SetFloat("camera.t0", camera->GetT1());
+	RTX_Shader.SetFloat("camera.t1", camera->GetT0());
 
 	//------------ RayTracing FBO 
 	bool curReadFBO = false;
@@ -84,11 +105,11 @@ int main(int argc, char ** argv) {
 			FBO_RayTracing[curReadFBO].GetColorTexture(1).Use(1);
 			FBO_RayTracing[curReadFBO].GetColorTexture(2).Use(2);
 			FBO_RayTracing[curReadFBO].GetColorTexture(3).Use(3);
-			materialShader.SetFloat("rdSeed[0]", Math::Rand_F());
-			materialShader.SetFloat("rdSeed[1]", Math::Rand_F());
-			materialShader.SetFloat("rdSeed[2]", Math::Rand_F());
-			materialShader.SetFloat("rdSeed[3]", Math::Rand_F());
-			VAO_Screen.Draw(materialShader);
+			RTX_Shader.SetFloat("rdSeed[0]", Math::Rand_F());
+			RTX_Shader.SetFloat("rdSeed[1]", Math::Rand_F());
+			RTX_Shader.SetFloat("rdSeed[2]", Math::Rand_F());
+			RTX_Shader.SetFloat("rdSeed[3]", Math::Rand_F());
+			VAO_Screen.Draw(RTX_Shader);
 
 			curReadFBO = curWriteFBO;
 			curWriteFBO = !curReadFBO;

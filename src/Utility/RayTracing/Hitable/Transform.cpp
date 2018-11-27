@@ -47,9 +47,9 @@ HitRst Transform::RayIn(Ray::Ptr & ray) const {
 	auto hitRst = hitable->RayIn(ray);
 
 	if (hitRst.hit) {
-		if (hitRst.isMatCoverable && material != NULL) {
-			hitRst.material = material;
-			hitRst.isMatCoverable = isMatCoverable;
+		if (hitRst.isMatCoverable && GetMat() != NULL) {
+			hitRst.material = GetMat();
+			hitRst.isMatCoverable = IsMatCoverable();
 		}
 
 		hitRst.record.vertex.Transform(transform, normalTransform);

@@ -7,9 +7,9 @@ using namespace glm;
 using namespace std;
 
 // TexT : Texture Type
-const float TexT_ConstTexture = 1.0f;
+const float TexT_ConstTexture = 0.0f;
 
-void GenFS_TV::Visit(const ConstTexture * constTexture) {
+void GenFS_TV::Visit(const ConstTexture::CPtr & constTexture) {
 	tex2idx[constTexture] = texData.size();
 	
 	texData.push_back(TexT_ConstTexture);

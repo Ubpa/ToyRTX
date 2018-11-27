@@ -22,7 +22,7 @@ File::~File() {
 	}
 }
 
-bool File::Check(Mode mode) {
+bool File::Check(Mode mode) const {
 	if (mode == this->mode && IsValid())
 		return true;
 	else
@@ -74,12 +74,20 @@ string File::ReadAll() {
 	return rst;
 }
 
-bool File::IsEnd() {
+bool File::IsEnd() const{
 	return feof(pF);
 }
 
-bool File::IsValid() {
+bool File::IsValid() const{
 	return pF != NULL;
+}
+
+void File::Close() {
+	if (!IsValid())
+		return;
+	
+	fclose(pF);
+	pF = NULL;
 }
 
 string File::ModeToStr(Mode mode) {

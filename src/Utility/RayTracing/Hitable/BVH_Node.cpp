@@ -70,9 +70,9 @@ HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
 	else
 		return HitRst::FALSE;
 
-	if (material != NULL && front->isMatCoverable) {
-		front->material = material;
-		front->isMatCoverable = isMatCoverable;
+	if (GetMat() != NULL && front->isMatCoverable) {
+		front->material = GetMat();
+		front->isMatCoverable = IsMatCoverable();
 	}
 
 	return *front;

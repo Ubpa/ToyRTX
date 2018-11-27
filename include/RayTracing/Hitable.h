@@ -10,8 +10,8 @@
 #define HITABLE_SETUP(CLASS) \
 HEAP_OBJ_SETUP(CLASS)\
 public:\
-virtual void Accept(HitableVisitor * hitableVisitor) const{\
-	hitableVisitor->Visit(this);\
+virtual void Accept(const HitableVisitor::Ptr & hitableVisitor) const{\
+	hitableVisitor->Visit(CThis());\
 }
 
 
@@ -35,11 +35,12 @@ namespace RayTracing {
 		Hitable(const Material::CPtr & material = NULL);
 
 		const Material::CPtr GetMat() const { return material; };
+		bool IsMatCoverable() const { return isMatCoverable; }
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const = 0;
 		virtual const AABB GetBoundingBox() const = 0;
-		virtual void Accept(HitableVisitor * hitableVisitor) const = 0;
-	protected:
+		virtual void Accept(const HitableVisitor::Ptr & hitableVisitor) const = 0;
+	private:
 		Material::CPtr material;
 		bool isMatCoverable;
 	};

@@ -5,16 +5,15 @@
 #include <string>
 #include <sstream>
 
-#include "GenFS_HV.h"
-#include "GenFS_MV.h"
-#include "GenFS_TV.h"
-
 namespace RayTracing {
 	class Hitable;
+	class GenFS_HV;
+	class GenFS_MV;
+	class GenFS_TV;
+
 	class FS_Generator {
 	public:
 		FS_Generator(const CppUtility::Other::CPtr<Hitable> & scene);
-		~FS_Generator();
 		const std::string BuildFS();
 	private:
 		void Data(std::stringstream & shaderSS);
@@ -30,11 +29,12 @@ namespace RayTracing {
 		static void MathFunc(std::stringstream & shaderSS);
 		static void Scatter(std::stringstream & shaderSS);
 		static void RayIn(std::stringstream & shaderSS);
+		static void Value(std::stringstream & shaderSS);
 		static void RayFunc(std::stringstream & shaderSS);
 
-		GenFS_HV * hitableVisitor;
-		GenFS_MV * matVisitor;
-		GenFS_TV * texVisitor;
+		CppUtility::Other::Ptr<GenFS_HV> hitableVisitor;
+		CppUtility::Other::Ptr<GenFS_MV> matVisitor;
+		CppUtility::Other::Ptr<GenFS_TV> texVisitor;
 	};
 }
 

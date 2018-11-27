@@ -61,9 +61,8 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 	ray->SetTMax(tFinal);
 
 	HitRst hitRst(true);
-	//hitRst.hitable = this;
 	hitRst.record = HitRecord(ray, ray->At(tFinal));
-	hitRst.material = material;
-	hitRst.isMatCoverable = isMatCoverable;
+	hitRst.material = GetMat();
+	hitRst.isMatCoverable = IsMatCoverable();
 	return hitRst;
 }

@@ -18,9 +18,9 @@ HitRst Group::RayIn(Ray::Ptr & ray) const {
 
 	}
 
-	if (finalHitRst.hit && finalHitRst.isMatCoverable && material != NULL) {
-		finalHitRst.material = material;
-		finalHitRst.isMatCoverable = isMatCoverable;
+	if (finalHitRst.hit && finalHitRst.isMatCoverable && GetMat() != NULL) {
+		finalHitRst.material = GetMat();
+		finalHitRst.isMatCoverable = IsMatCoverable();
 	}
 
 	return finalHitRst;

@@ -18,7 +18,7 @@ set(STR_TARGET_SOURCES "${STR_TARGET_SOURCES} ${CMAKE_SOURCE_DIR}/data/shaders/C
 #set(STR_TARGET_SOURCES "${DIRNAME}.cpp ${DIRNAME}.fs ${DIRNAME}.vs")
 #多个库文件用 [空格] 分隔，如果为空，就输入[一个空格]
 #如：set(STR_TARGET_LIBS "lib1.lib lib2.lib")
-set(STR_TARGET_LIBS "ImgWindow RayCamera Hitable Image Math Material Scene RayTracer")
+set(STR_TARGET_LIBS "ImgWindow RayCamera Hitable Image Math Material RT_Texture Scene RayTracer FS_Generator")
 
 SETUP_PROJECT(${MODE} ${TARGET_NAME} ${STR_TARGET_SOURCES} ${STR_TARGET_LIBS})
 

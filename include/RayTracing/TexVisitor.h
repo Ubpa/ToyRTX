@@ -1,16 +1,19 @@
 #ifndef _TEX_VISITOR_H_
 #define _TEX_VISITOR_H_
 
+#include <Utility/HeapObj.h>
+
 namespace RayTracing {
 	class ConstTexture;
 	class OpTexture;
 	class ImgTexture;
 
-	class TexVisitor {
+	class TexVisitor : public CppUtility::Other::HeapObj {
+		HEAP_OBJ_SETUP(TexVisitor)
 	public:
-		virtual void Visit(const ConstTexture * constTexture);
-		virtual void Visit(const OpTexture * opTexture);
-		virtual void Visit(const ImgTexture * imgTexture);
+		virtual void Visit(const CppUtility::Other::CPtr<ConstTexture> & constTexture);
+		virtual void Visit(const CppUtility::Other::CPtr<OpTexture> & opTexture);
+		virtual void Visit(const CppUtility::Other::CPtr<ImgTexture> & imgTexture);
 	private:
 	};
 }

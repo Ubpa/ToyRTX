@@ -10,8 +10,8 @@
 #define TEXTURE_SETUP(CLASS) \
 HEAP_OBJ_SETUP(CLASS)\
 public:\
-virtual void Accept(TexVisitor * texVisitor) const{\
-	texVisitor->Visit(this);\
+virtual void Accept(const TexVisitor::Ptr & texVisitor) const{\
+	texVisitor->Visit(CThis());\
 }
 
 namespace RayTracing {
@@ -19,7 +19,7 @@ namespace RayTracing {
 		HEAP_OBJ_SETUP(Texture)
 	public:
 		virtual glm::rgb Value(float u = 0, float v = 0, const glm::vec3 & p = glm::vec3(0)) const = 0;
-		virtual void Accept(TexVisitor * texVisitor) const = 0;
+		virtual void Accept(const TexVisitor::Ptr & texVisitor) const = 0;
 	};
 }
 

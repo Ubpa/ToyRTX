@@ -32,8 +32,8 @@ HitRst Triangle::RayIn(Ray::Ptr & ray) const {
 	hitRst.record.vertex = Vertex::Interpolate_Tri(vec3(abgt[0], abgt[1], abgt[2]), A, B, C);
 	//hitRst.hitable = this;
 	hitRst.record.ray = ray;
-	hitRst.material = material;
-	hitRst.isMatCoverable = isMatCoverable;
+	hitRst.material = GetMat();
+	hitRst.isMatCoverable = IsMatCoverable();
 	ray->SetTMax(abgt[3]);
 	return hitRst;
 }
