@@ -1,5 +1,5 @@
-#include "GenFS_HV.h"
-#include "GenFS_MV.h"
+#include "GenData_HV.h"
+#include "GenData_MV.h"
 
 #include <RayTracing/Hitable.h>
 #include <RayTracing/Group.h>
@@ -13,7 +13,7 @@ using namespace std;
 const float HT_Sphere = 0.0f;
 const float HT_Group = 1.0f;
 
-void GenFS_HV::Visit(const Hitable::CPtr & hitable) {
+void GenData_HV::Visit(const Hitable::CPtr & hitable) {
 	if(hitable->GetMat())
 		mat2idxVec[hitable->GetMat()].push_back(sceneData.size());
 	sceneData.push_back(-1);
@@ -21,7 +21,7 @@ void GenFS_HV::Visit(const Hitable::CPtr & hitable) {
 	sceneData.push_back(hitable->IsMatCoverable());
 }
 
-void GenFS_HV::Visit(const Group::CPtr & group) {
+void GenData_HV::Visit(const Group::CPtr & group) {
 	sceneData.push_back(HT_Group);
 
 	Visit(static_cast<const Hitable::CPtr>(group));
@@ -42,7 +42,7 @@ void GenFS_HV::Visit(const Group::CPtr & group) {
 	}
 }
 
-void GenFS_HV::Visit(const Sphere::CPtr & sphere) {
+void GenData_HV::Visit(const Sphere::CPtr & sphere) {
 	sceneData.push_back(HT_Sphere);
 
 	Visit(static_cast<const Hitable::CPtr>(sphere));
@@ -55,7 +55,7 @@ void GenFS_HV::Visit(const Sphere::CPtr & sphere) {
 	sceneData.push_back(sphere->GetRadius());
 }
 
-void GenFS_HV::SetMat(const MatIdxMap & mat2idx) {
+void GenData_HV::SetMat(const MatIdxMap & mat2idx) {
 	for (auto const & pair : mat2idx) {
 		auto target = mat2idxVec.find(pair.first);
 		if (target != mat2idxVec.end()) {
@@ -65,7 +65,7 @@ void GenFS_HV::SetMat(const MatIdxMap & mat2idx) {
 	}
 }
 
-void GenFS_HV::Accept(const GenFS_MV::Ptr & genFS_MV) {
+void GenData_HV::Accept(const GenData_MV::Ptr & genFS_MV) {
 	for (auto const & pair : mat2idxVec)
 		pair.first->Accept(genFS_MV);
 

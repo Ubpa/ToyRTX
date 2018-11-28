@@ -438,9 +438,15 @@ struct HitRst RayIn_Scene(){
 
 因为我们只能使用长度20的栈，因此如果访问Group时直接将所有子节点都载入栈中，则栈不够用。
 
+考虑一种树结构，使得可以在非递归深度搜索时，栈空间的复杂度为O(depth)，而原来的结构需要O(b*depth)
+
 ![1543372411007](assets/1543372411007.png)
 
 把孩子节点指针顺序放置，-1表示孩子链表的结尾
+
+`pow(2, 20) == 1048576 `，故一般的大模型，大场景都没有问题。除非把大模型放在较深的位置。
+
+别把深度搞得过深就行
 
 ### 3.6.1 Hitable结构
 
@@ -464,11 +470,22 @@ struct Group{// 3 + childrenNum
 
 ### 3.6.2 流程
 
+1. 出栈得到当前节点指针的指针，查表得节点指针
+
+2. 如果当前节点为叶子节点（Sphere、Triangle），则处理完后 `Acc(): Push(Pop()+1)`
+
+3. 如果当前节点为枝节节点（Group、BVH_Node、Mesh），则将其孩子节点指针的指针入栈
+4. 如果当前节点为空节点 (-1)，则 `Pop(); CheckEmpty(); Exit(table[Top()]), Acc()`
+
+>**旧版本**
+>
 >1. 出栈得到当前节点指针的指针，如果该指针指向非空指针（0），则该指针+1（即兄弟节点指针的指针）入栈
 >
 >2. 如果当前节点为叶子节点（Sphere、Triangle），则处理完即可
 >
 >3. 如果当前节点为枝节节点（Group、BVH_Node、Mesh），则将其孩子节点指针的指针入栈
+>
+>此方法有弊端，无法处理离开节点时的操作，比如 Transform
 
 ### 3.6.3 示例
 
@@ -476,25 +493,34 @@ struct Group{// 3 + childrenNum
 
 一个Group节点，其有两个孩子节点，都是Sphere。程序会为该节点添加一个放在一个Group里。
 
-**内存**
+**SceneData**
 
 ```c
 /*@  0*/ 1, -1, 1,  5, -1
 /*@  5*/ 1, -1, 1, 11, 18, -1,
 /*@ 11*/ 0,  2, 0,  0, 0, -1, 0.5,
-/*@ 18*/ 0,  1, 0,  0, 0, -2, 0.5,
+/*@ 18*/ 0,  0, 0,  0, 0, -2, 0.5
 ```
 
 **流程**
 
 ```c
-Push 3 // 初始化, Group的第一个孩子节点指针的位置                        //[ 3 >
-Pop, Push 8
-Pop, Push 9
-Pop
+1. Push 3 // 初始化, Group的第一个孩子节点指针的位置           //[ 3 >
+2. Top-->3, table[3]-->5, Group,
+	Push 8 == 5+3;                                        //[ 3,  8 >
+3. Top-->8, table[8]-->11, Sphere,
+	Acc 8-->9                                             //[ 3,  9 >
+4. Top-->9, table[9]-->18, Sphere, 
+	Acc 9-->10                                            //[ 3, 10 >
+5. Top-->10, table[10]-->-1, NULL,
+	Pop, Not Empty, Exit(table[Top-->3]-->5), Acc 3-->4   //[ 4 >
+6. Top-->4, table[4]-->-1, NULL,
+	Pop, Empty, return                                    //[ >
 ```
 
 ### 3.6.4 Shader 实现
+
+**旧版本**
 
 ```c
 struct HitRst RayIn_Scene(){
@@ -518,6 +544,49 @@ struct HitRst RayIn_Scene(){
 			Push(idx+3);
         //else
         //    ;// do nothing
+    }
+    
+    return finalHitRst;
+}
+```
+
+**新版本**
+
+```c
+struct HitRst RayIn_Scene(){
+    Stack_Push(3);//Group的 孩子指针 的位置
+    struct HitRst finalHitRst = HitRst_InValid;
+    while(!Stack_Empty()){
+        float pIdx = Stack_Top();
+		float idx = At(SceneData, pIdx);
+		if(idx == -1.0){
+			Stack_Pop();
+			if(Stack_Empty())
+				return finalHitRst;
+
+			//由于暂时没有离开节点时需要做的事情, 因此先都注释掉
+			//float pIdx = Stack_Top();
+			//float idx = At(SceneData, pIdx);// idx != -1
+			//float type = At(SceneData, idx);// 只可能是那些有子节点的类型
+			//if(type == HT_Group)
+			//	;// 修改材质指针
+
+			Stack_Acc();
+			continue;
+		}
+		
+		float type = At(SceneData, idx);
+		if(type == HT_Sphere){
+			struct HitRst hitRst = RayIn_Sphere(idx);
+			if(hitRst.hit)
+				finalHitRst = hitRst;
+
+			Stack_Acc();
+		}
+		else if(type == HT_Group)
+			Stack_Push(idx+3);
+		//else
+		//    ;// do nothing
     }
     
     return finalHitRst;

@@ -11,16 +11,16 @@
 namespace RayTracing {
 	class Material;
 	class Texture;
-	class GenFS_TV;
+	class GenData_TV;
 
 	// Generate Fragmen Shader -- Material Visitor
-	class GenFS_MV : public MatVisitor{
-		HEAP_OBJ_SETUP(GenFS_MV)
+	class GenData_MV : public MatVisitor{
+		HEAP_OBJ_SETUP(GenData_MV)
 	public:
 		typedef std::map<CppUtility::Other::CPtr<Material>, size_t> MatIdxMap;
 		typedef std::map<CppUtility::Other::CPtr<Texture>, size_t> TexIdxMap;
 
-		void Accept(const CppUtility::Other::Ptr<GenFS_TV> & genFS_TV);
+		void Accept(const CppUtility::Other::Ptr<GenData_TV> & genFS_TV);
 		const MatIdxMap & GetMatIdxMap() const { return mat2idx; }
 		const std::vector<float> & GetMatData() const { return matData; };
 	private:

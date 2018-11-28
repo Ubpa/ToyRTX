@@ -1,7 +1,7 @@
 #include "Defines.h"
 #include "CreateScene.h"
 
-#include <RayTracing/FS_Generator.h>
+#include <RayTracing/GenData.h>
 #include <RayTracing/ConstTexture.h>
 #include <RayTracing/Dielectric.h>
 #include <RayTracing/Metal.h>
@@ -32,6 +32,7 @@ using namespace glm;
 using namespace std;
 
 int main(int argc, char ** argv) {
+	//------------ Init
 	TexWindow texWindow(str_WindowTitle);
 	if (!texWindow.IsValid()) {
 		printf("ERROR: Texture Window Create Fail.\n");
@@ -42,46 +43,44 @@ int main(int argc, char ** argv) {
 	const int height = texWindow.GetHeight();
 	const float ratioWH = width / (float)height;
 
+
 	//------------ Ä£ÐÍ . Screen
 	VAO VAO_Screen(&(data_ScreenVertices[0]), sizeof(data_ScreenVertices), { 2,2 });
-	
+
+
 	//------------ Scene
 	Scene::CPtr scene = CreateScene0(ratioWH);
-	
+
+
 	//------------ Fragment Shader Generator
-	FS_Generator fsGenerator(scene->obj);
-	//printf("size: %d\n", fsGenerator.GetSceneData().size());
-	//for (size_t i = 0; i < fsGenerator.GetSceneData().size(); i++)
-	//	printf("%f, ", fsGenerator.GetSceneData()[i]);
-	//printf("\n");
-	//printf("size: %d\n", fsGenerator.GetMatData().size());
-	//for (size_t i = 0; i < fsGenerator.GetMatData().size(); i++)
-	//	printf("%f, ", fsGenerator.GetMatData()[i]);
-	//printf("\n");
-	//printf("size: %d\n", fsGenerator.GetTexData().size());
-	//for (size_t i = 0; i < fsGenerator.GetTexData().size(); i++)
-	//	printf("%f, ", fsGenerator.GetTexData()[i]);      
-	//printf("\n");
-	
-	CppUtility::OpenGL::Texture texDataTex(fsGenerator.GetSceneData().size(), 1, fsGenerator.GetSceneData().data(), GL_FLOAT, GL_RED, GL_R32F);
-	CppUtility::OpenGL::Texture sceneDataTex(fsGenerator.GetMatData().size(), 1, fsGenerator.GetMatData().data(), GL_FLOAT, GL_RED, GL_R32F);
-	CppUtility::OpenGL::Texture matDataTex(fsGenerator.GetTexData().size(), 1, fsGenerator.GetTexData().data(), GL_FLOAT, GL_RED, GL_R32F);
+	GenData genData(scene->obj);
+	/*
+	printf("size: %d\n", genData.GetSceneData().size());
+	for (size_t i = 0; i < genData.GetSceneData().size(); i++)
+		printf("%f, ", genData.GetSceneData()[i]);
+	printf("\n");
+	printf("size: %d\n", genData.GetMatData().size());
+	for (size_t i = 0; i < genData.GetMatData().size(); i++)
+		printf("%f, ", genData.GetMatData()[i]);
+	printf("\n");
+	printf("size: %d\n", genData.GetTexData().size());
+	for (size_t i = 0; i < genData.GetTexData().size(); i++)
+		printf("%f, ", genData.GetTexData()[i]);      
+	printf("\n"); 
+	*/
+	CppUtility::OpenGL::Texture sceneDataTex(genData.GetSceneData().size(), 1, genData.GetSceneData().data(), GL_FLOAT, GL_RED, GL_R32F);
+	CppUtility::OpenGL::Texture matDataTex(genData.GetMatData().size(), 1, genData.GetMatData().data(), GL_FLOAT, GL_RED, GL_R32F);
+	CppUtility::OpenGL::Texture texDataTex(genData.GetTexData().size(), 1, genData.GetTexData().data(), GL_FLOAT, GL_RED, GL_R32F);
+
+
 	//------------ RayTracing Basic Shader
 	string RTX_vs = rootPath + str_RTX_vs;
 	string RTX_fs = rootPath + str_RTX_fs;
-	//string RTX_fs_src = fsGenerator.BuildFS();
-	//File RTX_fs_file(RTX_fs, File::WRITE);
-	//RTX_fs_file.Printf("%s", RTX_fs_src.c_str());
-	//RTX_fs_file.Close(); 
 	Shader RTX_Shader(RTX_vs, RTX_fs);
 	if (!RTX_Shader.IsValid()) {
 		printf("ERROR: RTX_Shader load fail.\n");
 		return 1;
 	}
-	//const vec3 pos(0, 0, 0);
-	//const vec3 viewPoint(0, 0, -1);
-	//const float fov = 90.0f;
-	//auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
 	auto camera = scene->camera;
 	TRayCamera::CPtr tCamera = std::dynamic_pointer_cast<const TRayCamera>(camera);
 	const float RayNumMax = 1000.0f;
@@ -102,10 +101,10 @@ int main(int argc, char ** argv) {
 	RTX_Shader.SetVec3f("camera.up", camera->GetUp());
 	RTX_Shader.SetVec3f("camera.front", camera->GetFront());
 	RTX_Shader.SetFloat("camera.lenR", camera->GetLenR());
-	RTX_Shader.SetFloat("camera.t0", tCamera ? tCamera->GetT0():0);
-	RTX_Shader.SetFloat("camera.t1", tCamera ? tCamera->GetT1():0);
+	RTX_Shader.SetFloat("camera.t0", tCamera ? tCamera->GetT0() : 0);
+	RTX_Shader.SetFloat("camera.t1", tCamera ? tCamera->GetT1() : 0);
 
-	
+
 	//------------ RayTracing FBO 
 	bool curReadFBO = false;
 	bool curWriteFBO = !curReadFBO;
@@ -114,32 +113,31 @@ int main(int argc, char ** argv) {
 		FBO(width, height, FBO::ENUM_TYPE_RAYTRACING),
 	};
 
+
 	//------------ ²Ù×÷
-	Timer timer; 
+	Timer timer;
 	timer.Start();
 	LambdaOp::Ptr rayTracingOp = ToPtr(new LambdaOp([&]() {
-		size_t loopNum = static_cast<size_t>(glm::max(texWindow.GetScale(),1.0));
+		size_t loopNum = static_cast<size_t>(glm::max(texWindow.GetScale(), 1.0));
 		for (size_t i = 0; i < loopNum; i++) {
 			FBO_RayTracing[curWriteFBO].Use();
 			FBO_RayTracing[curReadFBO].GetColorTexture(0).Use(0);
 			FBO_RayTracing[curReadFBO].GetColorTexture(1).Use(1);
 			FBO_RayTracing[curReadFBO].GetColorTexture(2).Use(2);
 			FBO_RayTracing[curReadFBO].GetColorTexture(3).Use(3);
-			sceneDataTex.Use(4); 
+			sceneDataTex.Use(4);
 			matDataTex.Use(5);
-			texDataTex.Use(6); 
+			texDataTex.Use(6);
 			RTX_Shader.SetFloat("rdSeed[0]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[1]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[2]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[3]", Math::Rand_F());
-			VAO_Screen.Draw(RTX_Shader);  
-			  
+			VAO_Screen.Draw(RTX_Shader);
+
 			curReadFBO = curWriteFBO;
 			curWriteFBO = !curReadFBO;
-		} 
+		}
 		texWindow.SetTex(FBO_RayTracing[curReadFBO].GetColorTexture(3));
-		 
-		//rayTracingOp->SetIsHold(false);
 
 		static size_t allLoopNum = 0;
 		allLoopNum += loopNum;
@@ -148,7 +146,7 @@ int main(int argc, char ** argv) {
 		printf("\rINFO: curLoopNum:%u, allLoopNum:%u, speed %.2f / s, used time: %.2f s     ",
 			loopNum, allLoopNum, speed, wholeTime);
 	}));
-	
+
 	bool success = texWindow.Run(rayTracingOp);
 	return success ? 0 : 1;
 }

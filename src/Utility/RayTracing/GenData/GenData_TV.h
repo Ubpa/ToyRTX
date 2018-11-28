@@ -10,8 +10,8 @@ namespace RayTracing {
 	class Texture;
 
 	// Generate Fragmen Shader -- Texture Visitor
-	class GenFS_TV : public TexVisitor{
-		HEAP_OBJ_SETUP(GenFS_TV)
+	class GenData_TV : public TexVisitor{
+		HEAP_OBJ_SETUP(GenData_TV)
 	public:
 		typedef std::map<CppUtility::Other::CPtr<Texture>, size_t> TexIdxMap;
 

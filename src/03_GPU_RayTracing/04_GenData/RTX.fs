@@ -70,22 +70,14 @@ const float TexT_ConstTexture = 0.0;
 int rdCnt = 0;
 in vec2 TexCoords;
 struct Ray gRay;
-float Stack[20]=float[](
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-);
-int StackTop = -1;
-void Push(float val){
-	StackTop++;
-	Stack[StackTop] = val;
-}
-float Pop(){
-	float val = Stack[StackTop];
-	StackTop--;
-	return val;
-}
-int StackSize(){
-	return StackTop + 1;
-}
+
+float _Stack[20] = float[]( 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 );
+int _Stack_mTop = -1;
+bool Stack_Empty();
+float Stack_Top();
+void Stack_Push(float val);
+float Stack_Pop();
+void Stack_Acc();
 
 float RandXY(float x, float y);// [0.0, 1.0)
 float Rand();// [0.0, 1.0)
@@ -109,21 +101,47 @@ vec3 Value_ConstTexture(float texIdx);
 void RayTracer();
 
 void main(){
-	if(false){
-	float val;
-	if(TexCoords.y<0.33)
-		val = At(SceneData, TexCoords.x*16);
-	else if(TexCoords.y<0.66)
-		val = At(TexData, TexCoords.x*16);
-	else
-		val = At(MatData, TexCoords.x*16);
-		//if(TexCoords.x<0.5)
-		//	out_rayTracingRst = vec3(val,0,0);
-		//else
-			out_rayTracingRst = vec3(At(SceneData, 4.0)/12.0,At(SceneData, 5.0)/26.0,0);
-	}
-    else
-		RayTracer();
+	//if(TexCoords.y<0.33)
+	//	out_rayTracingRst=vec3(At(SceneData, TexCoords.x*25),0,0);
+	//else if(TexCoords.y<0.67)
+	//	out_rayTracingRst=vec3(At(SceneData, TexCoords.x*4),0,0);
+	//else
+	//	out_rayTracingRst=vec3(At(SceneData, TexCoords.x*8),0,0);
+	RayTracer();
+}
+
+float Stack_Top(){
+	//if(_Stack_mTop == -1)
+	//	return -1.0;
+
+	return _Stack[_Stack_mTop];
+}
+
+void Stack_Push(float val){
+	_Stack_mTop++;
+	_Stack[_Stack_mTop] = val;
+}
+
+float Stack_Pop(){
+	float val = _Stack[_Stack_mTop];
+	_Stack_mTop--;
+	return val;
+}
+
+int Stack_Size(){
+	return _Stack_mTop + 1;
+}
+
+bool Stack_Empty(){
+	return _Stack_mTop == -1;
+}
+
+void Stack_Acc(){
+	//if(_Stack_mTop == -1)
+	//	return false;
+
+	_Stack[_Stack_mTop] += 1.0;
+	//return true;
 }
 
 float RandXY(float x, float y){
@@ -272,26 +290,39 @@ bool Scatter_Dielectric(struct Vertex vertex, float matIdx){
 }
 
 struct HitRst RayIn_Scene(){
-    Push(3);//Group的孩子指针的位置
+    Stack_Push(3);//Group的 孩子指针 的位置
     struct HitRst finalHitRst = HitRst_InValid;
-    while(StackSize() > 0){
-        float pp = Pop();
-		float idx = At(SceneData, pp);
-		if(idx == -1.0)
+    while(!Stack_Empty()){
+        float pIdx = Stack_Top();
+		float idx = At(SceneData, pIdx);
+		if(idx == -1.0){
+			Stack_Pop();
+			if(Stack_Empty())
+				return finalHitRst;
+
+			//由于暂时没有离开节点时需要做的事情, 因此先都注释掉
+			//float pIdx = Stack_Top();
+			//float idx = At(SceneData, pIdx);// idx != -1
+			//float type = At(SceneData, idx);// 只可能是那些有子节点的类型
+			//if(type == HT_Group)
+			//	;// 修改材质指针
+
+			Stack_Acc();
 			continue;
+		}
+		
+		float type = At(SceneData, idx);
+		if(type == HT_Sphere){
+			struct HitRst hitRst = RayIn_Sphere(idx);
+			if(hitRst.hit)
+				finalHitRst = hitRst;
 
-		Push(pp + 1.0);
-
-        float type = At(SceneData, idx);
-        if(type == HT_Sphere){
-            struct HitRst hitRst = RayIn_Sphere(idx);
-            if(hitRst.hit)
-                finalHitRst = hitRst;
-        }
-        else if(type == HT_Group)
-			Push(idx+3);
-        //else
-        //    ;// do nothing
+			Stack_Acc();
+		}
+		else if(type == HT_Group)
+			Stack_Push(idx+3);
+		//else
+		//    ;// do nothing
     }
     
     return finalHitRst;
@@ -422,8 +453,7 @@ void RayTracer(){
     
     struct HitRst finalHitRst;
 	finalHitRst = RayIn_Scene();
-	//return;
-	//if(false){
+
     if(finalHitRst.hit){
         bool rayOut = Scatter_Material(finalHitRst.vertex, finalHitRst.matIdx);
         

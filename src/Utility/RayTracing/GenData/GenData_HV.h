@@ -10,16 +10,16 @@
 
 namespace RayTracing {
 	class Material;
-	class GenFS_MV;
+	class GenData_MV;
 
 	// Generate Fragmen Shader -- Hitable Visitor
-	class GenFS_HV : public HitableVisitor{
-		HEAP_OBJ_SETUP(GenFS_HV)
+	class GenData_HV : public HitableVisitor{
+		HEAP_OBJ_SETUP(GenData_HV)
 	public:
 		typedef std::map<CppUtility::Other::CPtr<Material>, size_t> MatIdxMap;
 
 		const std::vector<float> & GetSceneData() const { return sceneData; };
-		void Accept(const CppUtility::Other::Ptr<GenFS_MV> & genFS_MV);
+		void Accept(const CppUtility::Other::Ptr<GenData_MV> & genFS_MV);
 	private:
 		void SetMat(const MatIdxMap & mat2idx);
 		virtual void Visit(const CppUtility::Other::CPtr<Hitable> & group);

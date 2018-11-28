@@ -1,4 +1,4 @@
-#include "GenFS_TV.h"
+#include "GenData_TV.h"
 
 #include <RayTracing/ConstTexture.h>
 
@@ -9,7 +9,7 @@ using namespace std;
 // TexT : Texture Type
 const float TexT_ConstTexture = 0.0f;
 
-void GenFS_TV::Visit(const ConstTexture::CPtr & constTexture) {
+void GenData_TV::Visit(const ConstTexture::CPtr & constTexture) {
 	tex2idx[constTexture] = texData.size();
 	
 	texData.push_back(TexT_ConstTexture);
