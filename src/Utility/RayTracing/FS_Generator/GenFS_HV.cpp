@@ -27,11 +27,14 @@ void GenFS_HV::Visit(const Group::CPtr & group) {
 	Visit(static_cast<const Hitable::CPtr>(group));
 
 	size_t childrenSize = group->GetChildren().size();
-	sceneData.push_back(childrenSize);
+	//sceneData.push_back(childrenSize);
 
 	size_t curChildIt = sceneData.size();
 	for (size_t i = 0; i < childrenSize; i++)
 		sceneData.push_back(-1);
+	
+	// 用以标识结尾
+	sceneData.push_back(-1);
 
 	for (auto const & child : group->GetChildren()) {
 		sceneData[curChildIt++] = sceneData.size();

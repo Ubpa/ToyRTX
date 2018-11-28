@@ -8,6 +8,7 @@
 
 namespace RayTracing {
 	class Hitable;
+	class Group;
 	class GenFS_HV;
 	class GenFS_MV;
 	class GenFS_TV;
@@ -42,6 +43,8 @@ namespace RayTracing {
 		CppUtility::Other::Ptr<GenFS_HV> hitableVisitor;
 		CppUtility::Other::Ptr<GenFS_MV> matVisitor;
 		CppUtility::Other::Ptr<GenFS_TV> texVisitor;
+
+		CppUtility::Other::CPtr<Group> root;
 	};
 }
 

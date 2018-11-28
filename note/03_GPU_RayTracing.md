@@ -1,4 +1,4 @@
-# 3. GPU_RayTracing
+#### 3. GPU_RayTracing
 
 ## 3.1 基本思路框架
 
@@ -422,4 +422,105 @@ struct HitRst RayIn_Scene(){
 }
 ```
 
-1.000000, -1.000000, 1.000000, 1.000000, 5.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, -1.000000, 0.500000,
+### 3.5.4 数据管理
+
+前边的实现是将数据放在const全局变量里，当场景变大后，数据增多。放在const全局变量的话会报错，提示空间不足。放在Uniform里也一样。
+
+因此现在只能放在纹理内。把一维纹理当做数组即可。由于现在版本的 OpenGL 已经删除了 `Sampler1D`，因此我们可以用 height == 1 的二维纹理来实现。
+
+此时也就不再需要动态生成Fragment Shader了，只需要准备好数据即可。
+
+### 3.5.5 栈
+
+本来采用栈的机制是没有问题的，但不知道为什么就是有bug。只能用长度20的数组，且需要初始化
+
+## 3.6 场景结构优化
+
+因为我们只能使用长度20的栈，因此如果访问Group时直接将所有子节点都载入栈中，则栈不够用。
+
+![1543372411007](assets/1543372411007.png)
+
+把孩子节点指针顺序放置，-1表示孩子链表的结尾
+
+### 3.6.1 Hitable结构
+
+```c++
+struct Sphere{// 7
+    int type = 0;
+    float matIdx;
+    bool matCoverable;
+    vec3 center;// @3
+    float radius;
+};
+
+struct Group{// 3 + childrenNum
+    int type = 1;
+    float matIdx;
+    bool matCoverable;
+    int childrenIdx[childrenNum];
+    int childrenEnd = -1;
+}
+```
+
+### 3.6.2 流程
+
+>1. 出栈得到当前节点指针的指针，如果该指针指向非空指针（0），则该指针+1（即兄弟节点指针的指针）入栈
+>
+>2. 如果当前节点为叶子节点（Sphere、Triangle），则处理完即可
+>
+>3. 如果当前节点为枝节节点（Group、BVH_Node、Mesh），则将其孩子节点指针的指针入栈
+
+### 3.6.3 示例
+
+**场景**
+
+一个Group节点，其有两个孩子节点，都是Sphere。程序会为该节点添加一个放在一个Group里。
+
+**内存**
+
+```c
+/*@  0*/ 1, -1, 1,  5, -1
+/*@  5*/ 1, -1, 1, 11, 18, -1,
+/*@ 11*/ 0,  2, 0,  0, 0, -1, 0.5,
+/*@ 18*/ 0,  1, 0,  0, 0, -2, 0.5,
+```
+
+**流程**
+
+```c
+Push 3 // 初始化, Group的第一个孩子节点指针的位置                        //[ 3 >
+Pop, Push 8
+Pop, Push 9
+Pop
+```
+
+### 3.6.4 Shader 实现
+
+```c
+struct HitRst RayIn_Scene(){
+    Push(3);//Group的孩子指针的位置
+    struct HitRst finalHitRst = HitRst_InValid;
+    while(StackSize() > 0){
+        float pp = Pop();
+		float idx = At(SceneData, pp);
+		if(idx == -1.0)
+			continue;
+
+		Push(pp + 1.0);
+
+        float type = At(SceneData, idx);
+        if(type == HT_Sphere){
+            struct HitRst hitRst = RayIn_Sphere(idx);
+            if(hitRst.hit)
+                finalHitRst = hitRst;
+        }
+        else if(type == HT_Group)
+			Push(idx+3);
+        //else
+        //    ;// do nothing
+    }
+    
+    return finalHitRst;
+}
+```
+

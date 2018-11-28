@@ -4,7 +4,7 @@
 #include "GenFS_MV.h"
 #include "GenFS_TV.h"
 
-#include <RayTracing/Hitable.h>
+#include <RayTracing/Group.h>
 
 using namespace RayTracing;
 using namespace CppUtility::Other;
@@ -15,10 +15,11 @@ FS_Generator::FS_Generator(const CppUtility::Other::CPtr<Hitable> & scene)
 	matVisitor(ToPtr(new GenFS_MV)),
 	texVisitor(ToPtr(new GenFS_TV))
 {
-	if (scene == NULL)
-		return;
+	auto group = new Group;
+	group->push_back(scene);
+	root = ToCPtr(group);
 
-	scene->Accept(hitableVisitor);
+	root->Accept(hitableVisitor);
 	hitableVisitor->Accept(matVisitor);
 	matVisitor->Accept(texVisitor);
 }
@@ -57,53 +58,6 @@ const string FS_Generator::BuildFS() {
 
 	return shaderSS.str();
 }
-
-/*
-void FS_Generator::Data(stringstream & shaderSS) {
-	auto const & sceneData = hitableVisitor->GetSceneData();
-	shaderSS << "const float SceneData[" << sceneData.size() << "] = float[](" << endl;
-
-	if (!sceneData.empty()) {
-		shaderSS << "    " << sceneData[0];
-		for (size_t i = 1; i < sceneData.size(); i++) {
-			shaderSS << ", ";
-			if ((i + 1) % 16 == 0)
-				shaderSS << endl << "    ";
-			shaderSS << sceneData.at(i);
-		}
-	}
-
-	shaderSS << endl << ");" << endl << "" << endl;
-
-	
-	auto const & matData = matVisitor->GetMatData();
-	shaderSS << "const float MatData[" << matData.size() << "] = float[](" << endl;
-	if (!matData.empty()) {
-		shaderSS << matData[0];
-		for (size_t i = 1; i < matData.size(); i++) {
-			shaderSS << ", ";
-			if ((i + 1) % 16 == 0)
-				shaderSS << endl << "    ";
-			shaderSS << matData.at(i);
-		}
-	}
-	shaderSS << endl << ");" << endl << "" << endl;
-
-
-	auto const & texData = texVisitor->GetTexData();
-	shaderSS << "const float TexData[" << texData.size() << "] = float[](" << endl;
-	if (!texData.empty()) {
-		shaderSS << texData[0];
-		for (size_t i = 1; i < texData.size(); i++) {
-			shaderSS << ", ";
-			if ((i + 1) % 16 == 0)
-				shaderSS << endl << "    ";
-			shaderSS << texData.at(i);
-		}
-	}
-	shaderSS << endl << ");" << endl << "" << endl;
-}
-*/
 
 void FS_Generator::Version(stringstream & shaderSS) {
 	shaderSS << "#version 330 core" << endl

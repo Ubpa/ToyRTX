@@ -70,6 +70,22 @@ const float TexT_ConstTexture = 0.0;
 int rdCnt = 0;
 in vec2 TexCoords;
 struct Ray gRay;
+float Stack[20]=float[](
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+);
+int StackTop = -1;
+void Push(float val){
+	StackTop++;
+	Stack[StackTop] = val;
+}
+float Pop(){
+	float val = Stack[StackTop];
+	StackTop--;
+	return val;
+}
+int StackSize(){
+	return StackTop + 1;
+}
 
 float RandXY(float x, float y);// [0.0, 1.0)
 float Rand();// [0.0, 1.0)
@@ -256,26 +272,24 @@ bool Scatter_Dielectric(struct Vertex vertex, float matIdx){
 }
 
 struct HitRst RayIn_Scene(){
-    float idxStack[20];
-	for(int i=0;i<20;i++)
-		idxStack[i] = 0;
-    int idxStackSize = 0;
+    Push(3);//Group的孩子指针的位置
     struct HitRst finalHitRst = HitRst_InValid;
-    idxStack[idxStackSize++] = 0.0;
-    while(idxStackSize > 0){
-        float idx = idxStack[--idxStackSize];
-        
+    while(StackSize() > 0){
+        float pp = Pop();
+		float idx = At(SceneData, pp);
+		if(idx == -1.0)
+			continue;
+
+		Push(pp + 1.0);
+
         float type = At(SceneData, idx);
         if(type == HT_Sphere){
             struct HitRst hitRst = RayIn_Sphere(idx);
             if(hitRst.hit)
                 finalHitRst = hitRst;
         }
-        else if(type == HT_Group){
-			int childrenNum = int(At(SceneData, idx+3));
-			for(int i=0; i<childrenNum; i++)
-				idxStack[idxStackSize++] = At(SceneData, idx+4+i);
-        }
+        else if(type == HT_Group)
+			Push(idx+3);
         //else
         //    ;// do nothing
     }
@@ -297,7 +311,7 @@ struct HitRst RayIn_Sphere(float idx){
     float c = dot(oc, oc) - radius * radius;
     float discriminant = b * b - a * c;
     
-    if (discriminant <= 0)
+    if (discriminant <= 0 || a == 0 || radius == 0)
         return hitRst;
     
     float t = (-b - sqrt(discriminant)) / a;
@@ -395,7 +409,6 @@ void WriteRay(int mode){
 }
 
 void RayTracer(){
-
     SetRay();
     if(gRay.curRayNum >= RayNumMax){
         WriteRay(3);

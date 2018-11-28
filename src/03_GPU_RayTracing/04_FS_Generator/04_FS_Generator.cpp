@@ -50,50 +50,29 @@ int main(int argc, char ** argv) {
 	
 	//------------ Fragment Shader Generator
 	FS_Generator fsGenerator(scene->obj);
-	vector<float> sceneData(fsGenerator.GetSceneData());
-	printf("size: %d\n", sceneData.size());
-	//for (size_t i = 0; i < sceneData.size(); i++)
-	//	printf("%f, ", sceneData[i]);
-	printf("\n");
-	vector<float> matData(fsGenerator.GetMatData());
-	printf("size: %d\n", matData.size());
-	//for (size_t i = 0; i < matData.size(); i++)
-	//	printf("%f, ", matData[i]);
-	printf("\n");
-	vector<float> texData(fsGenerator.GetTexData());
-	printf("size: %d\n", texData.size());
-	//for (size_t i = 0; i < texData.size(); i++)
-	//	printf("%f, ", texData[i]);      
-	printf("\n");
-	size_t i;
-	i = 1;
-	while (i < sceneData.size())
-		i <<= 1;
-	sceneData.resize(i);
-	printf("size: %d\n", sceneData.size());
-	i = 1;
-	while (i < matData.size())
-		i <<= 1;
-	matData.resize(i);
-	printf("size: %d\n", matData.size());
-	i = 1;
-	while (i < texData.size())
-		i <<= 1;
-	texData.resize(i);
-	printf("size: %d\n", texData.size());
-	for (size_t i = 0; i < texData.size(); i++)
-		printf("%f, ", texData[i]);
-	printf("\n");
-	CppUtility::OpenGL::Texture texDataTex(texData.size(), 1, texData.data(), GL_FLOAT, GL_RED, GL_R32F);
-	CppUtility::OpenGL::Texture sceneDataTex(sceneData.size(), 1, sceneData.data(), GL_FLOAT, GL_RED, GL_R32F);
-	CppUtility::OpenGL::Texture matDataTex(matData.size(), 1, matData.data(), GL_FLOAT, GL_RED, GL_R32F);
+	//printf("size: %d\n", fsGenerator.GetSceneData().size());
+	//for (size_t i = 0; i < fsGenerator.GetSceneData().size(); i++)
+	//	printf("%f, ", fsGenerator.GetSceneData()[i]);
+	//printf("\n");
+	//printf("size: %d\n", fsGenerator.GetMatData().size());
+	//for (size_t i = 0; i < fsGenerator.GetMatData().size(); i++)
+	//	printf("%f, ", fsGenerator.GetMatData()[i]);
+	//printf("\n");
+	//printf("size: %d\n", fsGenerator.GetTexData().size());
+	//for (size_t i = 0; i < fsGenerator.GetTexData().size(); i++)
+	//	printf("%f, ", fsGenerator.GetTexData()[i]);      
+	//printf("\n");
+	
+	CppUtility::OpenGL::Texture texDataTex(fsGenerator.GetSceneData().size(), 1, fsGenerator.GetSceneData().data(), GL_FLOAT, GL_RED, GL_R32F);
+	CppUtility::OpenGL::Texture sceneDataTex(fsGenerator.GetMatData().size(), 1, fsGenerator.GetMatData().data(), GL_FLOAT, GL_RED, GL_R32F);
+	CppUtility::OpenGL::Texture matDataTex(fsGenerator.GetTexData().size(), 1, fsGenerator.GetTexData().data(), GL_FLOAT, GL_RED, GL_R32F);
 	//------------ RayTracing Basic Shader
 	string RTX_vs = rootPath + str_RTX_vs;
 	string RTX_fs = rootPath + str_RTX_fs;
 	//string RTX_fs_src = fsGenerator.BuildFS();
 	//File RTX_fs_file(RTX_fs, File::WRITE);
 	//RTX_fs_file.Printf("%s", RTX_fs_src.c_str());
-	//RTX_fs_file.Close();
+	//RTX_fs_file.Close(); 
 	Shader RTX_Shader(RTX_vs, RTX_fs);
 	if (!RTX_Shader.IsValid()) {
 		printf("ERROR: RTX_Shader load fail.\n");
@@ -105,7 +84,7 @@ int main(int argc, char ** argv) {
 	//auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
 	auto camera = scene->camera;
 	TRayCamera::CPtr tCamera = std::dynamic_pointer_cast<const TRayCamera>(camera);
-	const float RayNumMax = 10000.0f;
+	const float RayNumMax = 1000.0f;
 
 	RTX_Shader.SetInt("origin_curRayNum", 0);
 	RTX_Shader.SetInt("dir_tMax", 1);
@@ -135,7 +114,7 @@ int main(int argc, char ** argv) {
 		FBO(width, height, FBO::ENUM_TYPE_RAYTRACING),
 	};
 
-	//------------ ²Ù×÷             d      f   f   fdfdff     ddddddd  dfdfd 
+	//------------ ²Ù×÷
 	Timer timer; 
 	timer.Start();
 	LambdaOp::Ptr rayTracingOp = ToPtr(new LambdaOp([&]() {
@@ -160,7 +139,7 @@ int main(int argc, char ** argv) {
 		} 
 		texWindow.SetTex(FBO_RayTracing[curReadFBO].GetColorTexture(3));
 		 
-		//rayTracingOp->SetIsHold(false); ddddddfffddd ddd d  dddd dddddddd ddddddddddfdddd
+		//rayTracingOp->SetIsHold(false);
 
 		static size_t allLoopNum = 0;
 		allLoopNum += loopNum;
