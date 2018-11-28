@@ -55,6 +55,7 @@ uniform sampler2D TexData;
 uniform struct Camera camera;
 uniform float rdSeed[4];
 uniform float RayNumMax;
+uniform bool enableGammaCorrection;
 
 const float PI = 3.1415926;
 const float tMin = 0.001;
@@ -71,7 +72,7 @@ int rdCnt = 0;
 in vec2 TexCoords;
 struct Ray gRay;
 
-float _Stack[20] = float[]( 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 );
+float _Stack[100];
 int _Stack_mTop = -1;
 bool Stack_Empty();
 float Stack_Top();
@@ -422,7 +423,7 @@ void WriteRay(int mode){
     }
     else if(mode == 1){//击中光源
         gRay.tMax = 0;
-        color = (color * gRay.curRayNum + gRay.color) / (gRay.curRayNum + 1);
+		color = (color * gRay.curRayNum + (enableGammaCorrection ? sqrt(gRay.color) : gRay.color)) / (gRay.curRayNum + 1);
         gRay.curRayNum = min(gRay.curRayNum + 1, RayNumMax);
     }
     //else if(mode == 2){//继续追踪

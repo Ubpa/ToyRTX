@@ -63,6 +63,7 @@ const float FLT_MAX = 99999999999999999999999999999999999999.0;
 const float rayP = 50.0/51.0;// depth = p/(1-p) --> p = depth/(depth+1)
 const float HT_Sphere         = 0.0;
 const float HT_Group          = 1.0;
+const float HT_BVH_Node       = 2.0;
 const float MatT_Lambertian   = 0.0;
 const float MatT_Metal        = 1.0;
 const float MatT_Dielectric   = 2.0;
@@ -93,6 +94,7 @@ void SetRay();
 void WriteRay(int mode);
 struct HitRst RayIn_Scene();
 struct HitRst RayIn_Sphere(float idx);
+bool AABB_Hit(float idx);
 bool Scatter_Material(struct Vertex vertex, float matIdx);
 bool Scatter_Lambertian(struct Vertex vertex, float matIdx);
 bool Scatter_Metal(struct Vertex vertex, float matIdx);
@@ -291,7 +293,7 @@ bool Scatter_Dielectric(struct Vertex vertex, float matIdx){
 }
 
 struct HitRst RayIn_Scene(){
-    Stack_Push(3);//Group的 孩子指针 的位置
+    Stack_Push(9);//Group的 孩子指针 的位置
     struct HitRst finalHitRst = HitRst_InValid;
     while(!Stack_Empty()){
         float pIdx = Stack_Top();
@@ -321,7 +323,13 @@ struct HitRst RayIn_Scene(){
 			Stack_Acc();
 		}
 		else if(type == HT_Group)
-			Stack_Push(idx+3);
+			Stack_Push(idx+9);
+		else if(type == HT_BVH_Node){
+			if(AABB_Hit(idx+3))
+				Stack_Push(idx+9);
+			else
+				Stack_Acc();
+		}
 		//else
 		//    ;// do nothing
     }
@@ -331,8 +339,8 @@ struct HitRst RayIn_Scene(){
 
 struct HitRst RayIn_Sphere(float idx){
     float matIdx = At(SceneData, idx+1);
-    vec3 center = vec3(At(SceneData, idx+3), At(SceneData, idx+4), At(SceneData, idx+5));
-    float radius = At(SceneData, idx+6);
+    vec3 center = vec3(At(SceneData, idx+9), At(SceneData, idx+10), At(SceneData, idx+11));
+    float radius = At(SceneData, idx+12);
     
     struct HitRst hitRst;
     hitRst.hit = false;
@@ -362,6 +370,32 @@ struct HitRst RayIn_Sphere(float idx){
     hitRst.matIdx = matIdx;
     
     return hitRst;
+}
+
+bool AABB_Hit(float idx){
+	vec3 minP = vec3(At(SceneData, idx), At(SceneData, idx+1), At(SceneData, idx+2));
+	vec3 maxP = vec3(At(SceneData, idx+3), At(SceneData, idx+4), At(SceneData, idx+5));
+
+	vec3 origin = gRay.origin;
+	vec3 dir = gRay.dir;
+	float local_tMin = tMin;
+	float tMax = gRay.tMax;
+	for (int i = 0; i < 3; i++) {
+		float invD = 1.0f / dir[i];
+		float t0 = (minP[i] - origin[i]) * invD;
+		float t1 = (maxP[i] - origin[i]) * invD;
+		if (invD < 0.0f){
+			float tmp = t0;
+			t0 = t1;
+			t1 = tmp;
+		}
+
+		local_tMin = max(t0, local_tMin);
+		tMax = min(t1, tMax);
+		if (tMax <= local_tMin)
+			return false;
+	}
+	return true;
 }
  
 vec3 Value_Texture(vec2 uv, vec3 p, float texIdx){

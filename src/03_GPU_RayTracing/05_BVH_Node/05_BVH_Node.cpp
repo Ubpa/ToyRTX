@@ -32,7 +32,7 @@ using namespace glm;
 using namespace std;
 
 int main(int argc, char ** argv) {
-	//------------ Init
+	//------------ Init 
 	TexWindow texWindow(str_WindowTitle);
 	if (!texWindow.IsValid()) {
 		printf("ERROR: Texture Window Create Fail.\n");
@@ -49,7 +49,7 @@ int main(int argc, char ** argv) {
 
 
 	//------------ Scene
-	Scene::CPtr scene = CreateScene1(ratioWH);
+	Scene::CPtr scene = CreateScene3(ratioWH);
 
 
 	//------------ Fragment Shader Generator

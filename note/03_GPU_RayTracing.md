@@ -448,6 +448,10 @@ struct HitRst RayIn_Scene(){
 
 别把深度搞得过深就行
 
+> 经测试，栈的空间又可以增大了，原因未知
+>
+> 总之，该结构的最后的隐患也解决了，皆大欢喜
+
 ### 3.6.1 Hitable结构
 
 ```c++
@@ -459,7 +463,7 @@ struct Sphere{// 7
     float radius;
 };
 
-struct Group{// 3 + childrenNum
+struct Group{// 4 + childrenNum
     int type = 1;
     float matIdx;
     bool matCoverable;
@@ -593,3 +597,104 @@ struct HitRst RayIn_Scene(){
 }
 ```
 
+### 3.6.5 总结
+
+新的结构非常合理，不需要对场景进行展开（保持树形结构，准确的说是有向无环图结构），也不需要新增空间（只是将原本的 `childrenNum` 改成 `childrenEnd`)。而且可以处理离开父节点时有操作需要处理的情况（如枝节节点设置`Material`，`Transform`节点对 ray 进行 `transform`。
+
+此外，之前说到的关于栈空间很小的bug也莫名其妙的修复了，原因未知。不过反正是好消息，舒服！
+
+## 3.7 BVH_Node
+
+BVH_Node 对场景遍历的加速很重要，所以现在来实现它
+
+对于第一本书后的那个经典场景（很多五颜六色的球的那个场景），经过测试，速度为 5-6 loop / s。
+
+### 3.7.1 数据结构
+
+```c++
+struct AABB{// 6
+    vec3 minP;
+    vec3 maxP;
+}
+
+struct Hitable{// 8
+    float matIdx;
+    float matCoverable;
+    struct AABB box;
+}
+
+struct Sphere{// 13
+    float type = 0.0;//@0
+    struct Hitable base;//@1
+    vec3 center;//@9
+    float radius;//@12
+};
+
+struct Group{// 10 + childrenNum
+    float type = 1.0;//@0
+    struct Hitable base;//@1
+    float childrenIdx[childrenNum];//@9
+    float childrenEnd = -1.0;
+}
+
+struct BVH_Node{// 10 + (left != NULL) + (right != NULL)
+    float type = 2.0;//@0
+    struct Hitable base;//@1
+	float leftIdx;//如果left != NULL, 则有此域
+    float rightIdx;//如果right != NULL, 则有此域
+    float childrenEnd = -1.0;
+}
+```
+
+### 3.7.2 Shader实现
+
+```c++
+struct HitRst RayIn_Scene(){
+    Stack_Push(9);//Group的 孩子指针 的位置
+    struct HitRst finalHitRst = HitRst_InValid;
+    while(!Stack_Empty()){
+        float pIdx = Stack_Top();
+		float idx = At(SceneData, pIdx);
+		if(idx == -1.0){
+			Stack_Pop();
+			if(Stack_Empty())
+				return finalHitRst;
+
+			//由于暂时没有离开节点时需要做的事情, 因此先都注释掉
+			//float pIdx = Stack_Top();
+			//float idx = At(SceneData, pIdx);// idx != -1
+			//float type = At(SceneData, idx);// 只可能是那些有子节点的类型
+			//if(type == HT_Group)
+			//	;// 修改材质指针
+
+			Stack_Acc();
+			continue;
+		}
+		
+		float type = At(SceneData, idx);
+		if(type == HT_Sphere){
+			struct HitRst hitRst = RayIn_Sphere(idx);
+			if(hitRst.hit)
+				finalHitRst = hitRst;
+
+			Stack_Acc();
+		}
+		else if(type == HT_Group)
+			Stack_Push(idx+9);
+		else if(type == HT_BVH_Node){
+			if(AABB_Hit(idx+3))
+				Stack_Push(idx+9);
+			else
+				Stack_Acc();
+		}
+		//else
+		//    ;// do nothing
+    }
+    
+    return finalHitRst;
+}
+```
+
+### 3.7.3 测试
+
+速度提升为 35 loop / s，变成了7倍，效果显著

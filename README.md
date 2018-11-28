@@ -20,7 +20,7 @@
 
 图形接口使用的是 OpenGL
 
-近日开始着手 **GPU的实现方案**
+近日正在着手 **GPU的实现方案**
 
 # 2. 代码框架
 
@@ -44,6 +44,9 @@
 /03_GPU_RayTracing
   -03_01_Basic
   -03_02_RayTracingBasicSystem
+  -03_03_Material
+  -03_04_GenData
+  -03_05_BVH_Node
 /Utility
   /OpenGL
     -Camera

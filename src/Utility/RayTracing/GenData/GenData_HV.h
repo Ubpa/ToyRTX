@@ -22,9 +22,10 @@ namespace RayTracing {
 		void Accept(const CppUtility::Other::Ptr<GenData_MV> & genFS_MV);
 	private:
 		void SetMat(const MatIdxMap & mat2idx);
-		virtual void Visit(const CppUtility::Other::CPtr<Hitable> & group);
+		virtual void Visit(const CppUtility::Other::CPtr<Hitable> & hitable);
 		virtual void Visit(const CppUtility::Other::CPtr<Group> & group);
 		virtual void Visit(const CppUtility::Other::CPtr<Sphere> & sphere);
+		virtual void Visit(const CppUtility::Other::CPtr<BVH_Node> & bvhNode);
 		using HitableVisitor::Visit;
 
 		std::vector<float> sceneData;
