@@ -36,3 +36,7 @@ const vector<float> GenData::GetMatData() const {
 const vector<float> GenData::GetTexData() const {
 	return texVisitor->GetTexData();
 }
+
+const GenData::ImgIdxMap GenData::GetImgIdxMap() const {
+	return texVisitor->GetImgIdxMap();
+}

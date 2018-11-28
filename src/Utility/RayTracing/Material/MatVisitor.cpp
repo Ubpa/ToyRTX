@@ -3,9 +3,10 @@
 using namespace RayTracing;
 using namespace CppUtility;
 
-void MatVisitor::Visit(const Other::CPtr<Lambertian> & Lambertian) { }
-void MatVisitor::Visit(const Other::CPtr<Metal> & Metal) { }
-void MatVisitor::Visit(const Other::CPtr<Dielectric> & Dielectric) { }
-void MatVisitor::Visit(const Other::CPtr<Light> & Light) { }
-void MatVisitor::Visit(const Other::CPtr<OpMaterial> & OpMaterial) { }
-void MatVisitor::Visit(const Other::CPtr<Isotropic> & Isotropic) { }
+void MatVisitor::Visit(const Other::CPtr<Material> & material) { }
+void MatVisitor::Visit(const Other::CPtr<Lambertian> & lambertian) { }
+void MatVisitor::Visit(const Other::CPtr<Metal> & metal) { }
+void MatVisitor::Visit(const Other::CPtr<Dielectric> & dielectric) { }
+void MatVisitor::Visit(const Other::CPtr<Light> & light) { }
+void MatVisitor::Visit(const Other::CPtr<OpMaterial> & opMaterial) { }
+void MatVisitor::Visit(const Other::CPtr<Isotropic> & isotropic) { }

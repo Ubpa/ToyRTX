@@ -698,3 +698,28 @@ struct HitRst RayIn_Scene(){
 ### 3.7.3 测试
 
 速度提升为 35 loop / s，变成了7倍，效果显著
+
+## 3.8 ImgTexture
+
+### 3.8.1 数据结构
+
+```c++
+struct ConstTexture{// 4
+    float type = 0.0;
+    vec3 color;
+}
+
+struct ImgTexture{// 2
+    float type = 1.0;
+    float texArrIdx;//Uniform TexArr[MAX_TEXTURE_SIZE]
+}
+```
+
+### 3.8.2 流程
+
+1. `GenData_TV` 收集 `Image`
+2. main 程序将 `Image` 放入 `Texture` 中，然后再设置 Uniform
+3. shader 获取 idx，转型成 int，然后从 TexArr 中获取相应纹理，再进行纹理采样
+
+
+

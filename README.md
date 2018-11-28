@@ -47,6 +47,7 @@
   -03_03_Material
   -03_04_GenData
   -03_05_BVH_Node
+  -03_06_ImgTexture
 /Utility
   /OpenGL
     -Camera

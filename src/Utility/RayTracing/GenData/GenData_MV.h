@@ -25,6 +25,7 @@ namespace RayTracing {
 		const std::vector<float> & GetMatData() const { return matData; };
 	private:
 		void SetTex(const TexIdxMap & tex2idx);
+
 		virtual void Visit(const CppUtility::Other::CPtr<Lambertian> & lambertian);
 		virtual void Visit(const CppUtility::Other::CPtr<Metal> & metal);
 		virtual void Visit(const CppUtility::Other::CPtr<Dielectric> & dielectric);

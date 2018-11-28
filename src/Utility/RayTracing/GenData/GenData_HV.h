@@ -29,6 +29,7 @@ namespace RayTracing {
 		using HitableVisitor::Visit;
 
 		std::vector<float> sceneData;
+		std::map< CppUtility::Other::CPtr<Hitable>, size_t> hitable2idx;
 		std::map<CppUtility::Other::CPtr<Material>, std::vector<size_t>> mat2idxVec;
 	};
 }

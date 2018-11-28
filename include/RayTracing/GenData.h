@@ -2,9 +2,15 @@
 #define _FS_GENERATOR_H_
 
 #include <Utility/Ptr.h>
+
+#include <map>
 #include <vector>
-#include <string>
-#include <sstream>
+
+namespace CppUtility {
+	namespace Other {
+		class Image;
+	}
+}
 
 namespace RayTracing {
 	class Hitable;
@@ -15,11 +21,14 @@ namespace RayTracing {
 
 	class GenData {
 	public:
+		typedef std::map<CppUtility::Other::CPtr<CppUtility::Other::Image>, size_t> ImgIdxMap;
+
 		GenData(const CppUtility::Other::CPtr<Hitable> & scene);
 		
 		const std::vector<float> GetSceneData() const;
 		const std::vector<float> GetMatData() const;
 		const std::vector<float> GetTexData() const;
+		const ImgIdxMap GetImgIdxMap() const;
 
 	private:
 

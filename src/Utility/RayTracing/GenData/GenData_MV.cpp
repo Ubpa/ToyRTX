@@ -11,14 +11,17 @@ using namespace std;
 
 // MatT : Material Type
 const float MatT_Lambertian = 0.0f;
-const float MatT_Metal = 1.0f;
+const float MatT_Metal      = 1.0f;
 const float MatT_Dielectric = 2.0f;
 
-const size_t MatSize_Lambertian = 2;
-const size_t MatSize_Metal = 3;
-const size_t MatSize_Dielectric = 2;
-
 void GenData_MV::Visit(const Lambertian::CPtr & lambertian) {
+	if (lambertian == NULL)
+		return;
+
+	auto targetPair = mat2idx.find(lambertian);
+	if (targetPair != mat2idx.end())
+		return;
+
 	mat2idx[lambertian] = matData.size();
 
 	matData.push_back(MatT_Lambertian);
@@ -29,6 +32,13 @@ void GenData_MV::Visit(const Lambertian::CPtr & lambertian) {
 }
 
 void GenData_MV::Visit(const Metal::CPtr & metal) {
+	if (metal == NULL)
+		return;
+
+	auto targetPair = mat2idx.find(metal);
+	if (targetPair != mat2idx.end())
+		return;
+
 	mat2idx[metal] = matData.size();
 
 	matData.push_back(MatT_Metal);
@@ -41,6 +51,13 @@ void GenData_MV::Visit(const Metal::CPtr & metal) {
 }
 
 void GenData_MV::Visit(const Dielectric::CPtr & dielectric) {
+	if (dielectric == NULL)
+		return;
+
+	auto targetPair = mat2idx.find(dielectric);
+	if (targetPair != mat2idx.end())
+		return;
+
 	mat2idx[dielectric] = matData.size();
 
 	matData.push_back(MatT_Dielectric);

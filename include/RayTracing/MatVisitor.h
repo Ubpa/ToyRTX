@@ -4,6 +4,7 @@
 #include <Utility/HeapObj.h>
 
 namespace RayTracing {
+	class Material;
 	class Lambertian;
 	class Metal;
 	class Dielectric;
@@ -14,12 +15,13 @@ namespace RayTracing {
 	class MatVisitor : public CppUtility::Other::HeapObj {
 		HEAP_OBJ_SETUP(MatVisitor)
 	public:
-		virtual void Visit(const CppUtility::Other::CPtr<Lambertian> & Lambertian);
-		virtual void Visit(const CppUtility::Other::CPtr<Metal> & Metal);
-		virtual void Visit(const CppUtility::Other::CPtr<Dielectric> & Dielectric);
-		virtual void Visit(const CppUtility::Other::CPtr<Light> & Light);
-		virtual void Visit(const CppUtility::Other::CPtr<OpMaterial> & OpMaterial);
-		virtual void Visit(const CppUtility::Other::CPtr<Isotropic> & Isotropic);
+		virtual void Visit(const CppUtility::Other::CPtr<Material> & material);
+		virtual void Visit(const CppUtility::Other::CPtr<Lambertian> & lambertian);
+		virtual void Visit(const CppUtility::Other::CPtr<Metal> & metal);
+		virtual void Visit(const CppUtility::Other::CPtr<Dielectric> & dielectric);
+		virtual void Visit(const CppUtility::Other::CPtr<Light> & light);
+		virtual void Visit(const CppUtility::Other::CPtr<OpMaterial> & opMaterial);
+		virtual void Visit(const CppUtility::Other::CPtr<Isotropic> & isotropic);
 	};
 }
 

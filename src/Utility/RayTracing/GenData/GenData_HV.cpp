@@ -10,11 +10,14 @@ using namespace glm;
 using namespace std;
 
 //HT : Hitable Type
-const float HT_Sphere = 0.0f;
-const float HT_Group = 1.0f;
+const float HT_Sphere   = 0.0f;
+const float HT_Group    = 1.0f;
 const float HT_BVH_Node = 2.0f;
 
 void GenData_HV::Visit(const Hitable::CPtr & hitable) {
+	if (hitable == NULL)
+		return;
+
 	if(hitable->GetMat())
 		mat2idxVec[hitable->GetMat()].push_back(sceneData.size());
 	sceneData.push_back(-1);
@@ -31,6 +34,15 @@ void GenData_HV::Visit(const Hitable::CPtr & hitable) {
 }
 
 void GenData_HV::Visit(const Sphere::CPtr & sphere) {
+	if (sphere == NULL)
+		return;
+
+	auto targetPair = hitable2idx.find(sphere);
+	if (targetPair != hitable2idx.end())
+		return;
+
+	hitable2idx[sphere] = sceneData.size();
+
 	sceneData.push_back(HT_Sphere);
 
 	Visit(static_cast<const Hitable::CPtr>(sphere));
@@ -44,6 +56,15 @@ void GenData_HV::Visit(const Sphere::CPtr & sphere) {
 }
 
 void GenData_HV::Visit(const Group::CPtr & group) {
+	if (group == NULL)
+		return;
+
+	auto targetPair = hitable2idx.find(group);
+	if (targetPair != hitable2idx.end())
+		return;
+
+	hitable2idx[group] = sceneData.size();
+
 	sceneData.push_back(HT_Group);
 
 	Visit(static_cast<const Hitable::CPtr>(group));
@@ -59,12 +80,30 @@ void GenData_HV::Visit(const Group::CPtr & group) {
 	sceneData.push_back(-1);
 
 	for (auto const & child : group->GetChildren()) {
+		if (child == NULL)
+			continue;
+
+		auto targetHitableIdx = hitable2idx.find(child);
+		if (targetHitableIdx != hitable2idx.end()) {
+			sceneData[curChildIt++] = targetHitableIdx->second;
+			continue;
+		}
+
 		sceneData[curChildIt++] = sceneData.size();
 		child->Accept(This());
 	}
 }
 
 void GenData_HV::Visit(const BVH_Node::CPtr & bvhNode) {
+	if (bvhNode == NULL)
+		return;
+
+	auto targetPair = hitable2idx.find(bvhNode);
+	if (targetPair != hitable2idx.end())
+		return;
+
+	hitable2idx[bvhNode] = sceneData.size();
+
 	sceneData.push_back(HT_BVH_Node);
 	Visit(static_cast<const Hitable::CPtr>(bvhNode));
 
@@ -80,13 +119,22 @@ void GenData_HV::Visit(const BVH_Node::CPtr & bvhNode) {
 	sceneData.push_back(-1);
 
 	if (bvhNode->GetLeft()) {
-		sceneData[curChildIt++] = sceneData.size();
-		bvhNode->GetLeft()->Accept(This());
+		auto targetLeftIdx = hitable2idx.find(bvhNode->GetLeft());
+		if (targetLeftIdx == hitable2idx.end()) {
+			sceneData[curChildIt++] = sceneData.size();
+			bvhNode->GetLeft()->Accept(This());
+		}else
+			sceneData[curChildIt++] = targetLeftIdx->second;
 	}
 
 	if (bvhNode->GetRight()) {
-		sceneData[curChildIt++] = sceneData.size();
-		bvhNode->GetRight()->Accept(This());
+		auto targetRightIdx = hitable2idx.find(bvhNode->GetRight());
+		if (targetRightIdx == hitable2idx.end()) {
+			sceneData[curChildIt++] = sceneData.size();
+			bvhNode->GetRight()->Accept(This());
+		}
+		else
+			sceneData[curChildIt++] = targetRightIdx->second;
 	}
 }
 
