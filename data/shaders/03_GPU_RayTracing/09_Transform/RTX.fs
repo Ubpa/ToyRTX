@@ -28,6 +28,7 @@ struct Ray{
     highp float curRayNum;//这里使用float以统一
 };
 void Ray_Update(vec3 origin, vec3 dir, vec3 attenuation);
+void Ray_Transform(mat4 transform);
 
 struct Vertex{
     vec3 pos;
@@ -35,13 +36,17 @@ struct Vertex{
     vec2 uv;
 };
 struct Vertex Vertex_InValid = struct Vertex(vec3(0), vec3(0), vec2(0));
+struct Vertex Vertex_Load(float idx);
+struct Vertex Vertex_Interpolate(vec3 abg, struct Vertex A, struct Vertex B, struct Vertex C);
+void Vertex_Transform(mat4 transform, mat3 normalTransform, inout struct Vertex vert);
 
 struct HitRst{
     bool hit;
     struct Vertex vertex;
     float matIdx;
+	float isMatCoverable;
 };
-struct HitRst HitRst_InValid = struct HitRst(false, Vertex_InValid, -1);
+struct HitRst HitRst_InValid = struct HitRst(false, Vertex_InValid, -1, 0);
 
 uniform sampler2D origin_curRayNum;
 uniform sampler2D dir_tMax;//若tMax为0, 则表示该光线无效
@@ -66,9 +71,13 @@ const float rayP = 50.0/51.0;// depth = p/(1-p) --> p = depth/(depth+1)
 const float HT_Sphere         = 0.0;
 const float HT_Group          = 1.0;
 const float HT_BVH_Node       = 2.0;
+const float HT_Triangle       = 3.0;
+const float HT_TriMesh        = 4.0;
+const float HT_Transform      = 5.0;
 const float MatT_Lambertian   = 0.0;
 const float MatT_Metal        = 1.0;
 const float MatT_Dielectric   = 2.0;
+const float MatT_Light        = 3.0;
 const float TexT_ConstTexture = 0.0;
 const float TexT_ImgTexture   = 1.0;
 
@@ -90,18 +99,23 @@ vec2 RandInSquare();
 vec2 RandInCircle();
 vec3 RandInSphere();
 float At(sampler2D data, float idx);
+mat4 Load_Mat4(float idx);
+mat3 Load_Mat3(float idx);
 float atan2(float y, float x);
 vec2 Sphere2UV(vec3 normal);
 float FresnelSchlick(vec3 viewDir, vec3 halfway, float ratioNtNi);
+vec4 Intersect_RayTri(vec3 e, vec3 d, vec3 a, vec3 b, vec3 c);
 void SetRay();
 void WriteRay(int mode);
 struct HitRst RayIn_Scene();
 struct HitRst RayIn_Sphere(float idx);
+struct HitRst RayIn_Triangle(float idx);
 bool AABB_Hit(float idx);
 bool Scatter_Material(struct Vertex vertex, float matIdx);
 bool Scatter_Lambertian(struct Vertex vertex, float matIdx);
 bool Scatter_Metal(struct Vertex vertex, float matIdx);
 bool Scatter_Dielectric(struct Vertex vertex, float matIdx);
+bool Scatter_Light(struct Vertex vertex, float matIdx);
 vec3 Value_Texture(vec2 uv, vec3 p, float texIdx);
 vec3 Value_ConstTexture(float texIdx);
 vec3 Value_ImgTexture(vec2 uv, float texIdx);
@@ -115,6 +129,31 @@ void main(){
 	//else
 	//	out_rayTracingRst=vec3(At(SceneData, TexCoords.x * textureSize(SceneData, 0).x),0,0);
 	RayTracer();
+}
+
+struct Vertex Vertex_Load(float idx){
+	struct Vertex vert;
+	vert.pos    = vec3(At(SceneData, idx+0), At(SceneData, idx+1), At(SceneData, idx+2));
+	vert.normal = vec3(At(SceneData, idx+3), At(SceneData, idx+4), At(SceneData, idx+5));
+	vert.uv     = vec2(At(SceneData, idx+6), At(SceneData, idx+7));
+	return vert;
+}
+
+struct Vertex Vertex_Interpolate(vec3 abg, struct Vertex A, struct Vertex B, struct Vertex C){
+	struct Vertex rst;
+
+	rst.uv[0] = dot(abg, vec3(A.uv[0], B.uv[0], C.uv[0]));
+	rst.uv[1] = dot(abg, vec3(A.uv[1], B.uv[1], C.uv[1]));
+	rst.pos = abg[0] * A.pos + abg[1] * B.pos + abg[2] * C.pos;
+	rst.normal = abg[0] * A.normal + abg[1] * B.normal + abg[2] * C.normal;
+
+	return rst;
+}
+
+void Vertex_Transform(mat4 transform, mat3 normalTransform, inout struct Vertex vert){
+	vec4 posQ = transform * vec4(vert.pos, 1.0);
+	vert.pos = posQ.xyz / posQ.w;
+	vert.normal = normalize(normalTransform * vert.normal);
 }
 
 float Stack_Top(){
@@ -190,6 +229,48 @@ float At(sampler2D data, float idx){
     vec2 texCoords = vec2((idx+0.5)/textureSize(data, 0).x, 0.5);
     return texture2D(data, texCoords).x;
 }
+
+mat4 Load_Mat4(float idx){
+	mat4 rst;
+	rst[0][0] = At(SceneData, idx +  0);
+	rst[0][1] = At(SceneData, idx +  1);
+	rst[0][2] = At(SceneData, idx +  2);
+	rst[0][3] = At(SceneData, idx +  3);
+
+	rst[1][0] = At(SceneData, idx +  4);
+	rst[1][1] = At(SceneData, idx +  5);
+	rst[1][2] = At(SceneData, idx +  6);
+	rst[1][3] = At(SceneData, idx +  7);
+
+	rst[2][0] = At(SceneData, idx +  8);
+	rst[2][1] = At(SceneData, idx +  9);
+	rst[2][2] = At(SceneData, idx + 10);
+	rst[2][3] = At(SceneData, idx + 11);
+
+	rst[3][0] = At(SceneData, idx + 12);
+	rst[3][1] = At(SceneData, idx + 13);
+	rst[3][2] = At(SceneData, idx + 14);
+	rst[3][3] = At(SceneData, idx + 15);
+	
+	return rst;
+}
+
+mat3 Load_Mat3(float idx){
+	mat3 rst;
+	rst[0][0] = At(SceneData, idx + 0);
+	rst[0][1] = At(SceneData, idx + 1);
+	rst[0][2] = At(SceneData, idx + 2);
+
+	rst[1][0] = At(SceneData, idx + 3);
+	rst[1][1] = At(SceneData, idx + 4);
+	rst[1][2] = At(SceneData, idx + 5);
+
+	rst[2][0] = At(SceneData, idx + 6);
+	rst[2][1] = At(SceneData, idx + 7);
+	rst[2][2] = At(SceneData, idx + 8);
+	
+	return rst;
+}
  
 float atan2(float y, float x){
     if(x>0){
@@ -223,6 +304,19 @@ float FresnelSchlick(vec3 viewDir, vec3 halfway, float ratioNtNi){
     return R;
 }
 
+vec4 Intersect_RayTri(vec3 e, vec3 d, vec3 a, vec3 b, vec3 c){
+	mat3 equation_A = mat3(vec3(a-b), vec3(a-c), d);
+
+	//平行
+	if (abs(determinant(equation_A)) < 0.00001)
+		return vec4(0, 0, 0, 0);
+
+	vec3 equation_b = a - e;
+	vec3 equation_X = inverse(equation_A) * equation_b;
+	float alpha = 1 - equation_X[0] - equation_X[1];
+	return vec4(alpha, equation_X);
+}
+
 bool Scatter_Material(struct Vertex vertex, float matIdx){
     float matType = At(MatData, matIdx);
     
@@ -232,7 +326,9 @@ bool Scatter_Material(struct Vertex vertex, float matIdx){
         return Scatter_Metal(vertex, matIdx);
     else if(matType == MatT_Dielectric)
         return Scatter_Dielectric(vertex, matIdx);
-    else{
+    else if(matType == MatT_Light)
+		return Scatter_Light(vertex, matIdx);
+	else{
         gRay.color = vec3(1,0,1);//以此提示材质存在问题
         return false;
     }
@@ -296,23 +392,63 @@ bool Scatter_Dielectric(struct Vertex vertex, float matIdx){
     return true;
 }
 
+
+bool Scatter_Light(struct Vertex vertex, float matIdx){
+	float texIdx = At(MatData, matIdx+1);
+	float linear = At(MatData, matIdx+2);
+	float quadratic = At(MatData, matIdx+3);
+
+	float d = gRay.tMax * length(gRay.dir);
+	float attDis = 1.0f / (1.0f + d * (linear + quadratic * d));
+	float attAngle = abs(dot(normalize(gRay.dir), vertex.normal));
+	vec3 lightColor = Value_Texture(vertex.uv, vertex.pos, texIdx);
+	gRay.color *= attDis * attAngle * lightColor;
+	//gRay.color *= attDis * lightColor;
+
+	return false;
+}
+
 struct HitRst RayIn_Scene(){
+	Stack_Push(gRay.tMax);//这里也需要入栈
     Stack_Push(9);//Group的 孩子指针 的位置
     struct HitRst finalHitRst = HitRst_InValid;
     while(!Stack_Empty()){
         float pIdx = Stack_Top();
 		float idx = At(SceneData, pIdx);
 		if(idx == -1.0){
-			Stack_Pop();
-			if(Stack_Empty())
+			Stack_Pop();//空指针 -1
+			float in_tMax = Stack_Pop();//进入节点时的tMax
+			if(Stack_Empty())//这说明是最顶层的Group出栈了，后续操作就不需要处理了
 				return finalHitRst;
 
-			//由于暂时没有离开节点时需要做的事情, 因此先都注释掉
-			//float pIdx = Stack_Top();
-			//float idx = At(SceneData, pIdx);// idx != -1
-			//float type = At(SceneData, idx);// 只可能是那些有子节点的类型
-			//if(type == HT_Group)
-			//	;// 修改材质指针
+			float pIdx = Stack_Top();
+			float idx = At(SceneData, pIdx);// idx != -1
+			float type = At(SceneData, idx);// 只可能是那些有子节点的类型
+			if(type == HT_Group || type == HT_BVH_Node || type == HT_TriMesh ){
+				if (gRay.tMax < in_tMax && finalHitRst.isMatCoverable == 1.0){
+					float matIdx = At(SceneData, idx+1);
+					if( matIdx != -1.0) {
+						finalHitRst.matIdx = matIdx;
+						finalHitRst.isMatCoverable = At(SceneData, idx+2);
+					}
+				}
+			}else if(type == HT_Transform){
+				mat4 tfmMat4 = Load_Mat4(idx+9);
+				Ray_Transform(tfmMat4);
+				if(gRay.tMax < in_tMax){
+					mat3 normTfmMat3 = Load_Mat3(idx+41);
+					Vertex_Transform(tfmMat4, normTfmMat3, finalHitRst.vertex);
+					if(finalHitRst.isMatCoverable == 1.0){
+						float matIdx = At(SceneData, idx+1);
+						if(matIdx != -1.0){
+							finalHitRst.matIdx = matIdx;
+							finalHitRst.isMatCoverable = At(SceneData, idx+2);
+						}
+					}
+				}
+			}
+			//else
+			//	;//do nothing
 
 			Stack_Acc();
 			continue;
@@ -326,15 +462,32 @@ struct HitRst RayIn_Scene(){
 
 			Stack_Acc();
 		}
-		else if(type == HT_Group)
+		else if(type == HT_Group){
+			Stack_Push(gRay.tMax);//入栈顺序先于孩子节点指针的指针
 			Stack_Push(idx+9);
-		else if(type == HT_BVH_Node){
-			if(AABB_Hit(idx+3))
+		}
+		else if(type == HT_BVH_Node || type == HT_TriMesh){
+			if(AABB_Hit(idx+3)){
+				Stack_Push(gRay.tMax);//入栈顺序先于孩子节点指针的指针
 				Stack_Push(idx+9);
+			}
 			else
 				Stack_Acc();
 		}
-		else
+		else if(type == HT_Triangle){
+			struct HitRst hitRst = RayIn_Triangle(idx);
+			if(hitRst.hit)
+				finalHitRst = hitRst;
+
+			Stack_Acc();
+		}
+		else if(type == HT_Transform){
+			mat4 invTfmMat4 = Load_Mat4(idx+25);
+			Ray_Transform(invTfmMat4);
+			Stack_Push(gRay.tMax);//入栈顺序先于孩子节点指针的指针
+			Stack_Push(idx+50);
+		}
+		else// not supported type
 		    Stack_Acc();
     }
     
@@ -343,6 +496,7 @@ struct HitRst RayIn_Scene(){
 
 struct HitRst RayIn_Sphere(float idx){
     float matIdx = At(SceneData, idx+1);
+	float isMatCoverable = At(SceneData, idx+2);
     vec3 center = vec3(At(SceneData, idx+9), At(SceneData, idx+10), At(SceneData, idx+11));
     float radius = At(SceneData, idx+12);
     
@@ -372,8 +526,32 @@ struct HitRst RayIn_Sphere(float idx){
     hitRst.vertex.normal = (hitRst.vertex.pos - center) / radius;
     hitRst.vertex.uv = Sphere2UV(hitRst.vertex.normal);
     hitRst.matIdx = matIdx;
-    
+    hitRst.isMatCoverable = isMatCoverable;
     return hitRst;
+}
+
+struct HitRst RayIn_Triangle(float idx){
+	float matIdx = At(SceneData, idx+1);
+	float isMatCoverable = At(SceneData, idx+2);
+	struct Vertex A = Vertex_Load(idx+ 9);
+	struct Vertex B = Vertex_Load(idx+17);
+	struct Vertex C = Vertex_Load(idx+25);
+
+	vec4 abgt = Intersect_RayTri(gRay.origin, gRay.dir, A.pos, B.pos, C.pos);
+	if (abgt == vec4(0)
+		|| abgt[0] < 0 || abgt[0] > 1
+		|| abgt[1] < 0 || abgt[1] > 1
+		|| abgt[2] < 0 || abgt[2] > 1
+		|| abgt[3] < tMin || abgt[3] > gRay.tMax)
+		return HitRst_InValid;
+
+	struct HitRst hitRst;
+	hitRst.hit = true;
+	hitRst.vertex = Vertex_Interpolate(abgt.xyz, A, B, C);
+	hitRst.matIdx = matIdx;
+	hitRst.isMatCoverable = isMatCoverable;
+	gRay.tMax = abgt[3];
+	return hitRst;
 }
 
 bool AABB_Hit(float idx){
@@ -429,6 +607,12 @@ void Ray_Update(vec3 origin, vec3 dir, vec3 attenuation){
     gRay.tMax = FLT_MAX;
 }
 
+void Ray_Transform(mat4 transform){
+	gRay.dir = mat3(transform) * gRay.dir;
+	vec4 originQ = transform * vec4(gRay.origin, 1.0f);
+	gRay.origin = originQ.xyz / originQ.w;
+}
+
 void Camera_GenRay(){
     vec2 st = TexCoords + RandInSquare() / textureSize(origin_curRayNum, 0);
     vec2 rd = camera.lenR * RandInCircle();
@@ -463,12 +647,18 @@ void WriteRay(int mode){
 
     if(mode == 0){//最终没有击中光源
         gRay.tMax = 0;
-        color *= gRay.curRayNum / (gRay.curRayNum + 1);
+		if(enableGammaCorrection)
+			color = sqrt(color * color * gRay.curRayNum / (gRay.curRayNum + 1));
+		else
+			color = color * gRay.curRayNum / (gRay.curRayNum + 1);
         gRay.curRayNum = min(gRay.curRayNum + 1, RayNumMax);
     }
     else if(mode == 1){//击中光源
         gRay.tMax = 0;
-		color = (color * gRay.curRayNum + (enableGammaCorrection ? sqrt(gRay.color) : gRay.color)) / (gRay.curRayNum + 1);
+		if(enableGammaCorrection)
+			color = sqrt((color * color * gRay.curRayNum + gRay.color) / (gRay.curRayNum + 1));
+		else
+			color = (color * gRay.curRayNum + gRay.color) / (gRay.curRayNum + 1);
         gRay.curRayNum = min(gRay.curRayNum + 1, RayNumMax);
     }
     //else if(mode == 2){//继续追踪
@@ -506,7 +696,7 @@ void RayTracer(){
         if(rayOut)
             WriteRay(2);//继续追踪
         else
-            WriteRay(1);
+            WriteRay(1);//碰到光源
     }else{// sky
         float t = 0.5f * (normalize(gRay.dir).y + 1.0f);
         vec3 white = vec3(1.0f, 1.0f, 1.0f);

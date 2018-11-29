@@ -21,8 +21,8 @@ void Vertex::Transform(const mat4 & transform, const mat3 & normalTransform) {
 const Vertex Vertex::Interpolate_Tri(const vec3 & abg, const Vertex & A, const Vertex & B, const Vertex & C) {
 	Vertex rst;
 
-	rst.u = dot(vec3(abg), vec3(A.u, B.u, C.u));
-	rst.v = dot(vec3(abg), vec3(A.v, B.v, C.v));
+	rst.u = dot(abg, vec3(A.u, B.u, C.u));
+	rst.v = dot(abg, vec3(A.v, B.v, C.v));
 	rst.pos = abg[0] * A.pos + abg[1] * B.pos + abg[2] * C.pos;
 	rst.normal = abg[0] * A.normal + abg[1] * B.normal + abg[2] * C.normal;
 

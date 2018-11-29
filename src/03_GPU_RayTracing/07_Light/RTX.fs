@@ -69,6 +69,7 @@ const float HT_BVH_Node       = 2.0;
 const float MatT_Lambertian   = 0.0;
 const float MatT_Metal        = 1.0;
 const float MatT_Dielectric   = 2.0;
+const float MatT_Light        = 3.0;
 const float TexT_ConstTexture = 0.0;
 const float TexT_ImgTexture   = 1.0;
 
@@ -102,6 +103,7 @@ bool Scatter_Material(struct Vertex vertex, float matIdx);
 bool Scatter_Lambertian(struct Vertex vertex, float matIdx);
 bool Scatter_Metal(struct Vertex vertex, float matIdx);
 bool Scatter_Dielectric(struct Vertex vertex, float matIdx);
+bool Scatter_Light(struct Vertex vertex, float matIdx);
 vec3 Value_Texture(vec2 uv, vec3 p, float texIdx);
 vec3 Value_ConstTexture(float texIdx);
 vec3 Value_ImgTexture(vec2 uv, float texIdx);
@@ -232,7 +234,9 @@ bool Scatter_Material(struct Vertex vertex, float matIdx){
         return Scatter_Metal(vertex, matIdx);
     else if(matType == MatT_Dielectric)
         return Scatter_Dielectric(vertex, matIdx);
-    else{
+    else if(matType == MatT_Light)
+		return Scatter_Light(vertex, matIdx);
+	else{
         gRay.color = vec3(1,0,1);//以此提示材质存在问题
         return false;
     }
@@ -296,6 +300,21 @@ bool Scatter_Dielectric(struct Vertex vertex, float matIdx){
     return true;
 }
 
+
+bool Scatter_Light(struct Vertex vertex, float matIdx){
+	float texIdx = At(MatData, matIdx+1);
+	float linear = At(MatData, matIdx+2);
+	float quadratic = At(MatData, matIdx+3);
+
+	float d = gRay.tMax * length(gRay.dir);
+	float attDis = 1.0f / (1.0f + d * (linear + quadratic * d));
+	float attAngle = abs(dot(normalize(gRay.dir), vertex.normal));
+	vec3 lightColor = Value_Texture(vertex.uv, vertex.pos, texIdx);
+	gRay.color *= attDis * attAngle * lightColor;
+
+	return false;
+}
+
 struct HitRst RayIn_Scene(){
     Stack_Push(9);//Group的 孩子指针 的位置
     struct HitRst finalHitRst = HitRst_InValid;
@@ -334,8 +353,8 @@ struct HitRst RayIn_Scene(){
 			else
 				Stack_Acc();
 		}
-		else
-		    Stack_Acc();
+		//else
+		//    ;// do nothing
     }
     
     return finalHitRst;
@@ -506,7 +525,7 @@ void RayTracer(){
         if(rayOut)
             WriteRay(2);//继续追踪
         else
-            WriteRay(1);
+            WriteRay(1);//碰到光源
     }else{// sky
         float t = 0.5f * (normalize(gRay.dir).y + 1.0f);
         vec3 white = vec3(1.0f, 1.0f, 1.0f);

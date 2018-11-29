@@ -330,8 +330,8 @@ struct HitRst RayIn_Scene(){
 			else
 				Stack_Acc();
 		}
-		//else
-		//    ;// do nothing
+		else
+		    Stack_Acc();
     }
     
     return finalHitRst;

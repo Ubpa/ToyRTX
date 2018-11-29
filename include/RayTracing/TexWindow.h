@@ -25,7 +25,7 @@ namespace RayTracing {
 
 		double GetScale() const { return scale; };
 		void SetTex(const CppUtility::OpenGL::Texture & tex) { this->tex = tex; };
-		bool IsValid() { return isValid; };
+		bool IsValid() const { return isValid; };
 
 		bool Run(const CppUtility::Other::Operation::Ptr & texUpdateOp);
 

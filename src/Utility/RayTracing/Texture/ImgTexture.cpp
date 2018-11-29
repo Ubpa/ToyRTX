@@ -21,6 +21,6 @@ rgb ImgTexture::Value(float u, float v, const glm::vec3 & p) const {
 	return rgb(pixel.r, pixel.g, pixel.b);
 }
 
-bool ImgTexture::IsValid(){
+bool ImgTexture::IsValid() const {
 	return img->IsValid();
 }

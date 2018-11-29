@@ -12,6 +12,10 @@ namespace RayTracing {
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 		virtual const AABB GetBoundingBox() const { return box; }
+		const glm::mat4 GetTransform() const { return transform; }
+		const glm::mat4 GetInvTransform() const { return inverseTransform; }
+		const glm::mat3 GetNormTransform() const { return normalTransform; }
+		const Hitable::CPtr GetChild() const { return hitable; }
 	private:
 		//如果要修改transform, 则要同时设置 inverseTransform 和 normalTransform
 		glm::mat4 transform;

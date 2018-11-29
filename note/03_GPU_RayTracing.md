@@ -721,5 +721,131 @@ struct ImgTexture{// 2
 2. main 程序将 `Image` 放入 `Texture` 中，然后再设置 Uniform
 3. shader 获取 idx，转型成 int，然后从 TexArr 中获取相应纹理，再进行纹理采样
 
+## 3.9 Light
 
+### 3.9.1 灯光
 
+原本灯光的实现很简单，就是直接从`Texture`上获取颜色
+
+然而，应该与夹角和距离有关
+
+修正后的函数如下
+
+```c++
+bool Light::Scatter(const HitRecord & rec) const {
+	float d = rec.ray->GetTMax() * length(rec.ray->GetDir());
+	float attDis = 1.0f / (1.0f + d * (linear + quadratic * d));
+	float attAngle = abs(dot(normalize(rec.ray->GetDir()), rec.vertex.normal));
+	rec.ray->SetLightColor(attDis * attAngle * lightTex->Value(rec.vertex.u, rec.vertex.v, rec.vertex.pos));
+	return false;
+}
+```
+
+### 3.9.2 数据结构
+
+```c++
+struct Light{// 4
+    int type = 3.0;
+    float linear;
+    float quadratic;
+    float texIdx;
+}
+```
+
+## 3.10 Triangle Mesh
+
+`TriMesh` 就是 `Triangle` 的 `BVH Tree`， `BVH_Node` 已经实现了，现在只需实现三角形即可
+
+### 3.10.1 数据结构
+
+```c++
+struct AABB{// 6
+    vec3 minP;
+    vec3 maxP;
+}
+
+struct Hitable{// 8
+    float matIdx;
+    float matCoverable;
+    struct AABB box;
+}
+
+struct Vertex{// 8
+    vec3 pos;
+    vec3 normal;
+    vec2 uv;
+}
+
+struct Triangle{// 33
+    float type = 3.0;//@0
+    struct Hitable base;//@1
+    struct Vertex A;//@9
+    struct Vertex B;//@17
+    struct Vertex C;//@25
+};
+
+struct Mesh{
+    float type = 4.0;
+    struct BVH_Node;// 去除type
+}
+```
+
+### 3.10.2 三角形
+
+**Intersect_Ray_Triangle**
+$$
+\mathbf{e} + t\mathbf{d} = \mathbf{f}(u, v)= \mathbf{a} + β(\mathbf{b} − \mathbf{a}) + γ(\mathbf{c} − \mathbf{a})
+$$
+因此
+$$
+β(\mathbf{a} − \mathbf{b})+γ(\mathbf{a} − \mathbf{c})+ t\mathbf{d}=\mathbf{a}-\mathbf{e}
+$$
+这是一个线性方程，可以求解出 $\beta$, $\gamma$ 和 $t$，从而 $\alpha=1-\beta-\gamma$，如果 $0\le\alpha,\beta,\gamma\le1$ 且 $tMin < t <tMax$，则相交。
+
+**三角线性插值**
+$$
+\mathbf{n}=\alpha\mathbf{n_A}+\beta\mathbf{n_B}+\gamma\mathbf{n_C}
+$$
+
+## 3.11 Transform
+
+### 3.11.1 数据结构
+
+Tranform 节点有一个子节点，数据结构的处理上类似 Group
+
+```c++
+struct AABB{// 6
+    vec3 minP;
+    vec3 maxP;
+}
+
+struct Hitable{// 8
+    float matIdx;
+    float matCoverable;
+    struct AABB box;
+}
+
+struct Transform{// 52
+    float type = 5.0;//@0
+    struct Hitable hitable;//@1
+    mat4 transform;//@9
+    mat4 invTransform;//@25
+    mat3 normTransform;//@41
+    float childIdx;//@50
+    float childEnd = -1.0;//@51
+}
+```
+
+### 3.11.2 进出节点的操作
+
+前边已经提到可以处理离开节点的操作，所以这点不存在问题。
+
+实际在写的时候发现还是有问题。
+
+需要知道在transform内发生了碰撞
+
+之前的Group、BVH_Node、TriMesh也是如此。
+
+可以记录进入时的tMax值，如果tMax值比进入时小了，说明发生了碰撞。
+
+可以把tMax放在栈中，在将孩子指针的指针入栈前先入栈。

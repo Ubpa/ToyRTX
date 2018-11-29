@@ -127,3 +127,7 @@ int val_03_GPU_RayTracing_02_RayTracingBasicSystem_ImgHeight = 640;
 # 03_GPU_RayTracing / 03_Material 输出图像大小
 int val_03_GPU_RayTracing_03_Material_ImgWidth = 1280;
 int val_03_GPU_RayTracing_03_Material_ImgHeight = 640;
+
+# 03_GPU_RayTracing / 09_Transform 输出图像大小
+int val_03_GPU_RayTracing_09_Transform_ImgWidth = 768;
+int val_03_GPU_RayTracing_09_Transform_ImgHeight = 768;

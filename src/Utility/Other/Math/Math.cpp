@@ -78,6 +78,7 @@ vec2 Math::Sphere2UV(const vec3 & normal) {
 vec4 Math::Intersect_RayTri(const vec3 & e, const vec3 & d, const vec3 & a, const vec3 & b, const vec3 & c) {
 	mat3 equation_A(vec3(a-b), vec3(a-c), d);
 
+	//Æ½ÐÐ
 	if (abs(determinant(equation_A)) < EPSILON)
 		return vec4(0, 0, 0, 0);
 

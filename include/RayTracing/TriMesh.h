@@ -2,7 +2,6 @@
 #define _TRI_MESH_H_
 
 #include <RayTracing/BVH_Node.h>
-#include <RayTracing/Triangle.h>
 
 #include <vector>
 

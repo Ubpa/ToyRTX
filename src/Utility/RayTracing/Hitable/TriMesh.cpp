@@ -1,4 +1,5 @@
 #include <RayTracing/TriMesh.h>
+#include <RayTracing/Triangle.h>
 
 using namespace RayTracing;
 using namespace CppUtility::Other;

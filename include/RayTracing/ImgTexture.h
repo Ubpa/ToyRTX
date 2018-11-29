@@ -21,7 +21,7 @@ namespace RayTracing {
 		ImgTexture(const std::string & fileName, bool flip = false);
 
 		virtual glm::rgb Value(float u = 0, float v = 0, const glm::vec3 & p = glm::vec3(0)) const;
-		bool IsValid();
+		bool IsValid() const;
 		const ImgCPtr GetImg() const { return img; }
 	private:
 		ImgCPtr img;

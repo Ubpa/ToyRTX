@@ -11,6 +11,9 @@ namespace RayTracing {
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 		virtual const AABB GetBoundingBox() const { return box; }
+		const Vertex & GetA() const { return A; }
+		const Vertex & GetB() const { return B; }
+		const Vertex & GetC() const { return C; }
 	private:
 		Vertex A, B, C;
 		AABB box;

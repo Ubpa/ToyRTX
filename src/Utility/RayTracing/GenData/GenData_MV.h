@@ -9,7 +9,6 @@
 #include <map>
 
 namespace RayTracing {
-	class Material;
 	class Texture;
 	class GenData_TV;
 
@@ -29,6 +28,7 @@ namespace RayTracing {
 		virtual void Visit(const CppUtility::Other::CPtr<Lambertian> & lambertian);
 		virtual void Visit(const CppUtility::Other::CPtr<Metal> & metal);
 		virtual void Visit(const CppUtility::Other::CPtr<Dielectric> & dielectric);
+		virtual void Visit(const CppUtility::Other::CPtr<Light> & light);
 		using MatVisitor::Visit;
 
 		std::vector<float> matData;

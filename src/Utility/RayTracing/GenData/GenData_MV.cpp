@@ -5,6 +5,7 @@
 #include <RayTracing/Lambertian.h>
 #include <RayTracing/Metal.h>
 #include <RayTracing/Dielectric.h>
+#include <RayTracing/Light.h>
 
 using namespace RayTracing;
 using namespace std;
@@ -13,6 +14,7 @@ using namespace std;
 const float MatT_Lambertian = 0.0f;
 const float MatT_Metal      = 1.0f;
 const float MatT_Dielectric = 2.0f;
+const float MatT_Light      = 3.0f;
 
 void GenData_MV::Visit(const Lambertian::CPtr & lambertian) {
 	if (lambertian == NULL)
@@ -63,6 +65,25 @@ void GenData_MV::Visit(const Dielectric::CPtr & dielectric) {
 	matData.push_back(MatT_Dielectric);
 
 	matData.push_back(dielectric->GetRafractIndex());
+}
+
+void GenData_MV::Visit(const Light::CPtr & light) {
+	if (light == NULL)
+		return;
+
+	auto targetPair = mat2idx.find(light);
+	if (targetPair != mat2idx.end())
+		return;
+
+	mat2idx[light] = matData.size();
+
+	matData.push_back(MatT_Light);
+	if (light->GetTexture())
+		tex2idxVec[light->GetTexture()].push_back(matData.size());
+	matData.push_back(-1);
+
+	matData.push_back(light->GetLinear());
+	matData.push_back(light->GetQuadratic());
 }
 
 void GenData_MV::SetTex(const TexIdxMap & tex2idx) {
