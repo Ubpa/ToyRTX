@@ -104,8 +104,7 @@ void Stack_Pop(out vec2 v2);
 void Stack_Pop(out vec3 v3); 
 void Stack_Pop(out struct Ray ray); 
 void Stack_Pop(out struct Vertex vert); 
-void Stack_Pop(out struct HitRst hitRst); 
-void Stack_Acc();
+void Stack_Pop(out struct HitRst hitRst);
 
 float RandXY(float x, float y);// [0.0, 1.0)
 float Rand();// [0.0, 1.0)
@@ -270,14 +269,6 @@ int Stack_Size(){
 
 bool Stack_Empty(){
 	return _Stack_mTop == -1;
-}
-
-void Stack_Acc(){
-	//if(_Stack_mTop == -1)
-	//	return false;
-
-	_Stack[_Stack_mTop] += 1.0;
-	//return true;
 }
 
 float RandXY(float x, float y){
@@ -493,22 +484,20 @@ bool Scatter_Light(inout struct Ray ray, struct Vertex vertex, float matIdx){
 }
 
 void RayIn_Scene(inout struct Ray ray, out struct HitRst finalHitRst){
-	Stack_Push(ray.tMax);//这里也需要入栈
     Stack_Push(9);//Group的 孩子指针 的位置
     finalHitRst.hit = false;
     while(!Stack_Empty()){
-        float pIdx = Stack_Top();
+        float pIdx = Stack_Pop();
 		float idx = At(SceneData, pIdx);
 		if(idx == -1.0){
-			Stack_Pop();//空指针 -1
-			float in_tMax = Stack_Pop();//进入节点时的tMax
 			if(Stack_Empty())//这说明是最顶层的Group出栈了，后续操作就不需要处理了
 				return;
 
-			float pIdx = Stack_Top();
+			float pIdx = Stack_Pop();
 			float idx = At(SceneData, pIdx);// idx != -1
 			float type = At(SceneData, idx);// 只可能是那些有子节点的类型
 			if(type == HT_Group || type == HT_BVH_Node || type == HT_TriMesh ){
+				float in_tMax = Stack_Pop();// 进入节点时的tMax
 				if (ray.tMax < in_tMax && finalHitRst.isMatCoverable == 1.0){
 					float matIdx = At(SceneData, idx+1);
 					if( matIdx != -1.0) {
@@ -517,6 +506,7 @@ void RayIn_Scene(inout struct Ray ray, out struct HitRst finalHitRst){
 					}
 				}
 			}else if(type == HT_Transform){
+				float in_tMax = Stack_Pop();// 进入节点时的tMax
 				mat4 tfmMat4;
 				Load_Mat4(idx+9, tfmMat4);
 				Ray_Transform(ray, tfmMat4);
@@ -536,7 +526,7 @@ void RayIn_Scene(inout struct Ray ray, out struct HitRst finalHitRst){
 			//else
 			//	;//do nothing
 
-			Stack_Acc();
+			Stack_Push(pIdx+1);
 			continue;
 		}
 		
@@ -544,37 +534,40 @@ void RayIn_Scene(inout struct Ray ray, out struct HitRst finalHitRst){
 		if(type == HT_Sphere){
 			RayIn_Sphere(idx, ray, finalHitRst);
 
-			Stack_Acc();
+			Stack_Push(pIdx+1);
 		}
 		else if(type == HT_Group){
-			Stack_Push(ray.tMax);//入栈顺序先于孩子节点指针的指针
+			Stack_Push(ray.tMax);
+			Stack_Push(pIdx);//将自己压回栈中
 			Stack_Push(idx+9);
 		}
 		else if(type == HT_BVH_Node || type == HT_TriMesh){
 			if(AABB_Hit(ray, idx+3)){
-				Stack_Push(ray.tMax);//入栈顺序先于孩子节点指针的指针
+				Stack_Push(ray.tMax);
+				Stack_Push(pIdx);//将自己压回栈中
 				Stack_Push(idx+9);
 			}
 			else
-				Stack_Acc();
+				Stack_Push(pIdx+1);
 		}
 		else if(type == HT_Triangle){
 			RayIn_Triangle(idx, ray, finalHitRst);
 
-			Stack_Acc();
+			Stack_Push(pIdx+1);
 		}
 		else if(type == HT_Transform){
 			mat4 invTfmMat4;
 			Load_Mat4(idx+25, invTfmMat4);
 			Ray_Transform(ray, invTfmMat4);
-			Stack_Push(ray.tMax);//入栈顺序先于孩子节点指针的指针
+			Stack_Push(ray.tMax);
+			Stack_Push(pIdx);//将自己压回栈中
 			Stack_Push(idx+50);
 		}
 		//else if(type == HT_Volume){
 		//	
 		//}
 		else// not supported type
-		    Stack_Acc();
+		    Stack_Push(pIdx+1);
     }
 }
 
