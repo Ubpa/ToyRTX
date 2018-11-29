@@ -1,6 +1,7 @@
 #include "GenData_HV.h"
 #include "GenData_MV.h"
 
+#include <RayTracing/Volume.h>
 #include <RayTracing/Group.h>
 #include <RayTracing/Sphere.h>
 #include <RayTracing/BVH_Node.h>
@@ -19,6 +20,7 @@ const float HT_BVH_Node  = 2.0f;
 const float HT_Triangle  = 3.0f;
 const float HT_TriMesh   = 4.0f;
 const float HT_Transform = 5.0f;
+const float HT_Volume    = 6.0f;
 
 void GenData_HV::Visit(const Hitable::CPtr & hitable) {
 	if (hitable == NULL)
@@ -231,6 +233,40 @@ void GenData_HV::Visit(const Transform::CPtr & transform) {
 	if (targetChildIdx == hitable2idx.end()) {
 		sceneData[childIt] = sceneData.size();
 		transform->GetChild()->Accept(This());
+	}
+	else
+		sceneData[childIt] = targetChildIdx->second;
+}
+
+void GenData_HV::Visit(const Volume::CPtr & volume) {
+	if (volume == NULL)
+		return;
+
+	auto targetPair = hitable2idx.find(volume);
+	if (targetPair != hitable2idx.end())
+		return;
+
+	hitable2idx[volume] = sceneData.size();
+
+	sceneData.push_back(HT_Volume);
+
+	Visit(static_cast<Hitable::CPtr>(volume));
+
+	sceneData.push_back(volume->GetDensity());
+
+	if (volume->GetBoundary() == NULL) {
+		sceneData.push_back(-1);
+		return;
+	}
+
+	size_t childIt = sceneData.size();
+	sceneData.push_back(-1);
+	sceneData.push_back(-1);
+
+	auto targetChildIdx = hitable2idx.find(volume->GetBoundary());
+	if (targetChildIdx == hitable2idx.end()) {
+		sceneData[childIt] = sceneData.size();
+		volume->GetBoundary()->Accept(This());
 	}
 	else
 		sceneData[childIt] = targetChildIdx->second;

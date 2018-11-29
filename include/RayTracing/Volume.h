@@ -11,9 +11,11 @@ namespace RayTracing {
 
 		virtual HitRst RayIn(Ray::Ptr & ray) const;
 		virtual const AABB GetBoundingBox() const { return boundary ? boundary->GetBoundingBox() : AABB::InValid; }
+		const Hitable::CPtr GetBoundary() const { return boundary; }
+		float GetDensity() const { return density; }
 	private:
-		const Hitable::CPtr boundary;
-		const float density;
+		Hitable::CPtr boundary;
+		float density;
 	};
 }
 

@@ -849,3 +849,34 @@ struct Transform{// 52
 可以记录进入时的tMax值，如果tMax值比进入时小了，说明发生了碰撞。
 
 可以把tMax放在栈中，在将孩子指针的指针入栈前先入栈。
+
+## 3.12 Volume
+
+Volume比较麻烦，因为它的计算中需要生成新的光线来进行辅助计算
+
+生成新的光线，想去追踪它，只能先把原光线和原碰撞结果入栈
+
+然后把boundary入栈，最终回到Volume时再进行后续操作
+
+### 3.12.1 数据结构
+
+```c++
+struct AABB{// 6
+    vec3 minP;
+    vec3 maxP;
+}
+
+struct Hitable{// 8
+    float matIdx;
+    float matCoverable;
+    struct AABB box;
+}
+
+struct Volume{
+    float type = 6.0;//@0
+    struct Hitable hitable;//@1
+    float density;
+    float boundaryIdx;
+    float childEnd = -1.0;
+}
+```

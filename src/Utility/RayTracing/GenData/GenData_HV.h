@@ -30,6 +30,7 @@ namespace RayTracing {
 		virtual void Visit(const CppUtility::Other::CPtr<Triangle> & triangle);
 		virtual void Visit(const CppUtility::Other::CPtr<TriMesh> & triMesh);
 		virtual void Visit(const CppUtility::Other::CPtr<Transform> & transform);
+		virtual void Visit(const CppUtility::Other::CPtr<Volume> & volume);
 
 		std::vector<float> sceneData;
 		std::map< CppUtility::Other::CPtr<Hitable>, size_t> hitable2idx;
