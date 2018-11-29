@@ -46,7 +46,7 @@
 #     ENUM_OPTION_SAVE_ALL_IMG = ENUM_OPTION_SAVE_SRC_IMG | ENUM_OPTION_SAVE_POST_PROCESS_IMG,
 #     ENUM_OPTION_ALL = ENUM_OPTION_POST_PROCESS_ALL | ENUM_OPTION_SAVE_ALL_IMG,
 # };
-bin option = 11111;
+bin option = 11110;
 
 # 根目录
 string RootPath = "${CMAKE_SOURCE_DIR}";
@@ -131,3 +131,7 @@ int val_03_GPU_RayTracing_03_Material_ImgHeight = 640;
 # 03_GPU_RayTracing / 09_Transform 输出图像大小
 int val_03_GPU_RayTracing_09_Transform_ImgWidth = 768;
 int val_03_GPU_RayTracing_09_Transform_ImgHeight = 768;
+
+# 03_GPU_RayTracing / 10_Volume 输出图像大小
+int val_03_GPU_RayTracing_10_Volume_ImgWidth = 768;
+int val_03_GPU_RayTracing_10_Volume_ImgHeight = 768;
