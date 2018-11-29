@@ -1,5 +1,7 @@
 #include "CreateScene.h"
 
+#include <RayTracing/Volume.h>
+#include <RayTracing/Isotropic.h>
 #include <RayTracing/TriMesh.h>
 #include <RayTracing/Light.h>
 #include <RayTracing/BVH_Node.h>
@@ -317,7 +319,7 @@ Scene::CPtr CreateScene6(float ratioWH) {
 
 	mat4 tfmLight(1.0f);
 	tfmLight = translate(tfmLight, vec3(0, 2.999, 0));
-	tfmLight = scale(tfmLight, vec3(3));
+	tfmLight = scale(tfmLight, vec3(4));
 	tfmLight = rotate(tfmLight, Math::PI / 2, vec3(1, 0, 0));
 	auto light = ToCPtr(new Transform(tfmLight, square, lightMat));
 
@@ -328,16 +330,17 @@ Scene::CPtr CreateScene6(float ratioWH) {
 	auto cube1 = ToCPtr(new Transform(tfmCube1, cube, cubeMat));
 
 	mat4 tfmCube2(1.0f);
-	tfmCube2 = translate(tfmCube2, vec3(-1.1, -1, -0.5));
-	tfmCube2 = scale(tfmCube2, vec3(1.6, 4, 1.6));
+	tfmCube2 = translate(tfmCube2, vec3(-1.1, -1.49, -0.5));
+	tfmCube2 = scale(tfmCube2, vec3(1.6, 3, 1.6));
 	tfmCube2 = rotate(tfmCube2, Math::PI / 9, vec3(0, 1, 0));
-	auto cube2 = ToCPtr(new Transform(tfmCube2, cube, cubeMat));
+	auto cube2 = ToPtr(new Transform(tfmCube2, cube));
+	auto volume = ToPtr(new Volume(cube2, 1.65f, ToPtr(new Isotropic(vec3(1.0f)))));
 
 
 	// Scene
 	auto group = ToPtr(new Group);
 
-	(*group) << greenWall << redWall << bottomWall << topWall << backWall << cube1 << cube2 << light << sky;
+	(*group) << greenWall << redWall << bottomWall << topWall << backWall << cube1 << volume << light << sky;
 
 	// Camera
 	float t0 = 0.0f;

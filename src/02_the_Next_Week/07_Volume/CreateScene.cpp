@@ -233,15 +233,14 @@ Scene::Ptr CreateScene2(float ratioWH) {
 	tfmCube2 = translate(tfmCube2, vec3(-1.1, -1.5, -0.5));
 	tfmCube2 = scale(tfmCube2, vec3(1.6,3,1.6));
 	tfmCube2 = rotate(tfmCube2, Math::PI / 9, vec3(0, 1, 0));
-	//tfmCube2 = scale(tfmCube2, vec3(4));
 	auto cube2 = ToPtr(new Transform(tfmCube2, cube));
-	auto volumn = ToPtr(new Volume(cube2, 1.65f, volumnMat));
+	auto volume = ToPtr(new Volume(cube2, 1.65f, volumnMat));
 	
 
 	// Scene
 	auto group = ToPtr(new Group);
 
-	(*group) << greenWall << redWall << bottomWall << topWall << backWall << cube1 << volumn << light;
+	(*group) << greenWall << redWall << bottomWall << topWall << backWall << cube1 << volume << light;
 
 	// Camera
 	float t0 = 0.0f;

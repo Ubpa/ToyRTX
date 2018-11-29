@@ -21,29 +21,32 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 	auto reverseRay = ToPtr(new Ray(ray->At(Ray::tMin*1.5f), - ray->GetDir()));
 	auto reverseHitRst = boundary->RayIn(reverseRay);
 	
-	HitRst * t0HitRst;
 	float t0;
+	float tMaxFromT0;
 	if (reverseHitRst.hit) {
 		// 反向光线撞击到边界, 说明光线在内部, 则此时体积内部的起点为 光线起点
 		// 此时以该起点的撞击结果即为前边的 boundaryHitRst
 		t0 = 0;
-		t0HitRst = &boundaryHitRst;
+		tMaxFromT0 = boundaryHitRst.record.ray->GetTMax();
+		//t0HitRst = boundaryHitRst;
 	}
 	else {
 		// 否则说明光线在外部, 则此时体积内部的起点为 光线撞击处
 		// 此时以该起点的撞击结果需计算
 		t0 = boundaryHitRst.record.ray->GetTMax();
 		auto t0Ray = ToPtr(new Ray(ray->At(t0), ray->GetDir()));
-		t0HitRst = &(boundary->RayIn(t0Ray));
+		HitRst t0HitRst = boundary->RayIn(t0Ray);
 
 		//太薄
-		if (!t0HitRst->hit) {
+		if (!t0HitRst.hit) {
 			ray->SetTMax(originTMax);
 			return HitRst::FALSE;
 		}
+
+		tMaxFromT0 = t0HitRst.record.ray->GetTMax();
 	}
 
-	float t1 = min(originTMax, t0 + t0HitRst->record.ray->GetTMax());
+	float t1 = min(originTMax, t0 + tMaxFromT0);
 	//此处的 len 未考虑 transform 的 scale
 	float lenInVolume = (t1 - t0) * length(ray->GetDir());
 

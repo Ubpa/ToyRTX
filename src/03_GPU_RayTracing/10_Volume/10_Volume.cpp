@@ -82,9 +82,9 @@ int main(int argc, char ** argv) {
 	for (size_t i = 0; i < genData.GetTexData().size(); i++)
 		printf("%f, ", genData.GetTexData()[i]);
 	printf("\n");
-	*/
-	//return 0;   
 	
+	return 0;   
+	*/
 
 	 //------------ RayTracing Basic Shader
 	string RTX_vs = rootPath + str_RTX_vs;
@@ -96,7 +96,7 @@ int main(int argc, char ** argv) {
 	}
 	auto camera = scene->camera;
 	TRayCamera::CPtr tCamera = std::dynamic_pointer_cast<const TRayCamera>(camera);
-	const float RayNumMax = 20000.0f;
+	const float RayNumMax = 5000.0f;
 
 	RTX_Shader.SetInt("origin_curRayNum", 0);
 	RTX_Shader.SetInt("dir_tMax", 1);

@@ -79,6 +79,7 @@ const float MatT_Lambertian   = 0.0;
 const float MatT_Metal        = 1.0;
 const float MatT_Dielectric   = 2.0;
 const float MatT_Light        = 3.0;
+const float MatT_Isotropic    = 4.0;
 const float TexT_ConstTexture = 0.0;
 const float TexT_ImgTexture   = 1.0;
 
@@ -89,6 +90,7 @@ in vec2 TexCoords;
 float _Stack[200];
 int _Stack_mTop = -1;
 bool Stack_Empty();
+void Stack_Clear();
 float Stack_Top();
 void Stack_Push(bool val);
 void Stack_Push(float val);
@@ -123,12 +125,14 @@ void WriteRay(struct Ray ray, int mode);
 void RayIn_Scene(inout struct Ray ray, out struct HitRst finalHitRst);
 void RayIn_Sphere(float idx, inout struct Ray ray, inout struct HitRst hitRst);
 void RayIn_Triangle(float idx, inout struct Ray ray, inout struct HitRst hitRst);
+void RayIn_Volume(float pIdx, float idx, float state, inout struct Ray ray, inout struct HitRst hitRst);
 bool AABB_Hit(struct Ray ray, float idx);
 bool Scatter_Material(inout struct Ray ray, struct Vertex vertex, float matIdx);
 bool Scatter_Lambertian(inout struct Ray ray, struct Vertex vertex, float matIdx);
 bool Scatter_Metal(inout struct Ray ray, struct Vertex vertex, float matIdx);
 bool Scatter_Dielectric(inout struct Ray ray, struct Vertex vertex, float matIdx);
 bool Scatter_Light(inout struct Ray ray, struct Vertex vertex, float matIdx);
+bool Scatter_Isotropic(inout struct Ray ray, struct Vertex vertex, float matIdx);
 vec3 Value_Texture(vec2 uv, vec3 p, float texIdx);
 vec3 Value_ConstTexture(float texIdx);
 vec3 Value_ImgTexture(vec2 uv, float texIdx);
@@ -271,6 +275,10 @@ bool Stack_Empty(){
 	return _Stack_mTop == -1;
 }
 
+void Stack_Clear(){
+	_Stack_mTop = -1;
+}
+
 float RandXY(float x, float y){
     return fract(cos(x * (12.9898) + y * (4.1414)) * 43758.5453);
 }
@@ -403,6 +411,8 @@ bool Scatter_Material(inout struct Ray ray, struct Vertex vertex, float matIdx){
         return Scatter_Dielectric(ray, vertex, matIdx);
     else if(matType == MatT_Light)
 		return Scatter_Light(ray, vertex, matIdx);
+	else if(matType == MatT_Isotropic)
+		return Scatter_Isotropic(ray, vertex, matIdx);
 	else{
         ray.color = vec3(1,0,1);//以此提示材质存在问题
         return false;
@@ -483,6 +493,14 @@ bool Scatter_Light(inout struct Ray ray, struct Vertex vertex, float matIdx){
 	return false;
 }
 
+bool Scatter_Isotropic(inout struct Ray ray, struct Vertex vertex, float matIdx){
+	float texIdx = At(MatData, matIdx+1);
+
+	vec3 attenuation = Value_Texture(vertex.uv, vertex.pos, texIdx);
+	Ray_Update(ray, vertex.pos, RandInSphere(), attenuation);
+	return true;
+}
+
 void RayIn_Scene(inout struct Ray ray, out struct HitRst finalHitRst){
     Stack_Push(9);//Group的 孩子指针 的位置
     finalHitRst.hit = false;
@@ -505,6 +523,7 @@ void RayIn_Scene(inout struct Ray ray, out struct HitRst finalHitRst){
 						finalHitRst.isMatCoverable = At(SceneData, idx+2);
 					}
 				}
+				Stack_Push(pIdx+1);
 			}else if(type == HT_Transform){
 				float in_tMax = Stack_Pop();// 进入节点时的tMax
 				mat4 tfmMat4;
@@ -522,11 +541,15 @@ void RayIn_Scene(inout struct Ray ray, out struct HitRst finalHitRst){
 						}
 					}
 				}
+				Stack_Push(pIdx+1);
+			}
+			else if(type == HT_Volume){
+				float state = Stack_Pop();
+				RayIn_Volume(pIdx, idx, state, ray, finalHitRst);
 			}
 			//else
 			//	;//do nothing
 
-			Stack_Push(pIdx+1);
 			continue;
 		}
 		
@@ -563,9 +586,9 @@ void RayIn_Scene(inout struct Ray ray, out struct HitRst finalHitRst){
 			Stack_Push(pIdx);//将自己压回栈中
 			Stack_Push(idx+50);
 		}
-		//else if(type == HT_Volume){
-		//	
-		//}
+		else if(type == HT_Volume){
+			RayIn_Volume(pIdx, idx, 0.0, ray, finalHitRst);
+		}
 		else// not supported type
 		    Stack_Push(pIdx+1);
     }
@@ -624,6 +647,101 @@ void RayIn_Triangle(float idx, inout struct Ray ray, inout struct HitRst hitRst)
 	hitRst.matIdx = matIdx;
 	hitRst.isMatCoverable = isMatCoverable;
 	ray.tMax = abgt[3];
+}
+
+void RayIn_Volume(float pIdx, float idx, float state, inout struct Ray ray, inout struct HitRst hitRst){
+	if(state==0.0){
+		float boundaryIdx = At(SceneData, idx+10);
+		if(boundaryIdx == -1.0){
+			Stack_Push(pIdx+1);
+			return;
+		}
+
+		Stack_Push(ray);// before hitRst
+		Stack_Push(hitRst);
+		Stack_Push(ray.tMax);// original ray's tMax
+		Stack_Push(1.0);//state
+		Stack_Push(pIdx);// ptr to ptr to volume
+		Stack_Push(idx+10);// ptr to ptr to volume
+	}else if(state==1.0){
+		float in_tMax = Stack_Pop();// original ray's tMax
+		if(ray.tMax >= in_tMax){// hit boundary ray
+			Stack_Pop(hitRst);
+			Stack_Pop(ray);// after hitRst
+			Stack_Push(pIdx+1);
+			return;
+		}
+		
+		Stack_Push(ray.tMax);// hit boundary ray's tMax
+
+		// reverse ray
+		Ray_Update(ray, ray.origin + tMin*1.5*ray.dir, -ray.dir, vec3(0));
+		hitRst = HitRst_InValid;
+		
+		Stack_Push(2.0);// state
+		Stack_Push(pIdx);// ptr to ptr to volume
+		Stack_Push(idx+10);// ptr to ptr to boundary
+	}else{
+		float t0;
+		float tMaxFromT0;
+		if(state==2.0){
+			if(!hitRst.hit){// reverse ray not hit, so ray's origin is in the volume
+				float t0 = Stack_Top();// hit boundary ray's tMax, don't pop it, will use it later(in state 3.0)
+
+				// ont boundary ray
+				vec3 origin = ray.origin + tMin*1.5*ray.dir - ray.dir * t0;
+				Ray_Update(ray, origin, -ray.dir, vec3(0));
+				hitRst = HitRst_InValid;
+
+				Stack_Push(3.0);// state
+				Stack_Push(pIdx);// ptr to ptr to volume
+				Stack_Push(idx+10);// ptr to ptr to boundary
+				return;
+			}
+
+			t0 = 0;
+			tMaxFromT0 = Stack_Pop();// hit boundary ray's tMax
+		}else if(state == 3.0){
+			t0 = Stack_Pop();// hit boundary ray's tMax
+
+			if(!hitRst.hit){// on boundary Ray
+				Stack_Pop(hitRst);
+				Stack_Pop(ray);
+				Stack_Push(pIdx+1);
+				return;
+			}
+
+			tMaxFromT0 = ray.tMax;// on boundary Ray's tMax
+		}
+		else //error state, it's a logic error
+			return;
+			
+		Stack_Pop(hitRst);
+		Stack_Pop(ray);
+		Stack_Push(pIdx+1);
+
+		float t1 = min(ray.tMax, t0 + tMaxFromT0);
+		//此处的 len 未考虑 transform 的 scale
+		float lenInVolume = (t1 - t0) * length(ray.dir);
+
+		float density = At(SceneData, idx+9);
+		// p = C * dL
+		// p(L) = lim(n->inf, (1 - CL/n)^n) = exp(-CL)
+		// L = -(1/C)ln(pL)
+		float hitLen = -(1.0f / density)*log(Rand());
+
+		if (hitLen >= lenInVolume)
+			return;
+
+		float tFinal = t0 + hitLen / length(ray.dir);
+		ray.tMax = tFinal;
+
+		hitRst.hit = true;
+		hitRst.vertex.pos = ray.origin + tFinal * ray.dir;
+		//hitRst.vertex.normal = RandInSphere();
+		hitRst.matIdx = At(SceneData, idx+1);
+		hitRst.isMatCoverable = At(SceneData, idx+2);
+	}
 }
 
 bool AABB_Hit(struct Ray ray, float idx){
@@ -723,7 +841,7 @@ void WriteRay(struct Ray ray, int mode){
     if(mode == 0){//最终没有击中光源
         ray.tMax = 0;
 		if(enableGammaCorrection)
-			color = sqrt(color * color * ray.curRayNum / (ray.curRayNum + 1));
+			color = color * sqrt( ray.curRayNum / (ray.curRayNum + 1));
 		else
 			color = color * ray.curRayNum / (ray.curRayNum + 1);
         ray.curRayNum = min(ray.curRayNum + 1, RayNumMax);

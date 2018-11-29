@@ -29,6 +29,7 @@ namespace RayTracing {
 		virtual void Visit(const CppUtility::Other::CPtr<Metal> & metal);
 		virtual void Visit(const CppUtility::Other::CPtr<Dielectric> & dielectric);
 		virtual void Visit(const CppUtility::Other::CPtr<Light> & light);
+		virtual void Visit(const CppUtility::Other::CPtr<Isotropic> & isotropic);
 		using MatVisitor::Visit;
 
 		std::vector<float> matData;
