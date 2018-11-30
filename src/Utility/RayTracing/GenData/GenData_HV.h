@@ -16,9 +16,12 @@ namespace RayTracing {
 	class GenData_HV : public HitableVisitor{
 		HEAP_OBJ_SETUP(GenData_HV)
 	public:
+		GenData_HV(std::vector<float> & packData);
+
 		typedef std::map<CppUtility::Other::CPtr<Material>, size_t> MatIdxMap;
 
-		const std::vector<float> & GetSceneData() const { return sceneData; };
+		const std::vector<float> & GetSceneData() const { return sceneData; }
+		const std::vector<float> & GetPackData() const { return packData; }
 		void Accept(const CppUtility::Other::Ptr<GenData_MV> & genFS_MV);
 	private:
 		void SetMat(const MatIdxMap & mat2idx);
@@ -33,6 +36,7 @@ namespace RayTracing {
 		virtual void Visit(const CppUtility::Other::CPtr<Volume> & volume);
 
 		std::vector<float> sceneData;
+		std::vector<float> & packData;
 		std::map< CppUtility::Other::CPtr<Hitable>, size_t> hitable2idx;
 		std::map<CppUtility::Other::CPtr<Material>, std::vector<size_t>> mat2idxVec;
 	};

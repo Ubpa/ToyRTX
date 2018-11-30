@@ -40,6 +40,20 @@ Scene::CPtr CreateScene0(float ratioWH) {
 	}
 
 	auto constTex = ToCPtr(new ConstTexture(rgb(0.5, 0.5, 0.5)));
+
+	vector<Vertex> squareVertexs;
+	for (size_t i = 0; i < sizeof(data_SquareVertexPos) / sizeof(float); i += 6) {
+		vec3 pos(data_SquareVertexPos[i], data_SquareVertexPos[i + 1], data_SquareVertexPos[i + 2]);
+		vec3 normal(data_SquareVertexPos[i + 3], data_SquareVertexPos[i + 4], data_SquareVertexPos[i + 5]);
+		squareVertexs.push_back(Vertex(pos, normal));
+	}
+	auto square = ToCPtr(new TriMesh(squareVertexs, ToCPtr(new Metal(constTex, 0.5f))));
+	if (!square->IsValid()) {
+		printf("ERROR: square is invalid.\n");
+		exit(1);
+	}
+	
+
 	Sphere::CPtr sphereTop = ToCPtr(new Sphere(vec3(0, 1, -1), 0.25, ToCPtr(new Metal(constTex, 0.2f))));
 	Sphere::CPtr sphereBottom = ToCPtr(new Sphere(vec3(0, -100.5, -1), 100, ToCPtr(new Lambertian(constTex))));
 
@@ -54,11 +68,18 @@ Scene::CPtr CreateScene0(float ratioWH) {
 	Sphere::CPtr sphereRight = ToCPtr(new Sphere(vec3(1, 0, -1), 0.5, ToCPtr(new Lambertian(rgb(0.1, 0.2, 0.5)))));
 	Group::Ptr group1 = ToPtr(new Group);
 
-	const vec3 pos(0, 0, 0);
-	const vec3 viewPoint(0, 0, -1);
+	const vec3 pos(0, 0, 1.2);
+	const vec3 viewPoint(0, 0, 0);
 	const float fov = 90.0f;
 	auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
 	(*group1) << sphereTop << sphereBottom << sphereMid << group0 << sphereRight;
+
+	mat4 tfm(1.0f);
+	tfm = translate(tfm, vec3(0.5));
+	tfm = scale(tfm, vec3(1.2));
+	tfm = rotate(tfm, Math::PI / 9, vec3(0, 1, 0));
+	auto tfmMid = ToPtr(new Transform(tfm, sphereMid));
+	//auto volume = ToPtr(new Volume(cube2, 1.65f, ToPtr(new Isotropic(vec3(1.0f)))));
 
 	return ToCPtr(new Scene(group1, camera));
 }
@@ -340,7 +361,7 @@ Scene::CPtr CreateScene6(float ratioWH) {
 	// Scene
 	auto group = ToPtr(new Group);
 
-	(*group) << greenWall << redWall << bottomWall << topWall << backWall << cube1 << volume << light << sky;
+	(*group) << redWall << greenWall << bottomWall << topWall << backWall << cube1 << volume << light << sky;
 
 	// Camera
 	float t0 = 0.0f;

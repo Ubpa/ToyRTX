@@ -13,6 +13,9 @@ using namespace std;
 const float TexT_ConstTexture = 0.0f;
 const float TexT_ImgTexture   = 1.0f;
 
+GenData_TV::GenData_TV(std::vector<float> & packData)
+	: packData(packData) { }
+
 void GenData_TV::Visit(const ConstTexture::CPtr & constTexture) {
 	if (constTexture == NULL)
 		return;
@@ -25,10 +28,12 @@ void GenData_TV::Visit(const ConstTexture::CPtr & constTexture) {
 
 	texData.push_back(TexT_ConstTexture);
 
-	const rgb & color = constTexture->GetColor();
-	texData.push_back(color.r);
-	texData.push_back(color.g);
-	texData.push_back(color.b);
+	texData.push_back(packData.size() / 4);
+	const rgb color = constTexture->GetColor();
+	packData.push_back(color.r);
+	packData.push_back(color.g);
+	packData.push_back(color.b);
+	packData.push_back(0);
 }
 
 void GenData_TV::Visit(const ImgTexture::CPtr & imgTexture) {

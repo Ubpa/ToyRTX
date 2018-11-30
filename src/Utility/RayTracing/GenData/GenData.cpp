@@ -11,9 +11,9 @@ using namespace CppUtility::Other;
 using namespace std;
 
 GenData::GenData(const CppUtility::Other::CPtr<Hitable> & scene)
-	: hitableVisitor(ToPtr(new GenData_HV)),
+	: hitableVisitor(ToPtr(new GenData_HV(packData))),
 	matVisitor(ToPtr(new GenData_MV)),
-	texVisitor(ToPtr(new GenData_TV))
+	texVisitor(ToPtr(new GenData_TV(packData)))
 {
 	auto group = new Group;
 	group->push_back(scene);
@@ -35,6 +35,10 @@ const vector<float> GenData::GetMatData() const {
 
 const vector<float> GenData::GetTexData() const {
 	return texVisitor->GetTexData();
+}
+
+const vector<float> GenData::GetPackData() const {
+	return packData;
 }
 
 const GenData::ImgIdxMap GenData::GetImgIdxMap() const {

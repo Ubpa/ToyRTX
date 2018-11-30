@@ -22,6 +22,9 @@ const float HT_TriMesh   = 4.0f;
 const float HT_Transform = 5.0f;
 const float HT_Volume    = 6.0f;
 
+GenData_HV::GenData_HV(vector<float> & packData)
+	: packData(packData) { }
+
 void GenData_HV::Visit(const Hitable::CPtr & hitable) {
 	if (hitable == NULL)
 		return;
@@ -31,14 +34,6 @@ void GenData_HV::Visit(const Hitable::CPtr & hitable) {
 	sceneData.push_back(-1);
 
 	sceneData.push_back(hitable->IsMatCoverable());
-
-	const AABB box = hitable->GetBoundingBox();
-	sceneData.push_back(box.GetMinP().x);
-	sceneData.push_back(box.GetMinP().y);
-	sceneData.push_back(box.GetMinP().z);
-	sceneData.push_back(box.GetMaxP().x);
-	sceneData.push_back(box.GetMaxP().y);
-	sceneData.push_back(box.GetMaxP().z);
 }
 
 void GenData_HV::Visit(const Sphere::CPtr & sphere) {
@@ -55,12 +50,13 @@ void GenData_HV::Visit(const Sphere::CPtr & sphere) {
 
 	Visit(static_cast<const Hitable::CPtr>(sphere));
 
-	vec3 center = sphere->GetCenter();
-	sceneData.push_back(center.x);
-	sceneData.push_back(center.y);
-	sceneData.push_back(center.z);
+	sceneData.push_back(packData.size() / 4);
 
-	sceneData.push_back(sphere->GetRadius());
+	vec3 center = sphere->GetCenter();
+	packData.push_back(center.x);
+	packData.push_back(center.y);
+	packData.push_back(center.z);
+	packData.push_back(sphere->GetRadius());
 }
 
 void GenData_HV::Visit(const Group::CPtr & group) {
@@ -82,10 +78,10 @@ void GenData_HV::Visit(const Group::CPtr & group) {
 
 	size_t curChildIt = sceneData.size();
 	for (size_t i = 0; i < childrenSize; i++)
-		sceneData.push_back(-1);
+		sceneData.push_back(-float(hitable2idx[group]));
 	
 	// childrenEnd 用以标识结尾
-	sceneData.push_back(-1);
+	sceneData.push_back(-float(hitable2idx[group]));
 
 	for (auto const & child : group->GetChildren()) {
 		if (child == NULL)
@@ -115,6 +111,19 @@ void GenData_HV::Visit(const BVH_Node::CPtr & bvhNode) {
 	sceneData.push_back(HT_BVH_Node);
 	Visit(static_cast<const Hitable::CPtr>(bvhNode));
 
+	sceneData.push_back(packData.size() / 4);
+
+	const AABB box = bvhNode->GetBoundingBox();
+	packData.push_back(box.GetMinP().x);
+	packData.push_back(box.GetMinP().y);
+	packData.push_back(box.GetMinP().z);
+	packData.push_back(0);
+	packData.push_back(box.GetMaxP().x);
+	packData.push_back(box.GetMaxP().y);
+	packData.push_back(box.GetMaxP().z);
+	packData.push_back(0);
+
+
 	size_t curChildIt = sceneData.size();
 	// left
 	if(bvhNode->GetLeft())
@@ -124,7 +133,7 @@ void GenData_HV::Visit(const BVH_Node::CPtr & bvhNode) {
 		sceneData.push_back(-1);
 	
 	// childrenEnd 用以标识结尾
-	sceneData.push_back(-1);
+	sceneData.push_back(-float(hitable2idx[bvhNode]));
 
 	if (bvhNode->GetLeft()) {
 		auto targetLeftIdx = hitable2idx.find(bvhNode->GetLeft());
@@ -161,15 +170,16 @@ void GenData_HV::Visit(const Triangle::CPtr & triangle) {
 	Visit(static_cast<Hitable::CPtr>(triangle));
 
 	const Vertex ABC[3] = { triangle->GetA(),triangle->GetB(),triangle->GetC() };
+	sceneData.push_back(packData.size() / 4);
 	for (size_t i = 0; i < 3; i++) {
-		sceneData.push_back(ABC[i].pos.x);
-		sceneData.push_back(ABC[i].pos.y);
-		sceneData.push_back(ABC[i].pos.z);
-		sceneData.push_back(ABC[i].normal.x);
-		sceneData.push_back(ABC[i].normal.y);
-		sceneData.push_back(ABC[i].normal.z);
-		sceneData.push_back(ABC[i].u);
-		sceneData.push_back(ABC[i].v);
+		packData.push_back(ABC[i].pos.x);
+		packData.push_back(ABC[i].pos.y);
+		packData.push_back(ABC[i].pos.z);
+		packData.push_back(ABC[i].u);
+		packData.push_back(ABC[i].normal.x);
+		packData.push_back(ABC[i].normal.y);
+		packData.push_back(ABC[i].normal.z);
+		packData.push_back(ABC[i].v);
 	}
 }
 
@@ -199,35 +209,38 @@ void GenData_HV::Visit(const Transform::CPtr & transform) {
 
 	Visit(static_cast<Hitable::CPtr>(transform));
 
+	sceneData.push_back(packData.size() / 4);
+
 	mat4 tfmMat4 = transform->GetTransform();
 	for (size_t col = 0; col < 4; col++) {
 		vec4 colVec4 = tfmMat4[col];
 		for (size_t row = 0; row < 4; row++)
-			sceneData.push_back(colVec4[row]);
+			packData.push_back(colVec4[row]);
 	}
 
 	mat4 invTfmMat4 = transform->GetInvTransform();
 	for (size_t col = 0; col < 4; col++) {
 		vec4 colVec4 = invTfmMat4[col];
 		for (size_t row = 0; row < 4; row++)
-			sceneData.push_back(colVec4[row]);
+			packData.push_back(colVec4[row]);
 	}
 
 	mat3 normTfmMat3 = transform->GetNormTransform();
 	for (size_t col = 0; col < 3; col++) {
 		vec3 colVec3 = normTfmMat3[col];
 		for (size_t row = 0; row < 3; row++)
-			sceneData.push_back(colVec3[row]);
+			packData.push_back(colVec3[row]);
+		packData.push_back(0);
 	}
 
 	if (transform->GetChild() == NULL) {
-		sceneData.push_back(-1);
+		sceneData.push_back(-float(hitable2idx[transform]));
 		return;
 	}
 
 	size_t childIt = sceneData.size();
 	sceneData.push_back(-1);
-	sceneData.push_back(-1);
+	sceneData.push_back(-float(hitable2idx[transform]));
 
 	auto targetChildIdx = hitable2idx.find(transform->GetChild());
 	if (targetChildIdx == hitable2idx.end()) {
@@ -255,13 +268,13 @@ void GenData_HV::Visit(const Volume::CPtr & volume) {
 	sceneData.push_back(volume->GetDensity());
 
 	if (volume->GetBoundary() == NULL) {
-		sceneData.push_back(-1);
+		sceneData.push_back(-float(hitable2idx[volume]));
 		return;
 	}
 
 	size_t childIt = sceneData.size();
 	sceneData.push_back(-1);
-	sceneData.push_back(-1);
+	sceneData.push_back(-float(hitable2idx[volume]));
 
 	auto targetChildIdx = hitable2idx.find(volume->GetBoundary());
 	if (targetChildIdx == hitable2idx.end()) {

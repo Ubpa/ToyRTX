@@ -964,3 +964,105 @@ Volume需要3次发射光线来计算光线在体积内的行走长度
 
 如果发生碰撞则按公式完成Volume的计算
 
+## 3.13 优化
+
+### 3.13.1 AABB
+
+虽然在场景数据中，每一个节点都有包围盒，但其实只有BVH_Node的包围盒在shader内被用于计算
+
+而其他节点的包围盒没有用处，因此不再生成他们的包围盒
+
+### 3.13.2 tMax压栈
+
+只有那些自身有material的组节点和需要碰撞信息的节点（Transform、Volume）需要将tMax压栈
+
+### 3.13.3 curRayNum 脱离 ray
+
+其实 Ray 的计算中根本不需要 curRayNum，当时下意识的把其放在了 Ray 中，其实放在全局变量里即可
+
+### 3.13.3 使用built-in函数
+
+### 3.13.4 把数据放在三通道和四通道的Pack
+
+#### 3.13.4.1 Hitable
+
+- 球的center和radius组合成一个pack4
+- BVH_Node的包围盒放在2个pack4里(minP, 0), (maxP, 0)
+- 把Vertex放在2个pack4里（pos,u), (normal, v)
+
+- 把Mat4放在4个pack4里，把Mat3放在3个pack4里
+
+**数据结构**
+
+```c++
+struct Sphere{
+    float type = 0.0;
+    float matIdx;
+    float isMatCoverable;
+    float center_radius_pack4_idx;
+}
+
+struct Group{
+    float type = 1.0;
+    float matIdx;
+    float isMatCoverable;
+    float children[len];
+    float childrenEnd;
+}
+
+struct BVH_Node{
+	float type = 2.0;
+    float matIdx;
+    float isMatCoverable;
+    float AABB_pack3_idx;
+    float leftIdx;//如果left != NULL, 则有此域
+    float rightIdx;//如果right != NULL, 则有此域
+    float childrenEnd = -1.0;
+}
+
+struct Triangle{
+    float type = 3.0;
+    float matIdx;
+    float isMatCoverable;
+    float vertexABC_pack4_idx;
+}
+
+struct TriMesh{
+    float type = 4.0;
+    float matIdx;
+    float isMatCoverable;
+    float AABB_pack4_idx;
+    float leftIdx;//如果left != NULL, 则有此域
+    float rightIdx;//如果right != NULL, 则有此域
+    float childrenEnd = -1.0;
+}
+
+struct Transform{
+    float type = 4.0;
+    float matIdx;
+    float isMatCoverable;
+    float tfm_pack4_idx;
+    float boundary;//如果boundary != NULL, 则有此域
+    float childEnd = -1.0;
+}
+```
+
+#### 3.13.4.2 Texture
+
+ConstTexture 把 color组成一个 pack4: (color, 0)
+
+### 3.13.5 压栈优化
+
+因为发现栈大小极大的影响了速度，所以优化入栈的变量非常重要
+
+入栈最频繁的是父节点指针的指针和子节点指针的指针
+
+后者是必要的，前者是为了处理组节点的尾操作
+
+想到我们可以将父节点指针的指针A作为孩子节点数组的尾部，原本是-1，现在改为 -A，一来可以节省一次入栈，二来也可以直接得到 A
+
+### 3.13.6 总结
+
+Volume那节的场景，栈空间需求降为30不到，在MX150上，速度从 11.5 loop/s 上升到 14.5 loop/s
+
+提升了 26% 的速度

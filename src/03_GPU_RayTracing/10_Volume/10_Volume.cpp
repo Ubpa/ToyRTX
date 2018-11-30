@@ -58,6 +58,7 @@ int main(int argc, char ** argv) {
 	OpenGL::Texture sceneDataTex(genData.GetSceneData().size(), 1, genData.GetSceneData().data(), GL_FLOAT, GL_RED, GL_R32F);
 	OpenGL::Texture matDataTex(genData.GetMatData().size(), 1, genData.GetMatData().data(), GL_FLOAT, GL_RED, GL_R32F);
 	OpenGL::Texture texDataTex(genData.GetTexData().size(), 1, genData.GetTexData().data(), GL_FLOAT, GL_RED, GL_R32F);
+	OpenGL::Texture packDataTex(genData.GetPackData().size(), 1, genData.GetPackData().data(), GL_FLOAT, GL_RGBA, GL_RGBA32F);
 
 	auto img2idx = genData.GetImgIdxMap();
 	const size_t texArrSize = 16;
@@ -69,24 +70,35 @@ int main(int argc, char ** argv) {
 		//printf("Set TexArr[%d]\n", pair.second);
 	}
 
-	/*
+	
 	printf("size: %d\n", genData.GetSceneData().size());
 	for (size_t i = 0; i < genData.GetSceneData().size(); i++)
 		printf("%f, ", genData.GetSceneData()[i]);
 	printf("\n");
+
 	printf("size: %d\n", genData.GetMatData().size());
 	for (size_t i = 0; i < genData.GetMatData().size(); i++)
 		printf("%f, ", genData.GetMatData()[i]);
 	printf("\n");
+
 	printf("size: %d\n", genData.GetTexData().size());
 	for (size_t i = 0; i < genData.GetTexData().size(); i++)
 		printf("%f, ", genData.GetTexData()[i]);
 	printf("\n");
-	
-	return 0;   
-	*/
 
-	 //------------ RayTracing Basic Shader
+	printf("size: %d\n", genData.GetPackData().size());
+	for (size_t i = 0; i < genData.GetPackData().size(); i += 4) {
+		printf("%f, ", genData.GetPackData()[i]);
+		printf("%f, ", genData.GetPackData()[i + 1]);
+		printf("%f, ", genData.GetPackData()[i + 2]);
+		printf("%f,\n", genData.GetPackData()[i + 3]);
+	}
+	printf("\n");
+
+	//return 0;
+	
+
+	//------------ RayTracing Basic Shader
 	string RTX_vs = rootPath + str_RTX_vs;
 	string RTX_fs = rootPath + str_RTX_fs;
 	Shader RTX_Shader(RTX_vs, RTX_fs);
@@ -105,11 +117,11 @@ int main(int argc, char ** argv) {
 	RTX_Shader.SetInt("SceneData", 4);
 	RTX_Shader.SetInt("MatData", 5);
 	RTX_Shader.SetInt("TexData", 6);
+	RTX_Shader.SetInt("PackData", 7);
 	for (size_t i = 0; i < texArrSize; i++)
-		RTX_Shader.SetInt(string("TexArr[") + to_string(i) + "]", 7 + i);
+		RTX_Shader.SetInt(string("TexArr[") + to_string(i) + "]", 8 + i);
 
 	RTX_Shader.SetFloat("RayNumMax", RayNumMax);
-	RTX_Shader.SetBool("enableGammaCorrection", true);
 	RTX_Shader.SetVec3f("camera.pos", camera->GetPos());
 	RTX_Shader.SetVec3f("camera.BL_Corner", camera->GetBL_Corner());
 	RTX_Shader.SetVec3f("camera.horizontal", camera->GetHorizontal());
@@ -145,8 +157,9 @@ int main(int argc, char ** argv) {
 			sceneDataTex.Use(4);
 			matDataTex.Use(5);
 			texDataTex.Use(6);
+			packDataTex.Use(7);
 			for (size_t i = 0; i < texArrSize; i++)
-				texArr[i].Use(7 + i);
+				texArr[i].Use(8 + i);
 			RTX_Shader.SetFloat("rdSeed[0]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[1]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[2]", Math::Rand_F());

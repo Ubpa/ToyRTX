@@ -17,6 +17,8 @@ namespace RayTracing {
 	class GenData_TV : public TexVisitor{
 		HEAP_OBJ_SETUP(GenData_TV)
 	public:
+		GenData_TV(std::vector<float> & packData);
+
 		typedef std::map<CppUtility::Other::CPtr<Texture>, size_t> TexIdxMap;
 		typedef std::map<CppUtility::Other::CPtr<CppUtility::Other::Image>, size_t> ImgIdxMap;
 
@@ -29,6 +31,7 @@ namespace RayTracing {
 		using TexVisitor::Visit;
 
 		std::vector<float> texData;
+		std::vector<float> & packData;
 		TexIdxMap tex2idx;
 		ImgIdxMap img2idx;
 	};

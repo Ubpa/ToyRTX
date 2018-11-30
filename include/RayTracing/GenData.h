@@ -28,6 +28,7 @@ namespace RayTracing {
 		const std::vector<float> GetSceneData() const;
 		const std::vector<float> GetMatData() const;
 		const std::vector<float> GetTexData() const;
+		const std::vector<float> GetPackData() const;
 		const ImgIdxMap GetImgIdxMap() const;
 
 	private:
@@ -37,6 +38,8 @@ namespace RayTracing {
 		CppUtility::Other::Ptr<GenData_TV> texVisitor;
 
 		CppUtility::Other::CPtr<Group> root;
+
+		std::vector<float> packData;
 	};
 }
 
