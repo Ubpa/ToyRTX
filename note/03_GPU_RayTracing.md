@@ -1066,3 +1066,18 @@ ConstTexture 把 color组成一个 pack4: (color, 0)
 Volume那节的场景，栈空间需求降为30不到，在MX150上，速度从 11.5 loop/s 上升到 14.5 loop/s
 
 提升了 26% 的速度
+
+## 3.14 All
+
+### 3.14.1 速度比较
+
+MX150 vs G5400
+
+窗口 768 * 768
+
+前者 10分钟 5200 loop 平均深度 3.84，则 1331200 sample/s
+
+后者 20w sample/s
+
+故 GPU 比 CPU 快了 6倍
+

@@ -50,7 +50,7 @@ int main(int argc, char ** argv) {
 
 
 	//------------ Scene
-	Scene::CPtr scene = CreateScene6(ratioWH);
+	Scene::CPtr scene = CreateScene7(ratioWH);
 
 
 	//------------ Fragment Shader Generator
@@ -70,7 +70,7 @@ int main(int argc, char ** argv) {
 		//printf("Set TexArr[%d]\n", pair.second);
 	}
 
-	
+	/*
 	printf("size: %d\n", genData.GetSceneData().size());
 	for (size_t i = 0; i < genData.GetSceneData().size(); i++)
 		printf("%f, ", genData.GetSceneData()[i]);
@@ -94,7 +94,7 @@ int main(int argc, char ** argv) {
 		printf("%f,\n", genData.GetPackData()[i + 3]);
 	}
 	printf("\n");
-
+	*/
 	//return 0;
 	
 

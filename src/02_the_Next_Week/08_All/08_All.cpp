@@ -49,8 +49,8 @@ int main(int argc, char ** argv){
 
 	vector<uvec2> pixels;
 
-	auto scene = CreateScene4((float)val_ImgWidth / (float)val_ImgHeight);
-
+	auto scene = CreateScene3((float)val_ImgWidth / (float)val_ImgHeight);
+	RayTracer rayTracer;
 	Timer timer;
 	timer.Start();
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
@@ -66,7 +66,7 @@ int main(int argc, char ** argv){
 			for (int k = 0; k < sampleNum; k++) {
 				float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
 				float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
-				color += RayTracer::Trace(scene->obj, scene->camera->GenRay(u, v));
+				color += rayTracer.TraceX(scene->obj, scene->camera->GenRay(u, v));
 			}
 			color /= sampleNum;
 			img.SetPixel(pixel.x, val_ImgHeight - 1 - pixel.y, sqrt(color));
@@ -77,8 +77,8 @@ int main(int argc, char ** argv){
 		double speed = (val_ImgWidth * val_ImgHeight - pixelSet.Size()) / wholeTime;
 		double needTime = pixelSet.Size() / speed;
 		double sumTime = wholeTime + needTime;
-		printf("\rINFO: %.2f%%, %.2f pixle / s, use %.2f s, need %.2f s, sum %.2f s     ",
-			curStep, speed, wholeTime, needTime, sumTime);
+		printf("\rINFO: %.2f%%, %.2f sample / s, average depth %.2f, use %.2f s, need %.2f s, sum %.2f s     ",
+			curStep, speed*sampleNum, rayTracer.depth/(speed*sampleNum*wholeTime), wholeTime, needTime, sumTime);
 
 		if (pixelSet.Size() == 0) {
 			printf("\n");
