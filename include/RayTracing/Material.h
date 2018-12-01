@@ -1,15 +1,13 @@
 #ifndef _MATERIAL_H_
 #define _MATERIAL_H_
 
-#include <RayTracing/Ray.h>
+#include <RayTracing/MatVisitor.h>
 
 #include <Utility/HeapObj.h>
 
 #include <glm/glm.hpp>
 
 #include <vector>
-
-#include <RayTracing/MatVisitor.h>
 
 #define MATERIAL_SETUP(CLASS) \
 HEAP_OBJ_SETUP(CLASS)\
@@ -19,6 +17,7 @@ virtual void Accept(const MatVisitor::Ptr & matVisitor) const{\
 }
 
 namespace RayTracing {
+	class Ray;
 	
 	struct Vertex {
 		Vertex(glm::vec3 pos = glm::vec3(0), glm::vec3 normal = glm::vec3(0, 0, 1), float u = 0, float v = 0);
@@ -33,10 +32,10 @@ namespace RayTracing {
 	};
 
 	struct HitRecord {
-		HitRecord(const Ray::Ptr & ray = NULL, const glm::vec3 & pos = glm::vec3(0),
+		HitRecord(const CppUtility::Other::Ptr<Ray> & ray = NULL, const glm::vec3 & pos = glm::vec3(0),
 			const glm::vec3 & normal = glm::vec3(0,0,1), float u = 0, float v = 0);
 
-		Ray::Ptr ray;
+		CppUtility::Other::Ptr<Ray> ray;
 		Vertex vertex;
 	};
 

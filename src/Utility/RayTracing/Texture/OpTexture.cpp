@@ -39,9 +39,12 @@ const Texture::CPtr OpTexture::NoiseTexture(size_t mode, const glm::rgb & color,
 			rst = color *0.5f*(1.0f + sin(scale*p.x + 5 * Math::Perlin::Turb(scale*p)));
 			break;
 		case 1:
-			rst = color *0.5f*(1.0f + Math::Perlin::Turb(scale * p));
+			rst = color * 0.5f*(1.0f + sin(5 * Math::Perlin::Turb(scale*p)));
 			break;
 		case 2:
+			rst = color *0.5f*(1.0f + Math::Perlin::Turb(scale * p));
+			break;
+		case 3:
 			rst = color * Math::Perlin::Turb(scale * p);
 			break;
 		}

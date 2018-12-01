@@ -1,5 +1,8 @@
 #include <RayTracing/Isotropic.h>
+
 #include <RayTracing/ConstTexture.h>
+#include <RayTracing/Ray.h>
+
 #include <Utility/Math.h>
 
 using namespace RayTracing;
