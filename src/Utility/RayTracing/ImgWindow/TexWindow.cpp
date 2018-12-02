@@ -108,10 +108,28 @@ bool TexWindow::Run(const Operation::Ptr & texUpdateOp) {
 	}
 	interpolationShader.SetInt("image", 0);
 
+	//------------ Gamma Shader
+	string gamma_vs = rootPath + str_Gamma_vs;
+	string gamma_fs = rootPath + str_Gamma_fs;
+	Shader gammaShader(interpolation_vs, gamma_fs);
+	if (!gammaShader.IsValid()) {
+		printf("ERROR: gammaShader load fail\n");
+		return false;
+	}
+	gammaShader.SetInt("image", 0);
+
+
 	//------------ Copy »º³å
 	FBO copyFBO(width, height, FBO::ENUM_TYPE_COLOR);
 	if (!copyFBO.IsValid()) {
 		printf("ERROR: Gen copyFBO fail\n");
+		return false;
+	}
+
+	//------------ Gamma »º³å
+	FBO gammaFBO(width, height, FBO::ENUM_TYPE_COLOR);
+	if (!gammaFBO.IsValid()) {
+		printf("ERROR: Gen gammaFBO fail\n");
 		return false;
 	}
 
@@ -215,6 +233,14 @@ bool TexWindow::Run(const Operation::Ptr & texUpdateOp) {
 		}
 	}));
 
+	auto gammaOp = ToPtr(new LambdaOp([&]() {
+		curTex->Use();
+		gammaFBO.Use();
+		VAO_Screen.Draw(gammaShader);
+		curTex = &gammaFBO.GetColorTexture();
+		curFBO = &gammaFBO;
+	}));
+
 	auto screenOp = ToPtr(new LambdaOp([&]() {
 		FBO::UseDefault();
 		curTex->Use();
@@ -244,6 +270,9 @@ bool TexWindow::Run(const Operation::Ptr & texUpdateOp) {
 		(*texProcessOp) << interpolationOp;
 	if ((option & ENUM_OPTION_POST_PROCESS_BLUR) != 0)
 		(*texProcessOp) << ppBlurOp;
+	if ((option & ENUM_OPTION_POST_PROCESS_GAMMA) != 0)
+		(*texProcessOp) << gammaOp;
+
 	(*renderQueue) << texProcessOp << screenOp;
 
 	// Ö¡²Ù×÷

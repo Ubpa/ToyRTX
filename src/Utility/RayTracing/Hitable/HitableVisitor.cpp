@@ -13,3 +13,4 @@ void HitableVisitor::Visit(const Other::CPtr<Volume> & volume) { }
 void HitableVisitor::Visit(const Other::CPtr<Group> & group) { }
 void HitableVisitor::Visit(const Other::CPtr<BVH_Node> & bvhNode) { }
 void HitableVisitor::Visit(const Other::CPtr<TriMesh> & triMesh) { }
+void HitableVisitor::Visit(const Other::CPtr<Model> & model) { }

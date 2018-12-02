@@ -14,6 +14,7 @@ namespace RayTracing {
 	class Group;
 	class BVH_Node;
 	class TriMesh;
+	class Model;
 
 	class HitableVisitor : public CppUtility::Other::HeapObj {
 		HEAP_OBJ_SETUP(HitableVisitor)
@@ -28,6 +29,7 @@ namespace RayTracing {
 		virtual void Visit(const CppUtility::Other::CPtr<Group> & group);
 		virtual void Visit(const CppUtility::Other::CPtr<BVH_Node> & bvhNode);
 		virtual void Visit(const CppUtility::Other::CPtr<TriMesh> & triMesh);
+		virtual void Visit(const CppUtility::Other::CPtr<Model> & model);
 	};
 }
 

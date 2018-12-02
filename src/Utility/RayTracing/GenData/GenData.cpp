@@ -44,3 +44,7 @@ const vector<float> GenData::GetPackData() const {
 const GenData::ImgIdxMap GenData::GetImgIdxMap() const {
 	return texVisitor->GetImgIdxMap();
 }
+
+const GenData::SkyboxImgs & GenData::GetSkyboxImgs() const {
+	return texVisitor->GetSkyboxImgs();
+}

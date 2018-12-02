@@ -8,6 +8,8 @@
 #include <RayTracing/Light.h>
 #include <RayTracing/Isotropic.h>
 
+#include <RayTracing/Texture.h>
+
 using namespace RayTracing;
 using namespace std;
 

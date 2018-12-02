@@ -22,7 +22,7 @@ Skybox::Skybox(const vector<string> & skybox) {
 	// -------------------------------------------------------
 	for (size_t i = 0; i < 6; i++)
 	{
-		auto img = new Image(skybox[i].c_str(), true);
+		auto img = new Image(skybox[i].c_str(), false);
 		if (!img->IsValid()) {
 			printf("ERROR: Skybox texture failed to load at path: %s\n", skybox[i].c_str());
 			imgs.clear();
@@ -46,7 +46,15 @@ rgb Skybox::Value(float u, float v, const vec3 & p) const {
 			maxDim = i;
 	}
 
-	vec2 texcoords;
+	size_t uDim[3] = { 2, 0, 0 };
+	size_t vDim[3] = { 1, 2, 1 };
+	bool flip[3][2] = { {true,false},{true,false},{false,true} };
+	bool flipDim[3] = { 0,1,0 };
+
+	vec2 texcoords((leftP[uDim[maxDim]] / abs(leftP[maxDim]) + 1) / 2, (leftP[vDim[maxDim]] / abs(leftP[maxDim]) + 1) / 2);
+	if (flip[maxDim][leftP[maxDim] <= 0])
+		texcoords[flipDim[maxDim]] = 1 - texcoords[flipDim[maxDim]];
+	/*
 	if (maxDim == 0) {
 		texcoords.y = (leftP.y / abs(leftP.x) + 1) / 2;
 		if (leftP.x > 0)
@@ -68,7 +76,7 @@ rgb Skybox::Value(float u, float v, const vec3 & p) const {
 		else
 			texcoords.x = 1 - (leftP.x / abs(leftP.z) + 1) / 2;
 	}
-
+	*/
 	size_t imgIdx = 2 * maxDim + (leftP[maxDim] > 0 ? 0 : 1);
 	size_t width = imgs[imgIdx]->GetWidth();
 	size_t height = imgs[imgIdx]->GetHeight();

@@ -22,6 +22,7 @@ namespace RayTracing {
 	class GenData {
 	public:
 		typedef std::map<CppUtility::Other::CPtr<CppUtility::Other::Image>, size_t> ImgIdxMap;
+		typedef std::vector<CppUtility::Other::CPtr<CppUtility::Other::Image> > SkyboxImgs;
 
 		GenData(const CppUtility::Other::CPtr<Hitable> & scene);
 		
@@ -30,7 +31,7 @@ namespace RayTracing {
 		const std::vector<float> GetTexData() const;
 		const std::vector<float> GetPackData() const;
 		const ImgIdxMap GetImgIdxMap() const;
-
+		const SkyboxImgs & GetSkyboxImgs() const;
 	private:
 
 		CppUtility::Other::Ptr<GenData_HV> hitableVisitor;

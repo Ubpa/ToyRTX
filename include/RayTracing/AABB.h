@@ -1,10 +1,13 @@
 #ifndef _AABB_H_
 #define _AABB_H_
 
-#include <RayTracing/Ray.h>
+#include <Utility/Ptr.h>
+
 #include <glm/glm.hpp>
 
 namespace RayTracing {
+	class Ray;
+
 	class AABB {
 	public:
 		AABB();
@@ -13,11 +16,12 @@ namespace RayTracing {
 		inline glm::vec3 GetMinP() const { return minP; }
 		inline glm::vec3 GetMaxP() const { return maxP; }
 		inline glm::vec3 GetCenter() const { return (minP + maxP) / 2.0f; }
+		inline float GetRadius() const { return length(maxP - minP) / 2.0f; }
 
 		// 设置后会将 isValid 设置成 true
 		void SetP(const glm::vec3 & minP, const glm::vec3 & maxP);
 		inline bool IsValid() const { return isValid; }
-		bool Hit(const Ray::Ptr & ray) const;
+		bool Hit(const CppUtility::Other::Ptr<Ray> & ray) const;
 
 		const AABB operator +(const AABB & aabb) const;
 		AABB & operator +=(const AABB & aabb);

@@ -56,6 +56,10 @@ FBO::FBO(size_t width, size_t height, ENUM_TYPE type)
 		if (!GenFBO_RAYTRACING(width, height))
 			printf("GenFBO_RAYTRACING fail\n");
 		break;
+	case OpenGL::FBO::ENUM_TYPE_RTX:
+		if (!GenFBO_RTX(width, height))
+			printf("GenFBO_RTX fail\n");
+		break;
 	default:
 		printf("ERROR: FBO type not know\n");
 		isValid = false;
@@ -178,6 +182,32 @@ bool FBO::GenFBO_COLOR(size_t width, size_t height, bool isFloat) {
 	glTexImage2D(GL_TEXTURE_2D, 0, isFloat ? GL_RGB16F : GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBufferID, 0);	// we only need a color buffer
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	isValid = IsComplete();
+	if (!isValid) {
+		printf("Framebuffer is not complete!\n");
+		return false;
+	}
+
+	colorTextures.push_back(Texture(colorBufferID));
+	return true;
+}
+
+bool FBO::GenFBO_RTX(size_t width, size_t height) {
+	glGenFramebuffers(1, &ID);
+	glBindFramebuffer(GL_FRAMEBUFFER, ID);
+	// create a color attachment texture
+	size_t colorBufferID;
+	glGenTextures(1, &colorBufferID);
+	glBindTexture(GL_TEXTURE_2D, colorBufferID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBufferID, 0);	// we only need a color buffer
@@ -455,7 +485,8 @@ const Texture & FBO::GetColorTexture(size_t idx) const {
 		&& type != ENUM_TYPE_RGBF2_DEPTH
 		&& type != ENUM_TYPE_RGBF3_DEPTH
 		&& type != ENUM_TYPE_GBUFFER
-		&& type != ENUM_TYPE_RAYTRACING)
+		&& type != ENUM_TYPE_RAYTRACING
+		&& type != ENUM_TYPE_RTX)
 		return Texture::InValid;
 
 	return colorTextures[idx];
@@ -467,7 +498,7 @@ const Texture & FBO::GetDepthTexture() const {
 
 	if (type != ENUM_TYPE_DEPTH
 		&& type != ENUM_TYPE_CUBE_DEPTH)
-		return Texture::InValid;;
+		return Texture::InValid;
 
 	return depthTexture;
 }
@@ -475,7 +506,7 @@ const Texture & FBO::GetDepthTexture() const {
 bool FBO::Use() const{
 	if (!isValid)
 		return false;
-
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, ID);
 	return true;
 }

@@ -1,6 +1,8 @@
 #include "GenData_HV.h"
 #include "GenData_MV.h"
 
+#include <RayTracing/Model.h>
+#include <RayTracing/Sky.h>
 #include <RayTracing/Volume.h>
 #include <RayTracing/Group.h>
 #include <RayTracing/Sphere.h>
@@ -21,6 +23,7 @@ const float HT_Triangle  = 3.0f;
 const float HT_TriMesh   = 4.0f;
 const float HT_Transform = 5.0f;
 const float HT_Volume    = 6.0f;
+const float HT_Sky       = 7.0f;
 
 GenData_HV::GenData_HV(vector<float> & packData)
 	: packData(packData) { }
@@ -283,6 +286,25 @@ void GenData_HV::Visit(const Volume::CPtr & volume) {
 	}
 	else
 		sceneData[childIt] = targetChildIdx->second;
+}
+
+void GenData_HV::Visit(const Sky::CPtr & sky) {
+	if (sky == NULL)
+		return;
+
+	auto targetPair = hitable2idx.find(sky);
+	if (targetPair != hitable2idx.end())
+		return;
+
+	hitable2idx[sky] = sceneData.size();
+
+	sceneData.push_back(HT_Sky);
+
+	Visit(static_cast<Hitable::CPtr>(sky));
+}
+
+void GenData_HV::Visit(const Model::CPtr & model) {
+	Visit(static_cast<const TriMesh::CPtr>(model));
 }
 
 void GenData_HV::SetMat(const MatIdxMap & mat2idx) {

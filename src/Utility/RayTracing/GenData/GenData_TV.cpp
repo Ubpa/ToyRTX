@@ -2,6 +2,7 @@
 
 #include <RayTracing/ConstTexture.h>
 #include <RayTracing/ImgTexture.h>
+#include <RayTracing/Skybox.h>
 #include <Utility/Image.h>
 
 using namespace CppUtility::Other;
@@ -12,6 +13,7 @@ using namespace std;
 // TexT : Texture Type
 const float TexT_ConstTexture = 0.0f;
 const float TexT_ImgTexture   = 1.0f;
+const float TexT_Skybox       = 2.0f;
 
 GenData_TV::GenData_TV(std::vector<float> & packData)
 	: packData(packData) { }
@@ -60,4 +62,19 @@ void GenData_TV::Visit(const ImgTexture::CPtr & imgTexture) {
 	}
 
 	texData.push_back(img2idx[imgTexture->GetImg()]);
+}
+
+void GenData_TV::Visit(const Skybox::CPtr & skybox) {
+	if (skybox == NULL || !skybox->IsValid())
+		return;
+
+	auto targetTexIdx = tex2idx.find(skybox);
+	if (targetTexIdx != tex2idx.end())
+		return;
+
+	tex2idx[skybox] = texData.size();
+
+	texData.push_back(TexT_Skybox);
+	
+	skyboxImgs = SkyboxImgs(skybox->GetSkyboxImgs());
 }

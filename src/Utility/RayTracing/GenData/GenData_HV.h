@@ -34,6 +34,8 @@ namespace RayTracing {
 		virtual void Visit(const CppUtility::Other::CPtr<TriMesh> & triMesh);
 		virtual void Visit(const CppUtility::Other::CPtr<Transform> & transform);
 		virtual void Visit(const CppUtility::Other::CPtr<Volume> & volume);
+		virtual void Visit(const CppUtility::Other::CPtr<Sky> & sky);
+		virtual void Visit(const CppUtility::Other::CPtr<Model> & model);
 
 		std::vector<float> sceneData;
 		std::vector<float> & packData;

@@ -1,5 +1,7 @@
 #include <RayTracing/Sky.h>
 
+#include <Utility/Math.h>
+
 using namespace RayTracing;
 using namespace CppUtility::Other;
 using namespace glm;
@@ -12,7 +14,8 @@ HitRst Sky::RayIn(Ray::Ptr & ray) const {
 
 	HitRst hitRst(true);
 	vec3 normal = normalize(ray->GetDir());
-	hitRst.record = HitRecord(ray, normal, -normal);
+	vec2 uv = Math::Sphere2UV(normal);
+	hitRst.record = HitRecord(ray, normal, -normal, uv[0], uv[1]);
 	hitRst.material = GetMat();
 	hitRst.isMatCoverable = IsMatCoverable();
 

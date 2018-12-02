@@ -77,7 +77,7 @@ int main(int argc, char ** argv){
 		double needTime = pixelSet.Size() / speed;
 		double sumTime = wholeTime + needTime;
 		printf("\rINFO: %.2f%%, %.2f sample / s, average depth %.2f, use %.2f s, need %.2f s, sum %.2f s     ",
-			curStep, speed*sampleNum, rayTracer.depth/(speed*sampleNum*wholeTime), wholeTime, needTime, sumTime);
+			curStep, speed*sampleNum, rayTracer.wholeDepth/(speed*sampleNum*wholeTime), wholeTime, needTime, sumTime);
 
 		if (pixelSet.Size() == 0) {
 			printf("\n");

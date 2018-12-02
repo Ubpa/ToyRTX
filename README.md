@@ -42,12 +42,23 @@
   -02_07_Volume
   -02_08_All
 /03_GPU_RayTracing
+	(只有3_10 和 3_11可以运行，其余由于后续代码更新后已不再可用，如需使用，需要回退版本)
   -03_01_Basic
   -03_02_RayTracingBasicSystem
   -03_03_Material
   -03_04_GenData
   -03_05_BVH_Node
   -03_06_ImgTexture
+  -03_07_Light
+  -03_08_TriMesh
+  -03_09_Transform
+  -03_10_Volume
+  -03_11_All
+/04_Extension
+  -04_01_Skybox
+  -04_02_Model
+  -04_03_GPU_Skybox_Model
+  -04_04_GPU_Loop
 /Utility
   /OpenGL
     -Camera
@@ -130,3 +141,10 @@ cmake ..
 
 ![02_the_Next_Week_08_All](assets/02_the_Next_Week_08_All-1543124633192.png)
 
+### 04_03_GPU_Skybox_Model
+
+![04_Extension_03_GPU_Skybox_Model_post](assets/04_Extension_03_GPU_Skybox_Model_post.png)
+
+### 04_04_GPU_Loop
+
+![04_Extension_04_GPU_Balance_post](assets/04_Extension_04_GPU_Balance_post.png)

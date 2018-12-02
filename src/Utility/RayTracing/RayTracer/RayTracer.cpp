@@ -3,30 +3,35 @@
 using namespace RayTracing;
 using namespace glm;
 
-RayTracer::RayTracer() {
-	depth = 0;
+RayTracer::RayTracer(size_t depth) 
+	: depth(depth), wholeDepth(0) { }
+
+rgb RayTracer::TraceX(const Hitable::CPtr & scene, Ray::Ptr & ray) {
+	return TraceX(scene, ray, depth);
 }
 
 rgb RayTracer::TraceX(const Hitable::CPtr & scene, Ray::Ptr & ray, size_t depth) {
 	if (depth == 0) {
-		this->depth += 50-depth;
+		wholeDepth += this->depth + 1;
 		return rgb(1.0001f / 255.0f);
 	}
 
 	auto hitRst = scene->RayIn(ray);
 	if (hitRst.hit) {
-		if (hitRst.material == NULL)
+		if (hitRst.material == NULL) {
+			wholeDepth += this->depth - depth + 1;
 			return rgb(1, 0, 1);
+		}
 
 		if (hitRst.material->Scatter(hitRst.record))
-			return RayTracer::Trace(scene, ray, depth - 1);
+			return RayTracer::TraceX(scene, ray, depth - 1);
 		else {
-			this->depth += 50 - depth;
+			wholeDepth += this->depth - depth + 1;
 			return ray->GetColor();
 		}
 	}
 	else {
-		this->depth += 50 - depth;
+		wholeDepth += this->depth - depth + 1;
 		return rgb(1.0001f / 255.0f);
 	}
 }

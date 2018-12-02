@@ -2,6 +2,7 @@
 #define _TEXTURE_H_
 
 #include <Utility/Image.h>
+#include <Utility/Ptr.h>
 #include <vector>
 #include <string>
 
@@ -21,6 +22,7 @@ namespace CppUtility {
 			Texture(ENUM_TYPE type);
 			Texture(size_t width, size_t height, const float * data, size_t dataType, size_t srcFormat, size_t internalFormat);
 			Texture(const std::vector<std::string> & skybox);
+			Texture(const std::vector<Other::CPtr<Other::Image>> & skyboxImgs);
 			Texture(const std::string & path, bool flip = false, bool gammaCorrection = false);
 
 			bool Load(const std::vector<std::string> & skybox);

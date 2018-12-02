@@ -83,9 +83,42 @@ bool Texture::Load(const std::vector<std::string> & skybox) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	type = ENUM_TYPE_2D;
+	type = ENUM_TYPE_CUBE_MAP;
 	UnBind();
 	return true;
+}
+
+Texture::Texture(const vector<CPtr<Image>> & skyboxImgs) {
+	if (skyboxImgs.size() != 6) {
+		ID = 0;
+		type = ENUM_TYPE_NOT_VALID;
+		return;
+	}
+
+	glGenTextures(1, &ID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+
+	for (size_t i = 0; i < 6; i++)
+	{
+		if (!skyboxImgs[i]->IsValid()) {
+			printf("Cubemap texture load fail\n");
+			ID = 0;
+			type = ENUM_TYPE_NOT_VALID;
+			return;
+		}
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, skyboxImgs[i]->GetWidth(), skyboxImgs[i]->GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, skyboxImgs[i]->GetConstData());
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	type = ENUM_TYPE_CUBE_MAP;
+	UnBind();
 }
 
 bool Texture::Load(const std::string & path, bool flip, bool gammaCorrection) {

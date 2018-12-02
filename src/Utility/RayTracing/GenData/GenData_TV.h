@@ -17,6 +17,8 @@ namespace RayTracing {
 	class GenData_TV : public TexVisitor{
 		HEAP_OBJ_SETUP(GenData_TV)
 	public:
+		typedef std::vector<CppUtility::Other::CPtr<CppUtility::Other::Image> > SkyboxImgs;
+
 		GenData_TV(std::vector<float> & packData);
 
 		typedef std::map<CppUtility::Other::CPtr<Texture>, size_t> TexIdxMap;
@@ -24,16 +26,19 @@ namespace RayTracing {
 
 		const TexIdxMap & GetTexIdxMap() const { return tex2idx; }
 		const ImgIdxMap & GetImgIdxMap() const { return img2idx; }
+		const SkyboxImgs & GetSkyboxImgs() const { return skyboxImgs; }
 		const std::vector<float> & GetTexData() const { return texData; };
 	private:
 		virtual void Visit(const CppUtility::Other::CPtr<ConstTexture> & constTexture);
 		virtual void Visit(const CppUtility::Other::CPtr<ImgTexture> & imgTexture);
+		virtual void Visit(const CppUtility::Other::CPtr<Skybox> & skybox);
 		using TexVisitor::Visit;
 
 		std::vector<float> texData;
 		std::vector<float> & packData;
 		TexIdxMap tex2idx;
 		ImgIdxMap img2idx;
+		SkyboxImgs skyboxImgs;
 	};
 }
 

@@ -3,8 +3,6 @@
 
 #include <RayTracing/BVH_Node.h>
 
-#include <vector>
-
 namespace RayTracing {
 	class TriMesh : public BVH_Node{
 		HITABLE_SETUP(TriMesh)

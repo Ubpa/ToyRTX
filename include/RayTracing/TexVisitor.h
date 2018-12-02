@@ -8,6 +8,7 @@ namespace RayTracing {
 	class ConstTexture;
 	class OpTexture;
 	class ImgTexture;
+	class Skybox;
 
 	class TexVisitor : public CppUtility::Other::HeapObj {
 		HEAP_OBJ_SETUP(TexVisitor)
@@ -16,6 +17,7 @@ namespace RayTracing {
 		virtual void Visit(const CppUtility::Other::CPtr<ConstTexture> & constTexture);
 		virtual void Visit(const CppUtility::Other::CPtr<OpTexture> & opTexture);
 		virtual void Visit(const CppUtility::Other::CPtr<ImgTexture> & imgTexture);
+		virtual void Visit(const CppUtility::Other::CPtr<Skybox> & skybox);
 	private:
 	};
 }

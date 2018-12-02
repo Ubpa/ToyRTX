@@ -48,6 +48,9 @@ namespace Define{
 	const std::string str_Interpolation_vs = str_Basic_P2T2_vs;
 	const std::string str_Interpolation_fs = str_ShadersCommon_Prefix + "Interpolation" + str_FsPostfix;
 
+	const std::string str_Gamma_vs = str_Basic_P2T2_vs;
+	const std::string str_Gamma_fs = str_ShadersCommon_Prefix + "Gamma" + str_FsPostfix;
+
 	const float data_ScreenVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 		// positions   // texCoords
 		-1.0f,  1.0f,  0.0f, 1.0f,

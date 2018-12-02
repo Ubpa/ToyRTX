@@ -1,5 +1,7 @@
 #include <RayTracing/AABB.h>
 
+#include <RayTracing/Ray.h>
+
 using namespace RayTracing;
 using namespace glm;
 
