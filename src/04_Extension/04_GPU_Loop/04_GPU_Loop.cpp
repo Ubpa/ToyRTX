@@ -52,7 +52,7 @@ int main(int argc, char ** argv) {
 
 
 	//------------ Scene
-	Scene::CPtr scene = CreateScene8(ratioWH);
+	Scene::CPtr scene = CreateScene0(ratioWH);
 
 
 	//------------ Fragment Shader Generator
@@ -173,7 +173,7 @@ int main(int argc, char ** argv) {
 	const size_t maxLoopNum = 5000;
 	size_t allLoopNum = 0;
 	LambdaOp::Ptr RTX_Op = ToPtr(new LambdaOp([&]() {
-		size_t loopNum = static_cast<size_t>(glm::max(texWindow.GetScale(), 1.0));
+		size_t loopNum = static_cast<size_t>(glm::max(texWindow.GetScale(), 2.0));
 		for (size_t i = 0; i < loopNum; i++) {
 			FBO_RayTracing[curWriteFBO].Use();
 			FBO_RayTracing[curReadFBO].GetColorTexture(0).Use(0);
@@ -195,10 +195,12 @@ int main(int argc, char ** argv) {
 		}
 
 		allLoopNum += loopNum;
+		double curStep = allLoopNum / (double)maxLoopNum * 100.0;
 		double wholeTime = timer.GetWholeTime();
 		double speed = allLoopNum / wholeTime;
-		printf("\rINFO: curLoopNum:%u, allLoopNum:%u, speed %.2f loop / s, used time: %.2f s     ",
-			loopNum, allLoopNum, speed, wholeTime);
+		double needTime = (maxLoopNum - allLoopNum) / speed;
+		printf("\rINFO: %.2f%%, speed %.2f loop / s, used time: %.2f s, need time: %.2f s, whole time: %.2f s     ",
+			curStep, speed, wholeTime, needTime, wholeTime + needTime);
 
 		if (allLoopNum >= maxLoopNum)
 			RTX_Op->SetIsHold(false);

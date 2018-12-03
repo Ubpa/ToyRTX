@@ -23,6 +23,7 @@ namespace Define {
 	const std::string str_Object_Prefix = "/data/objects/";
 
 	const std::string str_Obj_Bunny = "/data/objects/bunny/bunny.obj";
+	const std::string str_Obj_Dragon = str_Object_Prefix + "dragon/dragon.obj";
 
 	const float data_SquareVertexPos[48] = {
 		-0.5, -0.5,  0,  0,  0,  1, 0, 0,

@@ -136,3 +136,11 @@ int val_03_GPU_RayTracing_10_Volume_ImgHeight = 768;
 # 03_GPU_RayTracing / 11_All 输出图像大小
 int val_03_GPU_RayTracing_11_All_ImgWidth = 768;
 int val_03_GPU_RayTracing_11_All_ImgHeight = 768;
+
+# 04_Extension / 02_Model 输出图像大小
+int val_04_Extension_02_Model_ImgWidth = 768;
+int val_04_Extension_02_Model_ImgHeight = 768;
+
+# 04_Extension / 04_GPU_Loop 输出图像大小
+int val_04_Extension_04_GPU_Loop_ImgWidth = 768;
+int val_04_Extension_04_GPU_Loop_ImgHeight = 768;

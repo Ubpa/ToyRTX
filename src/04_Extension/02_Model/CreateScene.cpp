@@ -1,5 +1,6 @@
 #include "CreateScene.h"
 
+#include <RayTracing/ConstTexture.h>
 #include <RayTracing/Model.h>
 #include <RayTracing/Sky.h>
 #include <RayTracing/Skybox.h>
@@ -159,7 +160,7 @@ Scene::CPtr CreateScene1(float ratioWH) {
 Scene::CPtr CreateScene2(float ratioWH) {
 	// Mesh
 	vector<Vertex> squareVertexs;
-	for (size_t i = 0; i < sizeof(data_SquareVertexPos) / sizeof(float); i += 6) {
+	for (size_t i = 0; i < sizeof(data_SquareVertexPos) / sizeof(float); i += 8) {
 		vec3 pos(data_SquareVertexPos[i], data_SquareVertexPos[i + 1], data_SquareVertexPos[i + 2]);
 		vec3 normal(data_SquareVertexPos[i+3], data_SquareVertexPos[i + 4], data_SquareVertexPos[i + 5]);
 		squareVertexs.push_back(Vertex(pos, normal));
@@ -244,7 +245,7 @@ Scene::CPtr CreateScene2(float ratioWH) {
 	// Scene
 	auto group = ToPtr(new Group);
 
-	(*group) << greenWall << redWall << bottomWall << topWall << backWall << cube1 << cube2 << light;
+	(*group) << greenWall << redWall << bottomWall << topWall << backWall << cube1/* << cube2*/ << light;
 
 	// Camera
 	float t0 = 0.0f;
@@ -520,4 +521,165 @@ Scene::CPtr CreateScene5(float ratioWH) {
 
 	auto scene = ToPtr(new Scene(group, camera));
 	return scene;
+}
+
+Scene::CPtr CreateScene6(float ratioWH) {
+	auto config = *GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
+	auto rootPath = *config->GetStrPtr("RootPath");
+	vector<string> skyboxImgPath(6);
+	for (size_t i = 0; i < 6; i++)
+		skyboxImgPath[i] = rootPath + str_Vec_Img_Skybox[i];
+	auto sky = ToPtr(new Sky(ToCPtr(new Light(ToCPtr(new Skybox(skyboxImgPath))))));
+	//auto sky = ToPtr(new Sky(ToCPtr(new Light(ToCPtr(new ImgTexture(rootPath + str_Img_SkySphere))))));
+
+	// Mesh
+	// Mesh Square
+	vector<Vertex> squareVertexs;
+	for (size_t i = 0; i < sizeof(data_SquareVertexPos) / sizeof(float); i += 8) {
+		vec3 pos(data_SquareVertexPos[i], data_SquareVertexPos[i + 1], data_SquareVertexPos[i + 2]);
+		vec3 normal(data_SquareVertexPos[i + 3], data_SquareVertexPos[i + 4], data_SquareVertexPos[i + 5]);
+		vec2 uv(data_SquareVertexPos[i + 6], data_SquareVertexPos[i + 7]);
+		squareVertexs.push_back(Vertex(pos, normal, uv.x, uv.y));
+	}
+	auto square = ToPtr(new TriMesh(squareVertexs));
+	if (!square->IsValid()) {
+		printf("ERROR: square is invalid.\n");
+		exit(1);
+	}
+	mat4 tfmBottom(1.0f);
+	tfmBottom = translate(tfmBottom, vec3(0, -1, 0));
+	tfmBottom = rotate(tfmBottom, -Math::PI / 2, vec3(1, 0, 0));
+	tfmBottom = scale(tfmBottom, vec3(8));
+	auto woodMat = ToCPtr(new Lambertian(ToPtr(new ImgTexture(rootPath + str_Img_Wood))));
+	auto bottomWood = ToPtr(new Transform(tfmBottom, square, woodMat));
+
+	auto sphere0 = ToPtr(new Sphere(vec3(0, -0.25, 0), 0.75, ToCPtr(new Metal(vec3(1.0)))));
+	//auto sphere2 = ToPtr(new Sphere(vec3(0, 0, 0), 1, ToCPtr(new Dielectric(1.5f))));
+
+	//------------ bunny
+	auto bunnyModel = ToCPtr(new Model(rootPath + str_Obj_Bunny));
+
+	mat4 bunnyInstanceMat(1.0);
+	bunnyInstanceMat = translate(bunnyInstanceMat, vec3(1.2, -0.25, 1.5));
+	bunnyInstanceMat = scale(bunnyInstanceMat, vec3(1.2));
+	bunnyInstanceMat = rotate(bunnyInstanceMat, -Math::PI / 6, vec3(0, 1, 0));
+
+	mat4 bunnyModelNormMat(1.0f);
+	bunnyModelNormMat = scale(bunnyModelNormMat, vec3(1.0f / bunnyModel->GetBoundingBox().GetRadius()));
+	bunnyModelNormMat = translate(bunnyModelNormMat, -bunnyModel->GetBoundingBox().GetCenter());
+
+	mat4 bunnyGlassMat = bunnyInstanceMat;
+	bunnyGlassMat *= bunnyModelNormMat;
+	auto bunnyGlass = ToCPtr(new Transform(bunnyGlassMat, bunnyModel, ToCPtr(new Dielectric(1.5f))));
+
+	mat4 bunnyVolumeMat = bunnyInstanceMat;
+	bunnyVolumeMat = scale(bunnyVolumeMat, vec3(0.99f));
+	bunnyVolumeMat *= bunnyModelNormMat;
+	auto bunnyVolumeBoundary = ToCPtr(new Transform(bunnyVolumeMat, bunnyModel));
+	auto bunnyVolume = ToCPtr(new Volume(bunnyVolumeBoundary, 8.0f, ToCPtr(new Isotropic(vec3(1.0f, 0.684f, 0.785f)))));
+	auto bunny = ToPtr(new Group);
+	(*bunny) << bunnyGlass << bunnyVolume;
+
+	//------------ dragon
+	auto dragonModel = ToCPtr(new Model(rootPath + str_Obj_Dragon));
+
+	mat4 dragonModelNormMat(1.0);
+	dragonModelNormMat = scale(dragonModelNormMat, vec3(1.0f / dragonModel->GetBoundingBox().GetRadius()));
+	dragonModelNormMat = translate(dragonModelNormMat, -dragonModel->GetBoundingBox().GetCenter());
+
+	mat4 dragonInstanceMat(1.0);
+	dragonInstanceMat = translate(dragonInstanceMat, vec3(-1.2, -0.25, 1.6));
+	dragonInstanceMat = rotate(dragonInstanceMat, Math::PI / 6, vec3(0, 1, 0));
+	dragonInstanceMat = scale(dragonInstanceMat, vec3(1.2));
+
+	mat4 tfmDragonGlass = dragonInstanceMat;
+	tfmDragonGlass *= dragonModelNormMat;
+	auto dragonGlass = ToCPtr(new Transform(tfmDragonGlass, dragonModel, ToCPtr(new Dielectric(1.5f))));
+
+	mat4 tfmDragonVolumeModel = dragonInstanceMat;
+	tfmDragonVolumeModel = scale(tfmDragonVolumeModel, vec3(0.99));
+	tfmDragonVolumeModel *= dragonModelNormMat;
+	auto dragonVolumeModel = ToCPtr(new Transform(tfmDragonVolumeModel, dragonModel));
+
+	auto dragonVolume = ToPtr(new Volume(dragonVolumeModel, 16.0f, ToPtr(new Isotropic(rgb(0, 0.644, 0.855f)))));
+	auto dragon = ToPtr(new Group);
+	(*dragon) << dragonGlass << dragonVolume;
+
+	auto group = ToPtr(new Group);
+	auto group1 = ToPtr(new Group);
+	(*group) << sphere0 << bottomWood << bunny << dragon << sky;// << sphere1 << sphere2;
+
+	vec3 origin(0, 0.75, 4);
+	vec3 viewPoint(0, 0, 0.5);
+	float fov = 60.0f;
+	float lenR = 0.00f;
+	//float distToFocus = 10.0f;
+	auto camera = ToPtr(new RayCamera(origin, viewPoint, ratioWH, fov, lenR));
+
+	auto scene = ToPtr(new Scene(group, camera));
+	return scene;
+}
+
+Scene::CPtr CreateScene7(float ratioWH) {
+	auto skyMat = ToPtr(new OpMaterial([](const HitRecord & rec)->bool {
+		float t = 0.5f * (rec.vertex.pos.y + 1.0f);
+		rgb white = rgb(1.0f, 1.0f, 1.0f);
+		rgb blue = rgb(0.5f, 0.7f, 1.0f);
+		rgb lightColor = (1 - t) * white + t * blue;
+		rec.ray->SetLightColor(lightColor);
+		return false;
+	}));
+	auto sky = ToPtr(new Sky(skyMat));
+
+	auto config = *GStorage<Ptr<Config>>::GetInstance()->GetPtr(str_MainConfig);
+	auto rootPath = *config->GetStrPtr("RootPath");
+	auto earthTex = ToCPtr(new ImgTexture(rootPath + str_Img_Earth, true));
+	if (!earthTex->IsValid()) {
+		printf("ERROR: earthTex[%s] is invalid.\n", (str_RootPath + str_Img_Earth).c_str());
+		exit(1);
+	}
+
+	auto constTex = ToCPtr(new ConstTexture(rgb(0.5, 0.5, 0.5)));
+
+	vector<Vertex> squareVertexs;
+	for (size_t i = 0; i < sizeof(data_SquareVertexPos) / sizeof(float); i += 8) {
+		vec3 pos(data_SquareVertexPos[i], data_SquareVertexPos[i + 1], data_SquareVertexPos[i + 2]);
+		vec3 normal(data_SquareVertexPos[i + 3], data_SquareVertexPos[i + 4], data_SquareVertexPos[i + 5]);
+		squareVertexs.push_back(Vertex(pos, normal));
+	}
+	auto square = ToCPtr(new TriMesh(squareVertexs, ToCPtr(new Metal(constTex, 0.5f))));
+	if (!square->IsValid()) {
+		printf("ERROR: square is invalid.\n");
+		exit(1);
+	}
+
+
+	Sphere::CPtr sphereTop = ToCPtr(new Sphere(vec3(0, 1, -1), 0.25, ToCPtr(new Metal(constTex, 0.2f))));
+	Sphere::CPtr sphereBottom = ToCPtr(new Sphere(vec3(0, -100.5, -1), 100, ToCPtr(new Lambertian(constTex))));
+
+	Sphere::CPtr sphereMid = ToCPtr(new Sphere(vec3(0, 0, -1), 0.5, ToCPtr(new Metal(earthTex, 0.2))));
+
+	auto dielectric = ToCPtr(new Dielectric(1.5));
+	Sphere::CPtr sphereLeftOut = ToCPtr(new Sphere(vec3(-1, 0, -1), 0.5, dielectric));
+	Sphere::CPtr sphereLeftIn = ToCPtr(new Sphere(vec3(-1, 0, -1), -0.45, dielectric));
+	Group::Ptr group0 = ToPtr(new Group);
+	(*group0) << sphereLeftOut << sphereLeftIn;
+
+	Sphere::CPtr sphereRight = ToCPtr(new Sphere(vec3(1, 0, -1), 0.5, ToCPtr(new Lambertian(rgb(0.1, 0.2, 0.5)))));
+	Group::Ptr group1 = ToPtr(new Group);
+
+	const vec3 pos(0, 0, 1.2);
+	const vec3 viewPoint(0, 0, 0);
+	const float fov = 90.0f;
+	auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
+	(*group1) << sphereTop << sphereBottom << sphereMid << group0 << sphereRight << sky;
+
+	mat4 tfm(1.0f);
+	tfm = translate(tfm, vec3(0.5));
+	tfm = scale(tfm, vec3(1.2));
+	tfm = rotate(tfm, Math::PI / 9, vec3(0, 1, 0));
+	auto tfmMid = ToPtr(new Transform(tfm, sphereMid));
+	//auto volume = ToPtr(new Volume(cube2, 1.65f, ToPtr(new Isotropic(vec3(1.0f)))));
+
+	return ToCPtr(new Scene(group1, camera));
 }

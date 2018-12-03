@@ -133,27 +133,106 @@ Scene::CPtr CreateScene1(float ratioWH) {
 }
 
 Scene::CPtr CreateScene2(float ratioWH) {
-	Sphere::CPtr sphereBottom = ToCPtr(new Sphere(vec3(0, -100.5, -1), 100, ToCPtr(new Lambertian(rgb(0.5, 0.5, 0.5)))));
-	Sphere::CPtr sphereMid = ToCPtr(new Sphere(vec3(0, 0, -1), 0.5, ToCPtr(new Lambertian(rgb(0.8, 0.8, 0)))));
-	Sphere::CPtr sphereLeftOut = ToCPtr(new Sphere(vec3(-1, 0, -1), 0.5, ToCPtr(new Dielectric(1.5))));
-	Sphere::CPtr sphereLeftIn = ToCPtr(new Sphere(vec3(-1, 0, -1), -0.45, ToCPtr(new Dielectric(1.5))));
-	Sphere::CPtr sphereRight = ToCPtr(new Sphere(vec3(1, 0, -1), 0.5, ToCPtr(new Metal(rgb(0.1, 0.2, 0.5), 0.0))));
-	vector<Hitable::CPtr> balls;
-	balls.push_back(sphereMid);
-	balls.push_back(sphereBottom);
-	BVH_Node::CPtr bvhBalls = ToCPtr(new BVH_Node(balls));
+	// Mesh
+	vector<Vertex> squareVertexs;
+	for (size_t i = 0; i < sizeof(data_SquareVertexPos) / sizeof(float); i += 8) {
+		vec3 pos(data_SquareVertexPos[i], data_SquareVertexPos[i + 1], data_SquareVertexPos[i + 2]);
+		vec3 normal(data_SquareVertexPos[i + 3], data_SquareVertexPos[i + 4], data_SquareVertexPos[i + 5]);
+		squareVertexs.push_back(Vertex(pos, normal));
+	}
+	auto square = ToPtr(new TriMesh(squareVertexs));
+	if (!square->IsValid()) {
+		printf("ERROR: square is invalid.\n");
+		exit(1);
+	}
 
-	Group::Ptr group0 = ToPtr(new Group);
-	Group::Ptr group1 = ToPtr(new Group);
-	(*group1) << sphereLeftOut << sphereLeftIn;
+	vector<Vertex> cubeVertexs;
+	for (size_t i = 0; i < sizeof(data_CubeVertexPos) / sizeof(float); i += 6) {
+		vec3 pos(data_CubeVertexPos[i], data_CubeVertexPos[i + 1], data_CubeVertexPos[i + 2]);
+		vec3 normal(data_CubeVertexPos[i + 3], data_CubeVertexPos[i + 4], data_CubeVertexPos[i + 5]);
+		cubeVertexs.push_back(Vertex(pos, normal));
+	}
+	auto cube = ToPtr(new TriMesh(cubeVertexs));
+	if (!cube->IsValid()) {
+		printf("ERROR: cube is invalid.\n");
+		exit(1);
+	}
 
-	const vec3 pos(0, 0, 0);
-	const vec3 viewPoint(0, 0, -1);
-	const float fov = 90.0f;
-	auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
-	(*group0) << sphereBottom << sphereMid << group1 << sphereRight;
+	// Mat
+	auto redMat = ToPtr(new Lambertian(vec3(0.65f, 0.05f, 0.05f)));
+	auto greenMat = ToPtr(new Lambertian(vec3(0.12f, 0.45f, 0.15f)));
+	auto grayMat = ToPtr(new Lambertian(vec3(0.73f, 0.73f, 0.73f)));
+	auto lightMat = ToPtr(new Light(rgb(3.0f)));
+	auto cubeMat = ToPtr(new Lambertian(rgb(1.0f)));
+	auto volumnMat = ToPtr(new Isotropic(vec3(1.0f)));
 
-	return ToPtr(new Scene(bvhBalls, camera));
+	// Transform
+	mat4 tfmRight(1.0f);
+	tfmRight = translate(tfmRight, vec3(3, 0, 0));
+	tfmRight = scale(tfmRight, vec3(6));
+	tfmRight = rotate(tfmRight, -Math::PI / 2, vec3(0, 1, 0));
+	auto redWall = ToPtr(new Transform(tfmRight, square, redMat));
+
+	mat4 tfmLeft(1.0f);
+	tfmLeft = translate(tfmLeft, vec3(-3, 0, 0));
+	tfmLeft = scale(tfmLeft, vec3(6));
+	tfmLeft = rotate(tfmLeft, Math::PI / 2, vec3(0, 1, 0));
+	auto greenWall = ToPtr(new Transform(tfmLeft, square, greenMat));
+
+	mat4 tfmBottom(1.0f);
+	tfmBottom = translate(tfmBottom, vec3(0, -3, 0));
+	tfmBottom = scale(tfmBottom, vec3(6));
+	tfmBottom = rotate(tfmBottom, -Math::PI / 2, vec3(1, 0, 0));
+	auto bottomWall = ToPtr(new Transform(tfmBottom, square, grayMat));
+
+	mat4 tfmTop(1.0f);
+	tfmTop = translate(tfmTop, vec3(0, 3, 0));
+	tfmTop = scale(tfmTop, vec3(6));
+	tfmTop = rotate(tfmTop, Math::PI / 2, vec3(1, 0, 0));
+	auto topWall = ToPtr(new Transform(tfmTop, square, grayMat));
+
+	mat4 tfmBack(1.0f);
+	tfmBack = translate(tfmBack, vec3(0, 0, -3));
+	tfmBack = scale(tfmBack, vec3(6));
+	auto backWall = ToPtr(new Transform(tfmBack, square, grayMat));
+
+	mat4 tfmLight(1.0f);
+	tfmLight = translate(tfmLight, vec3(0, 2.999, 0));
+	tfmLight = scale(tfmLight, vec3(4));
+	tfmLight = rotate(tfmLight, Math::PI / 2, vec3(1, 0, 0));
+	auto light = ToPtr(new Transform(tfmLight, square, lightMat));
+
+	mat4 tfmCube1(1.0f);
+	tfmCube1 = translate(tfmCube1, vec3(1.1, -2.2, 1));
+	tfmCube1 = scale(tfmCube1, vec3(1.6f));
+	tfmCube1 = rotate(tfmCube1, -Math::PI / 12, vec3(0, 1, 0));
+	auto cube1 = ToPtr(new Transform(tfmCube1, cube, cubeMat));
+
+	mat4 tfmCube2(1.0f);
+	tfmCube2 = translate(tfmCube2, vec3(-1.1, -1.5, -0.5));
+	tfmCube2 = scale(tfmCube2, vec3(1.6, 3, 1.6));
+	tfmCube2 = rotate(tfmCube2, Math::PI / 9, vec3(0, 1, 0));
+	//tfmCube2 = scale(tfmCube2, vec3(4));
+	auto volumn = ToPtr(new Volume(cube, 3.0f, volumnMat));
+	auto cube2 = ToPtr(new Transform(tfmCube2, volumn));
+
+
+	// Scene
+	auto group = ToPtr(new Group);
+
+	(*group) << greenWall << redWall << bottomWall << topWall << backWall << cube1/* << cube2*/ << light;
+
+	// Camera
+	float t0 = 0.0f;
+	float t1 = 1.0f;
+	vec3 origin(0, 0, 10);
+	vec3 viewPoint(0, 0, 0);
+	float fov = 45.0f;
+	float lenR = 0.05f;
+	float distToFocus = 8.0f;
+	TRayCamera::Ptr camera = ToPtr(new TRayCamera(origin, viewPoint, ratioWH, t0, t1, fov, lenR, distToFocus));
+
+	return ToPtr(new Scene(group, camera));
 }
 
 Scene::CPtr CreateScene3(float ratioWH) {
