@@ -12,6 +12,7 @@ set (ALL_SOURCES ${ALL_SOURCES}
 	"${CMAKE_SOURCE_DIR}/data/shaders/common/ppBlur.fs"
 	"${CMAKE_SOURCE_DIR}/data/shaders/common/gamma.fs"
 	"${CMAKE_CURRENT_SOURCE_DIR}/TexWindow.cpp"
+	"${CMAKE_SOURCE_DIR}/data/shaders/common/interpolation.fs"
 	"${CMAKE_SOURCE_DIR}/include/RayTracing/TexWindow.h"
 )
 foreach(SOURCE ${ALL_SOURCES})

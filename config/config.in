@@ -43,7 +43,7 @@
 #	ENUM_OPTION_SAVE_SRC_IMG = 1 << 4,
 #	ENUM_OPTION_SAVE_POST_PROCESS_IMG = 1 << 5,
 # };
-bin option = 111000;
+bin option = 111100;
 
 # 根目录
 string RootPath = "${CMAKE_SOURCE_DIR}";
@@ -53,13 +53,13 @@ int val_Default_ImgWidth = 1280;
 int val_Default_ImgHeight = 768;
 
 # 图像更新帧率
-int FPS = 1;
+int FPS = 20;
 
 # 采样率
 int sampleNum = 200;
 
 # 高斯模糊次数
-int blurNum = 0;
+int blurNum = 1;
 
 # 01_in_a_Weekend / 01_Image 输出图像大小
 int val_01_in_a_Weekend_01_Image_ImgWidth = 200;
