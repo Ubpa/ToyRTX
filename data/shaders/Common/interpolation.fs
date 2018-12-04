@@ -18,35 +18,33 @@ void main()
 	}else{
 		vec2 tex_offset = 1.0 / textureSize(image, 0); // gets size of single texel
 		float weightSum = 0;
-		for(int i=0;i<2;i++){
-			for(int j=0;j<2;j++){
-				float w = weight[i] * weight[j];
-				vec3 tmpColor;
+		for(int i=1;i<3;i++){
+            int j=i;
+            vec3 tmpColor;
 
-				tmpColor = texture(image, TexCoords + vec2(tex_offset.x * i, tex_offset.y * j)).rgb;
-				if(tmpColor != vec3(0)){
-					result += tmpColor * w;
-					weightSum += w;
-				}
+            tmpColor = texture(image, TexCoords + vec2(tex_offset.x * i, tex_offset.y * j)).rgb;
+            if(tmpColor != vec3(0)){
+                result += tmpColor;
+                weightSum += 1;
+            }
 
-				tmpColor = texture(image, TexCoords + vec2(tex_offset.x * i, - tex_offset.y * j)).rgb;
-				if(tmpColor != vec3(0)){
-					result += tmpColor * w;
-					weightSum += w;
-				}
-				
-				tmpColor = texture(image, TexCoords + vec2(- tex_offset.x * i, tex_offset.y * j)).rgb;
-				if(tmpColor != vec3(0)){
-					result += tmpColor * w;
-					weightSum += w;
-				}
+            tmpColor = texture(image, TexCoords + vec2(tex_offset.x * i, - tex_offset.y * j)).rgb;
+            if(tmpColor != vec3(0)){
+                result += tmpColor;
+                weightSum += 1;
+            }
+            
+            tmpColor = texture(image, TexCoords + vec2(- tex_offset.x * i, tex_offset.y * j)).rgb;
+            if(tmpColor != vec3(0)){
+                result += tmpColor;
+                weightSum += 1;
+            }
 
-				tmpColor = texture(image, TexCoords + vec2(- tex_offset.x * i, - tex_offset.y * j)).rgb;
-				if(tmpColor != vec3(0)){
-					result += tmpColor * w;
-					weightSum += w;
-				}
-			}
+            tmpColor = texture(image, TexCoords + vec2(- tex_offset.x * i, - tex_offset.y * j)).rgb;
+            if(tmpColor != vec3(0)){
+                result += tmpColor;
+                weightSum += 1;
+            }
 		}
 		FragColor = vec4(result / weightSum, 1.0);
 	}

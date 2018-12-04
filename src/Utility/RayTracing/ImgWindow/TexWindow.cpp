@@ -175,7 +175,7 @@ bool TexWindow::Run(const Operation::Ptr & texUpdateOp) {
 	LambdaOp::Ptr scaleUpdate = ToPtr(new LambdaOp([&]() {
 		double tps = 1.0f / fps;
 		double loopTime = mainTimer.GetLog(1);
-		scale *= loopTime < tps ? 1.03 : 0.9708;
+		scale *= loopTime < tps ? 1.01 : 0.99;
 		curFrame = static_cast<size_t>(mainTimer.GetWholeTime() / tps);
 		if (!texUpdateOp->IsHold()) {
 			printf("Now the texture is no need to update.\n");

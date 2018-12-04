@@ -127,14 +127,19 @@ int main(int argc, char ** argv) {
 	TRayCamera::CPtr tCamera = std::dynamic_pointer_cast<const TRayCamera>(camera);
 
 	RTX_Shader.SetInt("SumColor", 0);
+	RTX_Shader.SetInt("RayData0", 1);
+	RTX_Shader.SetInt("RayData1", 2);
+	RTX_Shader.SetInt("RayData2", 3);
 
-	RTX_Shader.SetInt("SceneData", 1);
-	RTX_Shader.SetInt("MatData", 2);
-	RTX_Shader.SetInt("TexData", 3);
-	RTX_Shader.SetInt("PackData", 4);
-	RTX_Shader.SetInt("skybox", 5);
+	RTX_Shader.SetInt("SceneData",4);
+	RTX_Shader.SetInt("MatData", 5);
+	RTX_Shader.SetInt("TexData", 6);
+	RTX_Shader.SetInt("PackData", 7);
+
+	RTX_Shader.SetInt("skybox", 8);
+
 	for (size_t i = 0; i < texArrSize; i++)
-		RTX_Shader.SetInt(string("TexArr[") + to_string(i) + "]", 6 + i);
+		RTX_Shader.SetInt(string("TexArr[") + to_string(i) + "]", 9 + i);
 
 	RTX_Shader.SetVec3f("camera.pos", camera->GetPos());
 	RTX_Shader.SetVec3f("camera.BL_Corner", camera->GetBL_Corner());
@@ -159,11 +164,7 @@ int main(int argc, char ** argv) {
 
 	//------------ RayTracing FBO
 	bool curReadFBO = false;
-	bool curWriteFBO = !curReadFBO;
-	FBO FBO_RayTracing[2] = {
-		FBO(width, height, FBO::ENUM_TYPE_RTX),
-		FBO(width, height, FBO::ENUM_TYPE_RTX),
-	};
+	FBO FBO_RayTracing[2] = { FBO(width, height, FBO::ENUM_TYPE_RAYTRACING),FBO(width, height, FBO::ENUM_TYPE_RAYTRACING) };
 	FBO FBO_Average(width, height, FBO::ENUM_TYPE_COLOR);
 
 
@@ -171,18 +172,10 @@ int main(int argc, char ** argv) {
 	Timer timer;
 	timer.Start();
 
-	const size_t maxLoopNum = 5000;
 	size_t allLoopNum = 0;
 	size_t frameLoop = 0;
 
-	//static const float fps = 10.0f;
 	LambdaOp::Ptr cameraUpdateOp = ToPtr(new LambdaOp([&]() {
-		//static const float tps = 1.0f / fps;
-		//static float lastFrameTime = 0.0f;
-		//if (timer.GetWholeTime() - lastFrameTime < 0.05)
-		//	return;
-		//lastFrameTime = timer.GetWholeTime();
-		
 		if (timer.GetWholeTime() > 11 )
 			return;
 
@@ -203,42 +196,38 @@ int main(int argc, char ** argv) {
 	}));
 
 	LambdaOp::Ptr RTX_Op = ToPtr(new LambdaOp([&]() {
-		size_t loopNum = 2;// static_cast<size_t>(glm::max(texWindow.GetScale(), 1.0));
+		size_t loopNum = static_cast<size_t>(glm::max(texWindow.GetScale(), 2.0));
 		for (size_t i = 0; i < loopNum; i++) {
-			FBO_RayTracing[curWriteFBO].Use();
+			FBO_RayTracing[!curReadFBO].Use();
 			FBO_RayTracing[curReadFBO].GetColorTexture(0).Use(0);
-			sceneDataTex.Use(1);
-			matDataTex.Use(2);
-			texDataTex.Use(3);
-			packDataTex.Use(4);
-			skyboxTex.Use(5);
+			FBO_RayTracing[curReadFBO].GetColorTexture(1).Use(1);
+			FBO_RayTracing[curReadFBO].GetColorTexture(2).Use(2);
+			FBO_RayTracing[curReadFBO].GetColorTexture(3).Use(3);
+			sceneDataTex.Use(4);
+			matDataTex.Use(5);
+			texDataTex.Use(6);
+			packDataTex.Use(7);
+			skyboxTex.Use(8);
 			for (size_t i = 0; i < texArrSize; i++)
-				texArr[i].Use(6 + i);
+				texArr[i].Use(9 + i);
 			RTX_Shader.SetFloat("rdSeed[0]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[1]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[2]", Math::Rand_F());
 			RTX_Shader.SetFloat("rdSeed[3]", Math::Rand_F());
 			VAO_Screen.Draw(RTX_Shader);
 			RTX_Shader.SetFloat("clear", 0.0);
-			frameLoop++;
-
-			curReadFBO = curWriteFBO;
-			curWriteFBO = !curReadFBO;
+			curReadFBO = !curReadFBO;
 		}
 		allLoopNum += loopNum;
-		//frameLoop += loopNum;
-		double curStep = allLoopNum / (double)maxLoopNum * 100.0;
 		double wholeTime = timer.GetWholeTime();
 		double speed = allLoopNum / wholeTime;
-		double needTime = (maxLoopNum - allLoopNum) / speed;
-		printf("\rINFO: %.2f spps, speed %.2f loop / s, used time: %.2f s, need time: %.2f s, whole time: %.2f s     ",
-			allLoopNum/wholeTime , speed, wholeTime, needTime, wholeTime + needTime);
+		printf("\rINFO: %.2f spps, speed %.2f loop / s, used time: %.2f s     ",
+			allLoopNum/wholeTime , speed, wholeTime);
 	}));
 
 	auto averageOp = ToPtr(new LambdaOp([&]() {
 		FBO_Average.Use();
 		FBO_RayTracing[curReadFBO].GetColorTexture(0).Use(0);
-		average_Shader.SetInt("num", frameLoop);
 		VAO_Screen.Draw(average_Shader);
 
 		texWindow.SetTex(FBO_Average.GetColorTexture(0));
@@ -248,6 +237,7 @@ int main(int argc, char ** argv) {
 	(*texUpdateOp) << cameraUpdateOp << RTX_Op << averageOp;
 
 	bool success = texWindow.Run(texUpdateOp);
+
 	return success ? 0 : 1;
 }
 

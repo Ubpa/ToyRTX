@@ -15,6 +15,8 @@ namespace RayTracing {
 
 		virtual Ray::Ptr GenRay(float s, float t) const;
 		
+
+
 		const glm::vec3 GetPos() const { return pos; }
 		const glm::vec3 GetBL_Corner() const { return BL_Corner; }
 		const glm::vec3 GetHorizontal() const { return horizontal; }
@@ -25,7 +27,6 @@ namespace RayTracing {
 		float GetLenR() const { return lenR; }
 	protected:
 		void GenRay(float s, float t, Ray::Ptr ray) const;
-		void Test(const Ray::Ptr & ray) const;
 		glm::vec3 pos;
 		glm::vec3 BL_Corner;
 		glm::vec3 horizontal;
