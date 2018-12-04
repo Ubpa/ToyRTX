@@ -4,7 +4,7 @@ precision highp float;
 layout (location = 0) out vec4 out_SumColor;
 layout (location = 1) out vec4 out_RayData0;
 layout (location = 2) out vec4 out_RayData1;
-layout (location = 3) out vec3 out_RayData2;
+layout (location = 3) out vec4 out_RayData2;
 
 struct Ray{// 11
     vec3 origin;
@@ -12,6 +12,7 @@ struct Ray{// 11
     highp vec3 color;
     float tMax;
 };
+float depth;
 float RayTime;
 float SampleNum;
 void Ray_Load(out struct Ray ray);
@@ -67,6 +68,8 @@ uniform sampler2D TexArr[16];
 uniform samplerCube skybox;
 
 uniform struct Camera camera;
+
+uniform mat4 oldViewProjectMat;
 
 uniform float rdSeed[4];
 uniform float clear;
@@ -868,16 +871,18 @@ void Ray_Update(inout struct Ray ray, vec3 origin, vec3 dir, vec3 attenuation){
 }
 
 void Ray_Load(out struct Ray ray){
-	vec4 val[2];
+	vec4 val[3];
 	val[0] = texture(RayData0, TexCoords);
 	ray.origin = val[0].xyz;
 	ray.tMax = val[0].w;
 	val[1] = texture(RayData1, TexCoords);
 	ray.dir = val[1].xyz;
 	RayTime = val[1].w;
-	ray.color = texture(RayData2, TexCoords).xyz;
+	val[2] = texture(RayData2, TexCoords);
+	ray.color = val[2].xyz;
+	depth = val[2].w;
 
-	if(ray.tMax == 0){
+	if(clear == 1.0 || ray.tMax == 0){
 		Camera_GenRay(ray);
 		return;
 	}
@@ -886,9 +891,47 @@ void Ray_Load(out struct Ray ray){
 void Ray_Store(struct Ray ray){
 	out_RayData0 = vec4(ray.origin, ray.tMax);
 	out_RayData1 = vec4(ray.dir, RayTime);
-	out_RayData2 = ray.color;
+	out_RayData2 = vec4(ray.color, depth);
+
+	vec4 oldColor;
+	if(clear==1.0){
+		if(ray.tMax != 0){
+			vec4 tmp = oldViewProjectMat * vec4(ray.origin, 1);
+			vec2 texc = (tmp.xy / tmp.w + 1)/2;
+			texc.y = 1 - texc.y;
+			
+			if(texc.x>0 && texc.x<1 && texc.y>0 && texc.y<1){
+				oldColor = texture(SumColor, texc);
+				if(oldColor.w != 0)
+					oldColor /= oldColor.w / 4;
+				else
+					oldColor = vec4(0);
+					
+				vec2 offset = 1.0/textureSize(SumColor,0);
+				vec4 c0 = texture(SumColor, texc+offset);
+				if(c0.w != 0)
+					c0 /= c0.w;
+				else
+					c0 = vec4(0);
+				vec4 c1 = texture(SumColor, texc-offset);
+				if(c1.w != 0)
+					c1 /= c1.w;
+				else
+					c1 = vec4(0);
+				oldColor += c0+c1;
+				if(oldColor.w != 0)
+					oldColor /= oldColor.w / 4;
+				else
+					oldColor = vec4(0);
+			}
+			else
+				oldColor = vec4(0);
+		}else
+			oldColor = vec4(0);
+	}else
+		oldColor = texture(SumColor, TexCoords);
 	vec4 newColor = ray.tMax == 0 ? vec4(ray.color, 1) : vec4(0);
-	out_SumColor = (1 - clear) * texture(SumColor, TexCoords) + newColor;
+	out_SumColor = oldColor + newColor;
 }
 
 void Ray_Transform(inout struct Ray ray, mat4 transform){
@@ -898,7 +941,7 @@ void Ray_Transform(inout struct Ray ray, mat4 transform){
 }
 
 void Camera_GenRay(out struct Ray ray){
-    vec2 st = TexCoords + RandInSquare() / textureSize(SumColor, 0);
+    vec2 st = TexCoords + (RandInSquare()-0.5) / textureSize(SumColor, 0);
     vec2 rd = camera.lenR * RandInCircle();
     
     ray.origin = camera.pos + rd.x * camera.right + rd.y * camera.up;
@@ -906,12 +949,16 @@ void Camera_GenRay(out struct Ray ray){
     ray.color = vec3(1);
     ray.tMax = FLT_MAX;
     RayTime = mix(camera.t0, camera.t1, Rand());
+	depth = 0;
 }
 
 void RayTracer(inout struct Ray ray){
-	if(Rand() > rayP){
+	depth++;
+	//if(Rand() > rayP){
+	if(depth > 20){
 		ray.color = vec3(0);
 		ray.tMax = 0;
+		depth = 0;
 		return;
 	}
 	
@@ -922,6 +969,7 @@ void RayTracer(inout struct Ray ray){
 		bool rayOut = Scatter_Material(ray, finalHitRst.vertex, finalHitRst.matIdx);
 		if(!rayOut){//×·×Ù½áÊø
 			ray.tMax = 0;
+			depth = 0;
 			return;
 		}
 	}else{// default sky
@@ -931,6 +979,7 @@ void RayTracer(inout struct Ray ray){
 		vec3 lightColor = (1 - t) * white + t * blue;
 		ray.color *= lightColor;
 		ray.tMax = 0;
+		depth = 0;
 		return;
 	}
 }

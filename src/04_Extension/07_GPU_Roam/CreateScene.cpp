@@ -85,9 +85,9 @@ Scene::CPtr CreateScene0(float ratioWH) {
 	Sphere::CPtr sphereRight = ToCPtr(new Sphere(vec3(1.1, 0, 0), 0.5, ToCPtr(new Lambertian(earthTex))));
 	Group::Ptr group1 = ToPtr(new Group);
 
-	const vec3 pos(0, 0, 1.2);
+	const vec3 pos(0, 0, 2.5);
 	const vec3 viewPoint(0, 0, 0);
-	const float fov = 90.0f;
+	const float fov = 45.0f;
 	auto camera = ToCPtr(new TRayCamera(pos, viewPoint, ratioWH, 0, 0, 90.0f));
 	(*group1) << bottomWood << sphereMid << group0 << sphereRight << sky;
 

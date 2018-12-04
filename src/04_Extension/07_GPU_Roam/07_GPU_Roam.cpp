@@ -11,12 +11,17 @@
 #include <RayTracing/TexWindow.h>
 #include <RayTracing/TRayCamera.h>
 
+#include <OpenGL/Shader.h>
 #include <OpenGL/Camera.h>
 #include <OpenGL/Texture.h>
 #include <OpenGL/VAO.h>
 #include <OpenGL/FBO.h>
 #include <OpenGL/CommonDefine.h>
 
+#include <GLFW/Glfw.h>
+
+#include <Utility/OpQueue.h>
+#include <Utility/EventManager.h>
 #include <Utility/GStorage.h>
 #include <Utility/LambdaOp.h>
 #include <Utility/Timer.h>
@@ -52,17 +57,17 @@ int main(int argc, char ** argv) {
 	//------------ Scene
 	Scene::CPtr scene = CreateScene0(ratioWH);
 
-	// Move
+	//------------ Move
 	vec3 front = normalize(scene->camera->GetFront());
 	float pitch = asin(front.y) / Math::PI * 180;
 	float yaw = acos(front.x / cos(pitch / 180 * Math::PI)) / Math::PI * 180;
-	Camera roamCamera(scene->camera->GetPos(), yaw, pitch, ratioWH);
+	Camera roamCamera(scene->camera->GetPos(), yaw, pitch, ratioWH, 1, 100);
 	size_t moveKey[] = { GLFW_KEY_S, GLFW_KEY_W, GLFW_KEY_D, GLFW_KEY_A, GLFW_KEY_E, GLFW_KEY_Q };
 	size_t arrowKey[] = { GLFW_KEY_DOWN, GLFW_KEY_UP, GLFW_KEY_RIGHT, GLFW_KEY_LEFT, GLFW_KEY_PAGE_DOWN, GLFW_KEY_PAGE_UP };
 	for (size_t i = 0; i < 6; i++) {
-		LambdaOp * op = new LambdaOp([=, &roamCamera, &timer]() {
+		LambdaOp::Ptr op = ToPtr(new LambdaOp([=, &roamCamera, &timer]() {
 			roamCamera.ProcessKeyboard(Camera::ENUM_Movement(Camera::MOVE_FORWARD + i), timer.GetLog(1));
-		});
+		}));
 
 		EventManager::GetInstance()->Register(EventManager::KEYBOARD | moveKey[i],
 			op);
@@ -117,18 +122,18 @@ int main(int argc, char ** argv) {
 		printf("%f, ", genData.GetSceneData()[i]);
 	printf("\n");
 	
-	*/
 	printf("size: %d\n", genData.GetMatData().size());
 	for (size_t i = 0; i < genData.GetMatData().size(); i++)
 		printf("%f, ", genData.GetMatData()[i]);
 	printf("\n");
+
 	printf("size: %d\n", genData.GetTexData().size());
 	for (size_t i = 0; i < genData.GetTexData().size(); i++)
 		printf("%f, ", genData.GetTexData()[i]);
 	printf("\n");
 	
 	printf("size: %d\n", genData.GetPackData().size());
-	/*
+	
 	for (size_t i = 0; i < genData.GetPackData().size(); i += 4) {
 		printf("%f, ", genData.GetPackData()[i]);
 		printf("%f, ", genData.GetPackData()[i + 1]);
@@ -202,6 +207,7 @@ int main(int argc, char ** argv) {
 		timer.Log();
 		static vec3 lastPos(0);
 		static vec3 lastViewPoint(0);
+		static mat4 viewProjectMat = roamCamera.GetProjectionMatrix() * roamCamera.GetViewMatrix();
 
 
 		if (lastPos == roamCamera.GetPos() && lastViewPoint == roamCamera.GetPos() - roamCamera.GetFront() )
@@ -220,13 +226,16 @@ int main(int argc, char ** argv) {
 		RTX_Shader.SetFloat("camera.lenR", camera->GetLenR());
 		RTX_Shader.SetFloat("camera.t0", camera->GetT0());
 		RTX_Shader.SetFloat("camera.t1", camera->GetT1());
+		RTX_Shader.SetMat4f("oldViewProjectMat", viewProjectMat);
+
+		viewProjectMat = roamCamera.GetProjectionMatrix() * roamCamera.GetViewMatrix();
 
 		RTX_Shader.SetFloat("clear", 1.0);
 		frameLoop = 0;
 	}));
 
 	LambdaOp::Ptr RTX_Op = ToPtr(new LambdaOp([&]() {
-		size_t loopNum = 4;// static_cast<size_t>(glm::max(texWindow.GetScale(), 2.0));
+		size_t loopNum = 6;// static_cast<size_t>(glm::max(texWindow.GetScale(), 2.0));
 		for (size_t i = 0; i < loopNum; i++) {
 			FBO_RayTracing[!curReadFBO].Use();
 			FBO_RayTracing[curReadFBO].GetColorTexture(0).Use(0);
