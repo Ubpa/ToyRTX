@@ -1,11 +1,14 @@
 #include <RayTracing/Sphere.h>
+
+#include <RayTracing/Ray.h>
+
 #include <Utility/Math.h>
 
 using namespace RayTracing;
 using namespace CppUtility::Other;
 using namespace glm;
 
-Sphere::Sphere(const vec3 & center, float radius, const Material::CPtr & material)
+Sphere::Sphere(const vec3 & center, float radius, Material::CPtr material)
 	: center(center), radius(radius), Hitable(material) {
 	vec3 minP = center - vec3(radius);
 	vec3 maxP = center + vec3(radius);
@@ -20,13 +23,13 @@ HitRst Sphere::RayIn(Ray::Ptr & ray) const {
 	float discriminant = b * b - a * c;
 
 	if (discriminant <= 0)
-		return HitRst::FALSE;
+		return HitRst::InValid;
 
 	float t = (-b - sqrt(discriminant)) / a;
 	if (t > ray->GetTMax() || t < Ray::tMin) {
 		t = (-b + sqrt(discriminant)) / a;
 		if (t > ray->GetTMax() || t < Ray::tMin)
-			return HitRst::FALSE;
+			return HitRst::InValid;
 	}
 	
 	ray->SetTMax(t);

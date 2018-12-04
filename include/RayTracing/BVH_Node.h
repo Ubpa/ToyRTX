@@ -8,10 +8,10 @@ namespace RayTracing {
 	class BVH_Node : public Hitable{
 		HITABLE_SETUP(BVH_Node)
 	public:
-		BVH_Node(const Material::CPtr & material = NULL);
-		BVH_Node(std::vector<Hitable::CPtr> & hitables, const Material::CPtr & material = NULL);
+		BVH_Node(Material::CPtr material = NULL);
+		BVH_Node(std::vector<Hitable::CPtr> & hitables, Material::CPtr material = NULL);
 
-		virtual HitRst RayIn(Ray::Ptr & ray) const;
+		virtual HitRst RayIn(CppUtility::Other::Ptr<Ray> & ray) const;
 		virtual const AABB GetBoundingBox() const { return box; }
 		const Hitable::CPtr GetLeft() const { return left; }
 		const Hitable::CPtr GetRight() const { return right; }

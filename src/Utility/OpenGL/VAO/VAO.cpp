@@ -1,8 +1,11 @@
 #include <OpenGL/VAO.h>
+
+#include<OpenGL/Shader.h>
+
 #include <glad/glad.h>
 
-using namespace std;
 using namespace CppUtility::OpenGL;
+using namespace std;
 
 VAO::VAO(float const * data, size_t dataSize, const std::vector<size_t> & attrLen){
 	if (data == NULL || dataSize == 0 || attrLen.size() == 0) {

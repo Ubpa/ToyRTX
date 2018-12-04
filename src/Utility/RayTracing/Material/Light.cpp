@@ -11,7 +11,7 @@ using namespace glm;
 Light::Light(const rgb & color, float linear, float quadratic)
 	: lightTex(ToPtr(new ConstTexture(color))), linear(linear), quadratic(quadratic) { }
 
-Light::Light(const Texture::CPtr & lightTex, float linear, float quadratic)
+Light::Light(Texture::CPtr lightTex, float linear, float quadratic)
 	: lightTex(lightTex), linear(linear), quadratic(quadratic) { }
 
 bool Light::Scatter(const HitRecord & rec) const {

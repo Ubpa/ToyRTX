@@ -3,6 +3,7 @@
 #include <RayTracing/Group.h>
 #include <RayTracing/ImgWindow.h>
 #include <RayTracing/RayCamera.h>
+#include <RayTracing/Ray.h>
 
 #include <Utility/Image.h>
 #include <Utility/LambdaOp.h>
@@ -21,8 +22,8 @@ using namespace std;
 typedef vec3 rgb;
 
 Hitable::Ptr CreateScene();
-rgb RayTracer(Hitable::Ptr scene, Ray::Ptr & ray);
-rgb Background(const Ray::Ptr & ray);
+rgb RayTracer(Hitable::Ptr scene, CppUtility::Other::Ptr<Ray> & ray);
+rgb Background(CppUtility::Other::Ptr<Ray> ray);
 
 int main(int argc, char ** argv){
 	ImgWindow imgWindow(str_WindowTitle);
@@ -55,7 +56,7 @@ int main(int argc, char ** argv){
 			size_t j = pixel.y;
 			float u = i / (float)val_ImgWidth;
 			float v = j / (float)val_ImgHeight;
-			Ray::Ptr ray = camera->GenRay(u, v);
+			CppUtility::Other::Ptr<Ray> ray = camera->GenRay(u, v);
 			rgb color = RayTracer::Trace(scene, ray);
 			float r = color.r;
 			float g = color.g;

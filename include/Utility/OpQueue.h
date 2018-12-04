@@ -11,18 +11,16 @@ namespace CppUtility {
 		public:
 			OpQueue(bool isHold = true);
 			//------------
-			OpQueue & operator<<(const Operation::Ptr & operation);
-			OpQueue & operator<<(Operation * operation);
-			void Push(const Operation::Ptr & op);
-			void Push(Operation * op);
+			OpQueue & operator<<(Operation::Ptr operation);
+			void Push(Operation::Ptr op);
 			size_t Size() const;
 			//------------
 			virtual void Run();
-		protected:
-			std::list< Operation::Ptr > opList;
 		private:
 			OpQueue(const OpQueue &) = delete;
 			OpQueue& operator=(const OpQueue &) = delete;
+
+			std::list< Operation::Ptr > opList;
 		};
 	}
 }

@@ -3,6 +3,7 @@
 #include <RayTracing/Triangle.h>
 #include <RayTracing/RayTracer.h>
 #include <RayTracing/ImgWindow.h>
+#include <RayTracing/RayCamera.h>
 
 #include <Utility/Math.h>
 #include <Utility/ImgPixelSet.h>

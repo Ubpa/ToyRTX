@@ -16,11 +16,11 @@ namespace CppUtility {
 			void operator()();
 			//------------
 			virtual void Run() = 0;
-		protected:
-			bool isHold;
 		private:
 			Operation(const Operation&) = delete;
 			Operation& operator=(const Operation&) = delete;
+
+			bool isHold;
 		};
 	}
 }

@@ -1,13 +1,17 @@
 #ifndef _EVENT_MANAGER_H_
 #define _EVENT_MANAGER_H_
 
-#include <Utility/OpQueue.h>
+#include <Utility/Ptr.h>
 #include <Utility/Singleton.h>
+
 #include <functional>
 #include <map>
 
 namespace CppUtility {
 	namespace Other {
+		class Operation;
+		class OpQueue;
+
 		class EventManager : public Singleton<EventManager> {
 		public:
 			enum ENUM_EVENT {
@@ -24,8 +28,7 @@ namespace CppUtility {
 			friend class Singleton<EventManager>;
 			static EventManager * GetInstance();
 			//------------
-			void Register(size_t event, Ptr<Operation> & op);
-			void Register(size_t event, Operation * op);
+			void Register(size_t event, Ptr<Operation> op);
 			void Register(size_t event, const std::function<void()> & op);
 			void Response(size_t event);
 		protected:

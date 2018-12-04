@@ -1,5 +1,6 @@
 #include "CreateScene.h"
 
+#include <RayTracing/Ray.h>
 #include <RayTracing/Isotropic.h>
 #include <RayTracing/Volume.h>
 #include <RayTracing/Transform.h>

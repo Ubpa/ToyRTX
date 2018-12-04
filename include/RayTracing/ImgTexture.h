@@ -3,9 +3,9 @@
 
 #include <RayTracing/Texture.h>
 
-#include <string>
-
 #include <Utility/Ptr.h>
+
+#include <string>
 
 namespace CppUtility {
 	namespace Other {

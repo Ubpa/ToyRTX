@@ -30,5 +30,5 @@ const Vertex Vertex::Interpolate_Tri(const vec3 & abg, const Vertex & A, const V
 	return rst;
 }
 
-HitRecord::HitRecord(const Ptr<Ray> & ray, const vec3 & pos, const vec3 & normal, float u, float v)
+HitRecord::HitRecord(Ptr<Ray> ray, const vec3 & pos, const vec3 & normal, float u, float v)
 	:ray(ray), vertex(pos,normal,u,v) { }

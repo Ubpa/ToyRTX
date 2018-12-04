@@ -53,7 +53,7 @@ int val_Default_ImgWidth = 1280;
 int val_Default_ImgHeight = 768;
 
 # 图像更新帧率
-int FPS = 20;
+int FPS = 40;
 
 # 采样率
 int sampleNum = 200;

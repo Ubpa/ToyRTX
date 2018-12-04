@@ -16,7 +16,7 @@ ImgWindow::ImgWindow(const string & title)
 	}
 }
 
-bool ImgWindow::Run(const Ptr<Operation> & imgUpdateOp) {
+bool ImgWindow::Run(Ptr<Operation> imgUpdateOp) {
 	Texture tex(Texture::ENUM_TYPE_2D_DYNAMIC);
 	tex.SetImg(img);
 	SetTex(tex);

@@ -1,5 +1,7 @@
 #include <RayTracing/Sky.h>
 
+#include <RayTracing/Ray.h>
+
 #include <Utility/Math.h>
 
 using namespace RayTracing;
@@ -10,7 +12,7 @@ const AABB Sky::box(vec3(10e-20f), vec3(10e20f));
 
 HitRst Sky::RayIn(Ray::Ptr & ray) const {
 	if (ray->GetTMax() != FLT_MAX)
-		return HitRst::FALSE;
+		return HitRst::InValid;
 
 	HitRst hitRst(true);
 	vec3 normal = normalize(ray->GetDir());

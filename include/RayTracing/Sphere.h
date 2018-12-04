@@ -7,9 +7,9 @@ namespace RayTracing {
 	class Sphere : public Hitable {
 		HITABLE_SETUP(Sphere)
 	public:
-		Sphere(const glm::vec3 & center = glm::vec3(0.0f), float radius = 1.0f, const Material::CPtr & material = NULL);
+		Sphere(const glm::vec3 & center = glm::vec3(0.0f), float radius = 1.0f, Material::CPtr material = NULL);
 
-		virtual HitRst RayIn(Ray::Ptr & ray) const;
+		virtual HitRst RayIn(CppUtility::Other::Ptr<Ray> & ray) const;
 		virtual const AABB GetBoundingBox() const { return box; }
 
 		const glm::vec3 & GetCenter() const { return center; }

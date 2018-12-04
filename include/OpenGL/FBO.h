@@ -1,8 +1,10 @@
 #ifndef _FBO_H_
 #define _FBO_H_
 
-#include <vector>
 #include <OpenGL/Texture.h>
+
+#include <vector>
+
 namespace CppUtility {
 	namespace OpenGL {
 		class FBO {

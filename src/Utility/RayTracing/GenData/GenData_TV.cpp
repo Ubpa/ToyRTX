@@ -18,7 +18,7 @@ const float TexT_Skybox       = 2.0f;
 GenData_TV::GenData_TV(std::vector<float> & packData)
 	: packData(packData) { }
 
-void GenData_TV::Visit(const ConstTexture::CPtr & constTexture) {
+void GenData_TV::Visit(ConstTexture::CPtr constTexture) {
 	if (constTexture == NULL)
 		return;
 
@@ -38,7 +38,7 @@ void GenData_TV::Visit(const ConstTexture::CPtr & constTexture) {
 	packData.push_back(0);
 }
 
-void GenData_TV::Visit(const ImgTexture::CPtr & imgTexture) {
+void GenData_TV::Visit(ImgTexture::CPtr imgTexture) {
 	if (imgTexture == NULL)
 		return;
 
@@ -64,7 +64,7 @@ void GenData_TV::Visit(const ImgTexture::CPtr & imgTexture) {
 	texData.push_back(img2idx[imgTexture->GetImg()]);
 }
 
-void GenData_TV::Visit(const Skybox::CPtr & skybox) {
+void GenData_TV::Visit(Skybox::CPtr skybox) {
 	if (skybox == NULL || !skybox->IsValid())
 		return;
 

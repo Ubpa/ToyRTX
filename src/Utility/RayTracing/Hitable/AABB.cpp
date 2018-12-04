@@ -20,7 +20,7 @@ void AABB::SetP(const glm::vec3 & minP, const glm::vec3 & maxP) {
 	isValid = true;
 }
 
-bool AABB::Hit(const Ray::Ptr & ray) const {
+bool AABB::Hit(Ray::Ptr ray) const {
 	if (!IsValid())
 		return false;
 

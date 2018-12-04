@@ -1,5 +1,9 @@
 #include <RayTracing/Transform.h>
+
+#include <RayTracing/Ray.h>
+
 #include <Utility/Math.h>
+
 #include <bitset>
 
 using namespace RayTracing;
@@ -7,7 +11,7 @@ using namespace CppUtility::Other;
 using namespace glm;
 using namespace std;
 
-Transform::Transform(const mat4 & transform, const Hitable::CPtr & hitable, const Material::CPtr & material)
+Transform::Transform(const mat4 & transform, Hitable::CPtr hitable, Material::CPtr material)
 	: transform(transform),
 	inverseTransform(inverse(transform)),
 	normalTransform(transpose(inverse(mat3(transform)))),
@@ -40,7 +44,7 @@ Transform::Transform(const mat4 & transform, const Hitable::CPtr & hitable, cons
 
 HitRst Transform::RayIn(Ray::Ptr & ray) const {
 	if (hitable == NULL)
-		return HitRst::FALSE;
+		return HitRst::InValid;
 
 	ray->Transform(inverseTransform);
 

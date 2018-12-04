@@ -14,6 +14,7 @@
 #include <RayTracing/Lambertian.h>
 #include <RayTracing/Sphere.h>
 #include <RayTracing/ImgTexture.h>
+#include <RayTracing/Ray.h>
 #include <RayTracing/TRayCamera.h>
 
 #include <Utility/Config.h>

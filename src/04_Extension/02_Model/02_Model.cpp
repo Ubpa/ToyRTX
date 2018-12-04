@@ -1,5 +1,7 @@
 #include "CreateScene.h"
 
+#include <RayTracing/Ray.h>
+#include <RayTracing/RayCamera.h>
 #include <RayTracing/RayTracer.h>
 #include <RayTracing/ImgWindow.h>
 

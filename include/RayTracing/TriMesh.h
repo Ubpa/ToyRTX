@@ -7,7 +7,7 @@ namespace RayTracing {
 	class TriMesh : public BVH_Node{
 		HITABLE_SETUP(TriMesh)
 	public:
-		TriMesh(const std::vector<Vertex> & vertexs, const Material::CPtr & material = NULL);
+		TriMesh(const std::vector<Vertex> & vertexs, Material::CPtr material = NULL);
 
 		inline bool IsValid() const { return isValid; };
 	protected:

@@ -1,6 +1,7 @@
 #include "Defines.h"
 #include "CreateScene.h"
 
+#include <OpenGL/Shader.h>
 #include <RayTracing/GenData.h>
 #include <RayTracing/ConstTexture.h>
 #include <RayTracing/Dielectric.h>

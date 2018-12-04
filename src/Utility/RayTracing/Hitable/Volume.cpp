@@ -1,22 +1,25 @@
 #include <RayTracing/Volume.h>
+
+#include <RayTracing/Ray.h>
+
 #include <Utility/Math.h>
 
 using namespace RayTracing;
 using namespace CppUtility::Other;
 using namespace glm;
 
-Volume::Volume(const Hitable::CPtr & boundary, float density, const Material::CPtr & material)
+Volume::Volume(Hitable::CPtr boundary, float density, Material::CPtr material)
 	: Hitable(material), density(density), boundary(boundary) { }
 
-HitRst Volume::RayIn(Ray::Ptr & ray) const {
+HitRst Volume::RayIn(CppUtility::Other::Ptr<Ray> & ray) const {
 	if (boundary == NULL)
-		return HitRst::FALSE;
+		return HitRst::InValid;
 
 	float originTMax = ray->GetTMax();
 
 	auto boundaryHitRst = boundary->RayIn(ray);
 	if (!boundaryHitRst.hit)
-		return HitRst::FALSE;
+		return HitRst::InValid;
 
 	auto reverseRay = ToPtr(new Ray(ray->At(Ray::tMin*1.5f), - ray->GetDir()));
 	auto reverseHitRst = boundary->RayIn(reverseRay);
@@ -40,7 +43,7 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 		//Ì«±¡
 		if (!t0HitRst.hit) {
 			ray->SetTMax(originTMax);
-			return HitRst::FALSE;
+			return HitRst::InValid;
 		}
 
 		tMaxFromT0 = t0HitRst.record.ray->GetTMax();
@@ -57,7 +60,7 @@ HitRst Volume::RayIn(Ray::Ptr & ray) const {
 
 	if (hitLen >= lenInVolume) {
 		ray->SetTMax(originTMax);
-		return HitRst::FALSE;
+		return HitRst::InValid;
 	}
 
 	float tFinal = t0 + hitLen / length(ray->GetDir());

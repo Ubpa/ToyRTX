@@ -2,7 +2,6 @@
 #define _T_RAY_CAMERA_H_
 
 #include <glm/glm.hpp>
-#include <RayTracing/TRay.h>
 #include <RayTracing/RayCamera.h>
 
 namespace RayTracing {
@@ -14,7 +13,7 @@ namespace RayTracing {
 			float fov = 45.0f, float lenR = 0.0f, float focus_dist = -1.0f,
 			const glm::vec3 & worldUp = glm::vec3(0, 1, 0));
 
-		virtual Ray::Ptr GenRay(float s, float t) const;
+		virtual CppUtility::Other::Ptr<Ray> GenRay(float s, float t) const;
 
 		float GetT0() const { return t0; }
 		float GetT1() const { return t1; }

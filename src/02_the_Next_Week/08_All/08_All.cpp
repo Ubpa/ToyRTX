@@ -2,6 +2,7 @@
 
 #include <RayTracing/Triangle.h>
 #include <RayTracing/RayTracer.h>
+#include <RayTracing/RayCamera.h>
 #include <RayTracing/ImgWindow.h>
 
 #include <Utility/Math.h>

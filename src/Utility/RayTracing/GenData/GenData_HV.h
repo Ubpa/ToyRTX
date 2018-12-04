@@ -22,20 +22,20 @@ namespace RayTracing {
 
 		const std::vector<float> & GetSceneData() const { return sceneData; }
 		const std::vector<float> & GetPackData() const { return packData; }
-		void Accept(const CppUtility::Other::Ptr<GenData_MV> & genFS_MV);
+		void Accept(CppUtility::Other::Ptr<GenData_MV> genFS_MV);
 	private:
 		void SetMat(const MatIdxMap & mat2idx);
 		using HitableVisitor::Visit;
-		virtual void Visit(const CppUtility::Other::CPtr<Hitable> & hitable);
-		virtual void Visit(const CppUtility::Other::CPtr<Group> & group);
-		virtual void Visit(const CppUtility::Other::CPtr<Sphere> & sphere);
-		virtual void Visit(const CppUtility::Other::CPtr<BVH_Node> & bvhNode);
-		virtual void Visit(const CppUtility::Other::CPtr<Triangle> & triangle);
-		virtual void Visit(const CppUtility::Other::CPtr<TriMesh> & triMesh);
-		virtual void Visit(const CppUtility::Other::CPtr<Transform> & transform);
-		virtual void Visit(const CppUtility::Other::CPtr<Volume> & volume);
-		virtual void Visit(const CppUtility::Other::CPtr<Sky> & sky);
-		virtual void Visit(const CppUtility::Other::CPtr<Model> & model);
+		virtual void Visit(CppUtility::Other::CPtr<Hitable> hitable);
+		virtual void Visit(CppUtility::Other::CPtr<Group> group);
+		virtual void Visit(CppUtility::Other::CPtr<Sphere> sphere);
+		virtual void Visit(CppUtility::Other::CPtr<BVH_Node> bvhNode);
+		virtual void Visit(CppUtility::Other::CPtr<Triangle> triangle);
+		virtual void Visit(CppUtility::Other::CPtr<TriMesh> triMesh);
+		virtual void Visit(CppUtility::Other::CPtr<Transform> transform);
+		virtual void Visit(CppUtility::Other::CPtr<Volume> volume);
+		virtual void Visit(CppUtility::Other::CPtr<Sky> sky);
+		virtual void Visit(CppUtility::Other::CPtr<Model> model);
 
 		std::vector<float> sceneData;
 		std::vector<float> & packData;

@@ -41,7 +41,7 @@ int File::Printf(const char * format, ...) {
 	return rst;
 }
 
-int File::Scanf(const char *  format, ...) {
+int File::Scanf(const char *  format, ...) const {
 	if (!Check(READ)) {
 		fprintf(stderr, "%s can't not read\n", fileName.c_str());
 		return -1;
@@ -53,7 +53,7 @@ int File::Scanf(const char *  format, ...) {
 	return rst;
 }
 
-string File::ReadLine() {
+string File::ReadLine() const {
 	if (!Check(READ)) {
 		fprintf(stderr, "%s can't not read\n", fileName.c_str());
 		return "";
@@ -63,7 +63,7 @@ string File::ReadLine() {
 	return buffer;
 }
 
-string File::ReadAll() {
+string File::ReadAll() const {
 	if (!Check(READ)) {
 		fprintf(stderr, "%s can't not read\n", fileName.c_str());
 		return "";
@@ -74,11 +74,11 @@ string File::ReadAll() {
 	return rst;
 }
 
-bool File::IsEnd() const{
+bool File::IsEnd() const {
 	return feof(pF);
 }
 
-bool File::IsValid() const{
+bool File::IsValid() const {
 	return pF != NULL;
 }
 

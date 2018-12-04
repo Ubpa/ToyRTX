@@ -1,7 +1,11 @@
 #include <OpenGL/Texture.h>
-#include <cstdio>
+
+#include <Utility/Image.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include <cstdio>
 
 using namespace CppUtility::OpenGL;
 using namespace CppUtility::Other;

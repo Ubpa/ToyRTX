@@ -9,7 +9,7 @@ namespace RayTracing {
 	public:
 		using Hitable::Hitable;
 
-		virtual HitRst RayIn(Ray::Ptr & ray) const;
+		virtual HitRst RayIn(CppUtility::Other::Ptr<Ray> & ray) const;
 
 		virtual const AABB GetBoundingBox() const { return box; }
 	private:

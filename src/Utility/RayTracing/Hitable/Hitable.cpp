@@ -6,9 +6,9 @@ using namespace CppUtility::Other;
 using namespace glm;
 using namespace std;
 
-const HitRst HitRst::FALSE(false);
+const HitRst HitRst::InValid(false);
 
-Hitable::Hitable(const Material::CPtr & material)
+Hitable::Hitable(Material::CPtr material)
 	: material(material) {
 	isMatCoverable = material ? false : true;
 }

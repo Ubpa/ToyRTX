@@ -1,5 +1,6 @@
 #include "CreateScene.h"
 
+#include <RayTracing/Ray.h>
 #include <RayTracing/ConstTexture.h>
 #include <RayTracing/Model.h>
 #include <RayTracing/Sky.h>

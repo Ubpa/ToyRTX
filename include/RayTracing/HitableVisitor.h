@@ -19,17 +19,17 @@ namespace RayTracing {
 	class HitableVisitor : public CppUtility::Other::HeapObj {
 		HEAP_OBJ_SETUP(HitableVisitor)
 	public:
-		virtual void Visit(const CppUtility::Other::CPtr<Hitable> & sphere);
-		virtual void Visit(const CppUtility::Other::CPtr<Sphere> & sphere);
-		virtual void Visit(const CppUtility::Other::CPtr<Sky> & sky);
-		virtual void Visit(const CppUtility::Other::CPtr<MoveSphere> & moveSphere);
-		virtual void Visit(const CppUtility::Other::CPtr<Triangle> & triangle);
-		virtual void Visit(const CppUtility::Other::CPtr<Transform> & transform);
-		virtual void Visit(const CppUtility::Other::CPtr<Volume> & volume);
-		virtual void Visit(const CppUtility::Other::CPtr<Group> & group);
-		virtual void Visit(const CppUtility::Other::CPtr<BVH_Node> & bvhNode);
-		virtual void Visit(const CppUtility::Other::CPtr<TriMesh> & triMesh);
-		virtual void Visit(const CppUtility::Other::CPtr<Model> & model);
+		virtual void Visit(CppUtility::Other::CPtr<Hitable> sphere);
+		virtual void Visit(CppUtility::Other::CPtr<Sphere> sphere);
+		virtual void Visit(CppUtility::Other::CPtr<Sky> sky);
+		virtual void Visit(CppUtility::Other::CPtr<MoveSphere> moveSphere);
+		virtual void Visit(CppUtility::Other::CPtr<Triangle> triangle);
+		virtual void Visit(CppUtility::Other::CPtr<Transform> transform);
+		virtual void Visit(CppUtility::Other::CPtr<Volume> volume);
+		virtual void Visit(CppUtility::Other::CPtr<Group> group);
+		virtual void Visit(CppUtility::Other::CPtr<BVH_Node> bvhNode);
+		virtual void Visit(CppUtility::Other::CPtr<TriMesh> triMesh);
+		virtual void Visit(CppUtility::Other::CPtr<Model> model);
 	};
 }
 

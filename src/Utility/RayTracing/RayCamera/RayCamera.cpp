@@ -1,4 +1,7 @@
 #include <RayTracing/RayCamera.h>
+
+#include <RayTracing/Ray.h>
+
 #include <Utility/Math.h>
 
 using namespace RayTracing;

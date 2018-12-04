@@ -1,4 +1,5 @@
 #include <RayTracing/TriMesh.h>
+
 #include <RayTracing/Triangle.h>
 
 using namespace RayTracing;
@@ -6,7 +7,7 @@ using namespace CppUtility::Other;
 using namespace glm;
 using namespace std;
 
-TriMesh::TriMesh(const vector<Vertex> & vertexs, const Material::CPtr & material)
+TriMesh::TriMesh(const vector<Vertex> & vertexs, Material::CPtr material)
 	: BVH_Node(material){
 	if (vertexs.size() % 3 != 0) {
 		isValid = false;

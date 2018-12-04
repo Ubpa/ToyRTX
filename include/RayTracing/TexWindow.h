@@ -2,8 +2,13 @@
 #define _TEX_WINDOW_H_
 
 #include <Utility/Config.h>
-#include <Utility/Operation.h>
 #include <OpenGL/Texture.h>
+
+namespace CppUtility {
+	namespace Other {
+		class Operation;
+	}
+}
 
 namespace RayTracing {
 	class TexWindow {
@@ -22,13 +27,13 @@ namespace RayTracing {
 			ENUM_OPTION_ALL = ENUM_OPTION_POST_PROCESS_ALL | ENUM_OPTION_SAVE_ALL_IMG,
 		};
 
-		TexWindow(const std::string & title = "Image_Window");
+		TexWindow(const std::string & title = "Window");
 
 		double GetScale() const { return scale; };
 		void SetTex(const CppUtility::OpenGL::Texture & tex) { this->tex = tex; };
 		bool IsValid() const { return isValid; };
 
-		bool Run(const CppUtility::Other::Operation::Ptr & texUpdateOp);
+		bool Run(CppUtility::Other::Ptr<CppUtility::Other::Operation> texUpdateOp);
 
 		int GetWidth() const { return width; }
 		int GetHeight() const { return height; }

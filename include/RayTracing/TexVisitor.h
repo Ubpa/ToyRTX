@@ -13,11 +13,11 @@ namespace RayTracing {
 	class TexVisitor : public CppUtility::Other::HeapObj {
 		HEAP_OBJ_SETUP(TexVisitor)
 	public:
-		virtual void Visit(const CppUtility::Other::CPtr<Texture> & tex);
-		virtual void Visit(const CppUtility::Other::CPtr<ConstTexture> & constTexture);
-		virtual void Visit(const CppUtility::Other::CPtr<OpTexture> & opTexture);
-		virtual void Visit(const CppUtility::Other::CPtr<ImgTexture> & imgTexture);
-		virtual void Visit(const CppUtility::Other::CPtr<Skybox> & skybox);
+		virtual void Visit(CppUtility::Other::CPtr<Texture> tex);
+		virtual void Visit(CppUtility::Other::CPtr<ConstTexture> constTexture);
+		virtual void Visit(CppUtility::Other::CPtr<OpTexture> opTexture);
+		virtual void Visit(CppUtility::Other::CPtr<ImgTexture> imgTexture);
+		virtual void Visit(CppUtility::Other::CPtr<Skybox> skybox);
 	private:
 	};
 }

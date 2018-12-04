@@ -20,7 +20,7 @@ const float MatT_Dielectric = 2.0f;
 const float MatT_Light      = 3.0f;
 const float MatT_Isotropic  = 4.0f;
 
-void GenData_MV::Visit(const Lambertian::CPtr & lambertian) {
+void GenData_MV::Visit(Lambertian::CPtr lambertian) {
 	if (lambertian == NULL)
 		return;
 
@@ -37,7 +37,7 @@ void GenData_MV::Visit(const Lambertian::CPtr & lambertian) {
 	matData.push_back(-1);
 }
 
-void GenData_MV::Visit(const Metal::CPtr & metal) {
+void GenData_MV::Visit(Metal::CPtr metal) {
 	if (metal == NULL)
 		return;
 
@@ -56,7 +56,7 @@ void GenData_MV::Visit(const Metal::CPtr & metal) {
 	matData.push_back(metal->GetFuzz());
 }
 
-void GenData_MV::Visit(const Dielectric::CPtr & dielectric) {
+void GenData_MV::Visit(Dielectric::CPtr dielectric) {
 	if (dielectric == NULL)
 		return;
 
@@ -71,7 +71,7 @@ void GenData_MV::Visit(const Dielectric::CPtr & dielectric) {
 	matData.push_back(dielectric->GetRafractIndex());
 }
 
-void GenData_MV::Visit(const Light::CPtr & light) {
+void GenData_MV::Visit(Light::CPtr light) {
 	if (light == NULL)
 		return;
 
@@ -90,7 +90,7 @@ void GenData_MV::Visit(const Light::CPtr & light) {
 	matData.push_back(light->GetQuadratic());
 }
 
-void GenData_MV::Visit(const Isotropic::CPtr & isotropic) {
+void GenData_MV::Visit(Isotropic::CPtr isotropic) {
 	if (isotropic == NULL)
 		return;
 
@@ -117,7 +117,7 @@ void GenData_MV::SetTex(const TexIdxMap & tex2idx) {
 	}
 }
 
-void GenData_MV::Accept(const GenData_TV::Ptr & genFS_TV) {
+void GenData_MV::Accept(GenData_TV::Ptr genFS_TV) {
 	for (auto const & pair : tex2idxVec)
 		pair.first->Accept(genFS_TV);
 

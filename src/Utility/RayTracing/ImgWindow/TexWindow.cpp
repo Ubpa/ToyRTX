@@ -6,10 +6,12 @@
 #include <OpenGL/VAO.h>
 #include <OpenGL/Shader.h>
 
+#include <Utility/Image.h>
 #include <Utility/GStorage.h>
 #include <Utility/LambdaOp.h>
 #include <Utility/OpNode.h>
 #include <Utility/Timer.h>
+#include <Utility/EventManager.h>
 
 #include <GLFW/Glfw.h>
  
@@ -70,7 +72,7 @@ TexWindow::TexWindow(const string & title)
 	isValid = true;
 }
 
-bool TexWindow::Run(const Operation::Ptr & texUpdateOp) {
+bool TexWindow::Run(Operation::Ptr texUpdateOp) {
 	//------------ VAO
 	VAO VAO_FlipScreen(&(data_Flip_ScreenVertices[0]), sizeof(data_Flip_ScreenVertices), { 2,2 });
 	VAO VAO_Screen(&(data_ScreenVertices[0]), sizeof(data_ScreenVertices), { 2,2 });
@@ -261,7 +263,7 @@ bool TexWindow::Run(const Operation::Ptr & texUpdateOp) {
 		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 	}));
 
-	auto renderQueue = new OpQueue;
+	auto renderQueue = ToPtr(new OpQueue);
 	if ((option & ENUM_OPTION_SAVE_SRC_IMG) != 0)
 		(*texProcessOp) << copyOp;
 	if ((option & ENUM_OPTION_POST_PROCESS_FLIP) != 0)
@@ -277,7 +279,7 @@ bool TexWindow::Run(const Operation::Ptr & texUpdateOp) {
 
 	// Ö¡²Ù×÷
 
-	auto opQueue = new OpQueue;
+	auto opQueue = ToPtr(new OpQueue);
 	(*opQueue) << updateOpQueue << renderQueue << finalOp;
 
 	//------------ Run
