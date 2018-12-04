@@ -10,7 +10,7 @@ using namespace RayTracing;
 using namespace CppUtility::Other;
 using namespace std;
 
-GenData::GenData(const CppUtility::Other::CPtr<Hitable> & scene)
+GenData::GenData(CppUtility::Other::CPtr<Hitable> scene)
 	: hitableVisitor(ToPtr(new GenData_HV(packData))),
 	matVisitor(ToPtr(new GenData_MV)),
 	texVisitor(ToPtr(new GenData_TV(packData)))

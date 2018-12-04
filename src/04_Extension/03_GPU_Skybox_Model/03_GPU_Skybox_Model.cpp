@@ -11,6 +11,7 @@
 #include <RayTracing/TexWindow.h>
 #include <RayTracing/TRayCamera.h>
 
+#include <OpenGL/Shader.h>
 #include <OpenGL/Texture.h>
 #include <OpenGL/VAO.h>
 #include <OpenGL/FBO.h>

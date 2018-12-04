@@ -29,9 +29,9 @@ namespace RayTracing {
 		const SkyboxImgs & GetSkyboxImgs() const { return skyboxImgs; }
 		const std::vector<float> & GetTexData() const { return texData; };
 	private:
-		virtual void Visit(const CppUtility::Other::CPtr<ConstTexture> & constTexture);
-		virtual void Visit(const CppUtility::Other::CPtr<ImgTexture> & imgTexture);
-		virtual void Visit(const CppUtility::Other::CPtr<Skybox> & skybox);
+		virtual void Visit(CppUtility::Other::CPtr<ConstTexture> constTexture);
+		virtual void Visit(CppUtility::Other::CPtr<ImgTexture> imgTexture);
+		virtual void Visit(CppUtility::Other::CPtr<Skybox> skybox);
 		using TexVisitor::Visit;
 
 		std::vector<float> texData;

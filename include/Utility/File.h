@@ -21,11 +21,11 @@ namespace CppUtility {
 
 			int Printf(const char * format, ...);
 
-			int Scanf(const char * format, ...);
+			int Scanf(const char * format, ...) const;
 
-			std::string ReadLine();
+			std::string ReadLine() const;
 
-			std::string ReadAll();
+			std::string ReadAll() const;
 
 			bool IsEnd() const;
 

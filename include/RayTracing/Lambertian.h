@@ -13,7 +13,7 @@ namespace RayTracing {
 	public:
 		Lambertian(float r, float g, float b);
 		Lambertian(const glm::rgb & albedo);
-		Lambertian(const CppUtility::Other::CPtr<Texture> & albedo);
+		Lambertian(CppUtility::Other::CPtr<Texture> albedo);
 
 		// 返回值为 true 说明光线继续传播
 		// 返回值为 false 说明光线不再传播

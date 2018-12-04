@@ -14,6 +14,7 @@
 #include <RayTracing/Group.h>
 #include <RayTracing/ImgWindow.h>
 #include <RayTracing/TRayCamera.h>
+#include <RayTracing/Ray.h>
 
 #include <Utility/Math.h>
 #include <Utility/ImgPixelSet.h>
@@ -37,7 +38,7 @@ using namespace std;
 
 Scene::Ptr CreateScene0(float ratioWH);
 Scene::Ptr CreateScene1(float ratioWH);
-rgb Background(const Ray::Ptr & ray);
+rgb Background(CppUtility::Other::Ptr<Ray> ray);
 
 int main(int argc, char ** argv){
 	ImgWindow imgWindow(str_WindowTitle);

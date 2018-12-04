@@ -1,11 +1,12 @@
 #ifndef _VAO_H_
 #define _VAO_H_
 
-#include<vector>
-#include<OpenGL/Shader.h>
+#include <vector>
 
 namespace CppUtility {
 	namespace OpenGL {
+		class Shader;
+
 		class VAO {
 		public:
 			struct VBO_DataPatch {

@@ -3,5 +3,5 @@
 using namespace RayTracing;
 using namespace CppUtility::Other;
 
-Scene::Scene(const Hitable::CPtr & obj, const RayCamera::CPtr & camera)
+Scene::Scene(CppUtility::Other::CPtr<Hitable> obj, CppUtility::Other::CPtr<RayCamera> camera)
 	: obj(obj), camera(camera) { }

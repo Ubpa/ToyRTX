@@ -1,18 +1,15 @@
 #ifndef _MESH_H_
 #define _MESH_H_
 
-#include <glad/glad.h> // holds all OpenGL type declarations
-
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <OpenGL/Shader.h>
 
 #include <string>
 #include <vector>
 
 namespace CppUtility {
 	namespace OpenGL {
+		class Shader;
+
 		class Mesh {
 		public:
 			struct Vertex {

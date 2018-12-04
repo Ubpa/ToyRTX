@@ -1,5 +1,9 @@
 #include <RayTracing/BVH_Node.h>
+
+#include <RayTracing/Ray.h>
+
 #include <Utility/Math.h>
+
 #include <algorithm>
 
 using namespace RayTracing;
@@ -7,15 +11,15 @@ using namespace CppUtility::Other;
 using namespace glm;
 using namespace std;
 
-BVH_Node::BVH_Node(const Material::CPtr & material)
+BVH_Node::BVH_Node(Material::CPtr material)
 	: box(AABB::InValid), Hitable(material) { }
 
-BVH_Node::BVH_Node(vector<Hitable::CPtr> & hitables, const Material::CPtr & material)
+BVH_Node::BVH_Node(vector<Hitable::CPtr> & hitables, Material::CPtr material)
 	: box(AABB::InValid), Hitable(material){
 	if (hitables.size() == 0)
 		return;
 
-	remove_if(hitables.begin(), hitables.end(), [](const Hitable::CPtr & hitable)->bool { return hitable->GetBoundingBox().IsValid(); });
+	remove_if(hitables.begin(), hitables.end(), [](Hitable::CPtr hitable)->bool { return hitable->GetBoundingBox().IsValid(); });
 	Build(hitables.begin(), hitables.end());
 }
 
@@ -23,7 +27,7 @@ void BVH_Node::Build(std::vector<Hitable::CPtr>::iterator begin, std::vector<Hit
 	size_t num = end - begin;
 	
 	size_t axis = GetAxis(begin, end);
-	sort(begin, end, [&](const Hitable::CPtr & a, const Hitable::CPtr & b)->bool {
+	sort(begin, end, [&](Hitable::CPtr a, Hitable::CPtr b)->bool {
 		return a->GetBoundingBox().GetMinP()[axis] < b->GetBoundingBox().GetMinP()[axis];
 	});
 
@@ -57,8 +61,8 @@ HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
 		return false;
 
 	HitRst * front;
-	HitRst hitRstLeft = left != NULL ? left->RayIn(ray) : HitRst::FALSE;
-	HitRst hitRstRight = right != NULL ? right->RayIn(ray) : HitRst::FALSE;
+	HitRst hitRstLeft = left != NULL ? left->RayIn(ray) : HitRst::InValid;
+	HitRst hitRstRight = right != NULL ? right->RayIn(ray) : HitRst::InValid;
 
 	//先进行左边的测试, 则测试后 ray.tMax 被更新(在有碰撞的情况下)
 	//此时如果 hitRstRight 有效, 则可知其 ray.tMax 更小
@@ -68,7 +72,7 @@ HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
 	else if(hitRstLeft.hit)
 		front = &hitRstLeft;
 	else
-		return HitRst::FALSE;
+		return HitRst::InValid;
 
 	if (GetMat() != NULL && front->isMatCoverable) {
 		front->material = GetMat();
@@ -84,7 +88,7 @@ size_t BVH_Node::GetAxis(vector<Hitable::CPtr>::const_iterator begin, const vect
 	X.reserve(num);
 	Y.reserve(num);
 	Z.reserve(num);
-	for_each(begin, end, [&](const Hitable::CPtr & hitable) {
+	for_each(begin, end, [&](Hitable::CPtr hitable) {
 		auto box = hitable->GetBoundingBox();
 		auto center = box.GetCenter();
 		X.push_back(center.x);

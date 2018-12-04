@@ -10,6 +10,7 @@
 #include <RayTracing/ImgWindow.h>
 #include <RayTracing/TRayCamera.h>
 #include <RayTracing/MoveSphere.h>
+#include <RayTracing/Ray.h>
 
 #include <Utility/Math.h>
 #include <Utility/ImgPixelSet.h>

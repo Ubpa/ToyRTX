@@ -13,11 +13,11 @@ namespace CppUtility {
 			void SetOp(const std::function<void()> & op);
 			//------------
 			virtual void Run();
-		protected:
-			std::function<void()> op;
 		private:
 			LambdaOp(const LambdaOp&) = delete;
 			LambdaOp& operator=(const LambdaOp&) = delete;
+
+			std::function<void()> op;
 		};
 	}
 }

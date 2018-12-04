@@ -11,7 +11,7 @@ namespace RayTracing{
 	class Model : public TriMesh {
 		HITABLE_SETUP(Model)
 	public:
-		Model(const std::string & path, const Material::CPtr & material = NULL);
+		Model(const std::string & path, Material::CPtr material = NULL);
 
 	private:
 		static std::vector<Vertex> Load(const std::string & path);

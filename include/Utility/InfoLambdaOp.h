@@ -14,11 +14,12 @@ namespace CppUtility {
 			//------------
 			void SetInfo(const T & info);
 			T & GetInfo();
-		protected:
-			T info;
+			const T & GetInfo() const;
 		private:
 			InfoLambdaOp(const InfoLambdaOp&) = delete;
 			InfoLambdaOp& operator=(const InfoLambdaOp&) = delete;
+
+			T info;
 		};
 
 		//------------
@@ -35,6 +36,11 @@ namespace CppUtility {
 
 		template<typename T>
 		T & InfoLambdaOp<T>::GetInfo() {
+			return info;
+		}
+
+		template<typename T>
+		const T & InfoLambdaOp<T>::GetInfo() const{
 			return info;
 		}
 	}

@@ -12,7 +12,7 @@
 #define MATERIAL_SETUP(CLASS) \
 HEAP_OBJ_SETUP(CLASS)\
 public:\
-virtual void Accept(const MatVisitor::Ptr & matVisitor) const{\
+virtual void Accept(MatVisitor::Ptr matVisitor) const{\
 	matVisitor->Visit(CThis());\
 }
 
@@ -32,7 +32,7 @@ namespace RayTracing {
 	};
 
 	struct HitRecord {
-		HitRecord(const CppUtility::Other::Ptr<Ray> & ray = NULL, const glm::vec3 & pos = glm::vec3(0),
+		HitRecord(CppUtility::Other::Ptr<Ray> ray = NULL, const glm::vec3 & pos = glm::vec3(0),
 			const glm::vec3 & normal = glm::vec3(0,0,1), float u = 0, float v = 0);
 
 		CppUtility::Other::Ptr<Ray> ray;
@@ -45,7 +45,7 @@ namespace RayTracing {
 		// 返回值为 true 说明光线继续传播
 		// 返回值为 false 说明光线不再传播
 		virtual bool Scatter(const HitRecord & rec) const = 0;
-		virtual void Accept(const MatVisitor::Ptr & matVisitor) const = 0;
+		virtual void Accept(MatVisitor::Ptr matVisitor) const = 0;
 	};
 }
 

@@ -3,11 +3,11 @@
 using namespace RayTracing;
 using namespace CppUtility::Other;
 
-Group::Group(const Material::CPtr & material)
+Group::Group(Material::CPtr material)
 	: Hitable(material), box(AABB::InValid) { }
 
-HitRst Group::RayIn(Ray::Ptr & ray) const {
-	HitRst finalHitRst = HitRst::FALSE;
+HitRst Group::RayIn(CppUtility::Other::Ptr<Ray> & ray) const {
+	HitRst finalHitRst = HitRst::InValid;
 
 	for (size_t i = 0; i < children.size(); i++) {
 		Hitable::CPtr hitable = children[i];
@@ -26,7 +26,7 @@ HitRst Group::RayIn(Ray::Ptr & ray) const {
 	return finalHitRst;
 }
 
-Group & Group::operator <<(const Hitable::CPtr & hitable) {
+Group & Group::operator <<(Hitable::CPtr hitable) {
 	if (hitable != NULL) {
 		children.push_back(hitable);
 		box += hitable->GetBoundingBox();

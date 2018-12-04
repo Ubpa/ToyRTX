@@ -21,7 +21,7 @@ namespace RayTracing {
 		// 设置后会将 isValid 设置成 true
 		void SetP(const glm::vec3 & minP, const glm::vec3 & maxP);
 		inline bool IsValid() const { return isValid; }
-		bool Hit(const CppUtility::Other::Ptr<Ray> & ray) const;
+		bool Hit(CppUtility::Other::Ptr<Ray> ray) const;
 
 		const AABB operator +(const AABB & aabb) const;
 		AABB & operator +=(const AABB & aabb);

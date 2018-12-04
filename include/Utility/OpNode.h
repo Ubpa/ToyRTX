@@ -9,24 +9,20 @@ namespace CppUtility {
 		class OpNode : public OpQueue {
 			HEAP_OBJ_SETUP(OpNode)
 		public:
-			OpNode(const Operation::Ptr & preOp = nullptr, const Operation::Ptr & postOp = nullptr, bool isHold = true);
+			OpNode(Operation::Ptr preOp = nullptr, Operation::Ptr postOp = nullptr, bool isHold = true);
 			OpNode(const std::function<void()> & preOp = nullptr, const std::function<void()> & postOp = nullptr, bool isHold = true);
-			OpNode(Operation * preOp = nullptr, Operation * postOp = nullptr, bool isHold = true);
 			//------------
-			void SetPreOp(const Operation::Ptr & preOp);
-			void SetPostOp(const Operation::Ptr & postOp);
-			void SetPreOp(Operation * preOp);
-			void SetPostOp(Operation * postOp);
-			size_t ChildNum();
+			void SetPreOp(Operation::Ptr preOp);
+			void SetPostOp(Operation::Ptr postOp);
+			size_t ChildNum() const;
 			virtual void Run();
-		protected:
-			using OpQueue::Size;
-			//------------
-			Operation::Ptr preOp;
-			Operation::Ptr postOp;
 		private:
+			using OpQueue::Size;
 			OpNode(const OpNode &) = delete;
 			OpNode& operator=(const OpNode &) = delete;
+
+			Operation::Ptr preOp;
+			Operation::Ptr postOp;
 		};
 	}
 }

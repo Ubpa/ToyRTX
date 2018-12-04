@@ -12,8 +12,10 @@ void LambdaOp::SetOp(const std::function<void()> & op) {
 }
 
 void LambdaOp::Run() {
-	if (op == NULL)
-		isHold = false;
-	else
-		op();
+	if (op == nullptr) {
+		SetIsHold(false);
+		return;
+	}
+	
+	op();
 }

@@ -7,6 +7,7 @@
 #include <RayTracing/Sphere.h>
 #include <RayTracing/Group.h>
 #include <RayTracing/ImgWindow.h>
+#include <RayTracing/Ray.h>
 #include <RayTracing/RayCamera.h>
 
 #include <Utility/Math.h>

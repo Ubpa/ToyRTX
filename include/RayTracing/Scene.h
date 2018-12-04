@@ -1,17 +1,19 @@
 #ifndef _SCENE_H_
 #define _SCENE_H_
 
-#include <RayTracing/Hitable.h>
-#include <RayTracing/RayCamera.h>
+#include <Utility/HeapObj.h>
 
 namespace RayTracing {
+	class Hitable;
+	class RayCamera;
+
 	class Scene : public CppUtility::Other::HeapObj{
 		HEAP_OBJ_SETUP(Scene)
 	public:
-		const Scene(const Hitable::CPtr & obj, const RayCamera::CPtr & camera);
+		const Scene(CppUtility::Other::CPtr<Hitable> obj, CppUtility::Other::CPtr<RayCamera> camera);
 
-		Hitable::CPtr obj;
-		const RayCamera::CPtr camera;
+		CppUtility::Other::CPtr<Hitable> obj;
+		const CppUtility::Other::CPtr<RayCamera> camera;
 	};
 }
 

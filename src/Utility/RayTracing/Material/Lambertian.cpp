@@ -9,7 +9,7 @@ using namespace RayTracing;
 using namespace CppUtility::Other;
 using namespace glm;
 
-Lambertian::Lambertian(const Texture::CPtr & albedo)
+Lambertian::Lambertian(Texture::CPtr albedo)
 	: albedo(albedo) { }
 
 Lambertian::Lambertian(float r, float g, float b)

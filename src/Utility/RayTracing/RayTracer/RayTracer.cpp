@@ -1,16 +1,18 @@
 #include <RayTracing/RayTracer.h>
 
+#include <RayTracing/Ray.h>
+
 using namespace RayTracing;
 using namespace glm;
 
 RayTracer::RayTracer(size_t depth) 
 	: depth(depth), wholeDepth(0) { }
 
-rgb RayTracer::TraceX(const Hitable::CPtr & scene, Ray::Ptr & ray) {
+rgb RayTracer::TraceX(Hitable::CPtr scene, CppUtility::Other::Ptr<Ray> & ray) {
 	return TraceX(scene, ray, depth);
 }
 
-rgb RayTracer::TraceX(const Hitable::CPtr & scene, Ray::Ptr & ray, size_t depth) {
+rgb RayTracer::TraceX(Hitable::CPtr scene, CppUtility::Other::Ptr<Ray> & ray, size_t depth) {
 	if (depth == 0) {
 		wholeDepth += this->depth + 1;
 		return rgb(1.0001f / 255.0f);
@@ -36,7 +38,7 @@ rgb RayTracer::TraceX(const Hitable::CPtr & scene, Ray::Ptr & ray, size_t depth)
 	}
 }
 
-rgb RayTracer::Trace(const Hitable::CPtr & scene, Ray::Ptr & ray, size_t depth) {
+rgb RayTracer::Trace(Hitable::CPtr scene, CppUtility::Other::Ptr<Ray> & ray, size_t depth) {
 	if (depth == 0)
 		return rgb(1.0001f / 255.0f);
 

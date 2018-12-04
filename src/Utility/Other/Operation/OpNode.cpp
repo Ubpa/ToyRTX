@@ -2,14 +2,8 @@
 
 using namespace CppUtility::Other;
 
-OpNode::OpNode(const Operation::Ptr & preOp, const Operation::Ptr & postOp, bool isHold)
+OpNode::OpNode(Operation::Ptr preOp, Operation::Ptr postOp, bool isHold)
 	: preOp(preOp), postOp(postOp), OpQueue(isHold) { }
-
-OpNode::OpNode(Operation * preOp, Operation * postOp, bool isHold)
-	: OpQueue(isHold){
-	this->preOp = preOp != nullptr ? ToPtr(preOp) : nullptr;
-	this->postOp = postOp != nullptr ? ToPtr(postOp) : nullptr;
-}
 
 OpNode::OpNode(const std::function<void()> & preOp, const std::function<void()> & postOp, bool isHold)
 	: OpQueue(isHold){
@@ -18,30 +12,33 @@ OpNode::OpNode(const std::function<void()> & preOp, const std::function<void()> 
 }
 
 //------------
-void OpNode::SetPreOp(const Operation::Ptr & preOp) {
+void OpNode::SetPreOp(Operation::Ptr preOp) {
 	this->preOp = preOp;
 }
 
-void OpNode::SetPostOp(const Operation::Ptr & postOp) {
+void OpNode::SetPostOp(Operation::Ptr postOp) {
 	this->postOp = postOp;
 }
 
-void OpNode::SetPreOp(Operation * preOp) {
-	SetPreOp(preOp != nullptr ? ToPtr(preOp) : nullptr);
-}
-
-void OpNode::SetPostOp(Operation * postOp) {
-	SetPreOp(postOp != nullptr ? ToPtr(postOp) : nullptr);
-}
-
-size_t OpNode::ChildNum() {
+size_t OpNode::ChildNum() const{
 	return Size();
 }
 
 void OpNode::Run() {
-	if (preOp != nullptr)
+	if (preOp != nullptr) {
 		preOp->Run();
+		if (!preOp->IsHold())
+			preOp = nullptr;
+	}
+
 	OpQueue::Run();
-	if (postOp != nullptr)
+
+	if (postOp != nullptr) {
 		postOp->Run();
+		if (!postOp->IsHold())
+			postOp = nullptr;
+	}
+
+	if (Size() == 0 && preOp == nullptr && postOp == nullptr)
+		SetIsHold(false);
 }

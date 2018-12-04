@@ -7,9 +7,9 @@ namespace RayTracing {
 	class Triangle : public Hitable {
 		HITABLE_SETUP(Triangle)
 	public:
-		Triangle(const Vertex & A, const Vertex & B, const Vertex & C, const Material::CPtr & material = NULL);
+		Triangle(const Vertex & A, const Vertex & B, const Vertex & C, Material::CPtr material = NULL);
 
-		virtual HitRst RayIn(Ray::Ptr & ray) const;
+		virtual HitRst RayIn(CppUtility::Other::Ptr<Ray> & ray) const;
 		virtual const AABB GetBoundingBox() const { return box; }
 		const Vertex & GetA() const { return A; }
 		const Vertex & GetB() const { return B; }

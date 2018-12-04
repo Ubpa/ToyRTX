@@ -1,4 +1,7 @@
 #include <RayTracing/TRayCamera.h>
+
+#include <RayTracing/TRay.h>
+
 #include <Utility/Math.h>
 
 using namespace CppUtility::Other;

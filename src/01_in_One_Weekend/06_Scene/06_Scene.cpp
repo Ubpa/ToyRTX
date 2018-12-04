@@ -6,6 +6,7 @@
 #include <RayTracing/OpMaterial.h>
 #include <RayTracing/Sky.h>
 #include <RayTracing/Sphere.h>
+#include <RayTracing/Ray.h>
 #include <RayTracing/Group.h>
 #include <RayTracing/ImgWindow.h>
 #include <RayTracing/RayCamera.h>

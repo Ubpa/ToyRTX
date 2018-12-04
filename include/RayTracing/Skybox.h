@@ -2,10 +2,10 @@
 #define _SKY_BOX_H_
 
 #include <RayTracing/Texture.h>
+
 #include <Utility/Ptr.h>
 
 #include <vector>
-
 #include <string>
 
 namespace CppUtility {

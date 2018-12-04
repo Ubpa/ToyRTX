@@ -1,12 +1,16 @@
 #ifndef _TEXTURE_H_
 #define _TEXTURE_H_
 
-#include <Utility/Image.h>
 #include <Utility/Ptr.h>
+
 #include <vector>
 #include <string>
 
 namespace CppUtility {
+	namespace Other {
+		class Image;
+	}
+
 	namespace OpenGL {
 		class Texture {
 		public:

@@ -28,7 +28,7 @@ const float HT_Sky       = 7.0f;
 GenData_HV::GenData_HV(vector<float> & packData)
 	: packData(packData) { }
 
-void GenData_HV::Visit(const Hitable::CPtr & hitable) {
+void GenData_HV::Visit(Hitable::CPtr hitable) {
 	if (hitable == NULL)
 		return;
 
@@ -39,7 +39,7 @@ void GenData_HV::Visit(const Hitable::CPtr & hitable) {
 	sceneData.push_back(hitable->IsMatCoverable());
 }
 
-void GenData_HV::Visit(const Sphere::CPtr & sphere) {
+void GenData_HV::Visit(Sphere::CPtr sphere) {
 	if (sphere == NULL)
 		return;
 
@@ -62,7 +62,7 @@ void GenData_HV::Visit(const Sphere::CPtr & sphere) {
 	packData.push_back(sphere->GetRadius());
 }
 
-void GenData_HV::Visit(const Group::CPtr & group) {
+void GenData_HV::Visit(Group::CPtr group) {
 	if (group == NULL)
 		return;
 
@@ -101,7 +101,7 @@ void GenData_HV::Visit(const Group::CPtr & group) {
 	}
 }
 
-void GenData_HV::Visit(const BVH_Node::CPtr & bvhNode) {
+void GenData_HV::Visit(BVH_Node::CPtr bvhNode) {
 	if (bvhNode == NULL)
 		return;
 
@@ -158,7 +158,7 @@ void GenData_HV::Visit(const BVH_Node::CPtr & bvhNode) {
 	}
 }
 
-void GenData_HV::Visit(const Triangle::CPtr & triangle) {
+void GenData_HV::Visit(Triangle::CPtr triangle) {
 	if (triangle == NULL)
 		return;
 
@@ -186,7 +186,7 @@ void GenData_HV::Visit(const Triangle::CPtr & triangle) {
 	}
 }
 
-void GenData_HV::Visit(const TriMesh::CPtr & triMesh) {
+void GenData_HV::Visit(TriMesh::CPtr triMesh) {
 	if (triMesh == NULL)
 		return;
 
@@ -198,7 +198,7 @@ void GenData_HV::Visit(const TriMesh::CPtr & triMesh) {
 	sceneData[hitable2idx[triMesh]] = HT_TriMesh;
 }
 
-void GenData_HV::Visit(const Transform::CPtr & transform) {
+void GenData_HV::Visit(Transform::CPtr transform) {
 	if (transform == NULL)
 		return;
 
@@ -254,7 +254,7 @@ void GenData_HV::Visit(const Transform::CPtr & transform) {
 		sceneData[childIt] = targetChildIdx->second;
 }
 
-void GenData_HV::Visit(const Volume::CPtr & volume) {
+void GenData_HV::Visit(Volume::CPtr volume) {
 	if (volume == NULL)
 		return;
 
@@ -288,7 +288,7 @@ void GenData_HV::Visit(const Volume::CPtr & volume) {
 		sceneData[childIt] = targetChildIdx->second;
 }
 
-void GenData_HV::Visit(const Sky::CPtr & sky) {
+void GenData_HV::Visit(Sky::CPtr sky) {
 	if (sky == NULL)
 		return;
 
@@ -303,7 +303,7 @@ void GenData_HV::Visit(const Sky::CPtr & sky) {
 	Visit(static_cast<Hitable::CPtr>(sky));
 }
 
-void GenData_HV::Visit(const Model::CPtr & model) {
+void GenData_HV::Visit(Model::CPtr model) {
 	Visit(static_cast<const TriMesh::CPtr>(model));
 }
 
@@ -317,7 +317,7 @@ void GenData_HV::SetMat(const MatIdxMap & mat2idx) {
 	}
 }
 
-void GenData_HV::Accept(const GenData_MV::Ptr & genFS_MV) {
+void GenData_HV::Accept(GenData_MV::Ptr genFS_MV) {
 	for (auto const & pair : mat2idxVec)
 		pair.first->Accept(genFS_MV);
 

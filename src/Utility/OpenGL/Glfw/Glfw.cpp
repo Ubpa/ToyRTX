@@ -1,6 +1,8 @@
 #include <GLFW/Glfw.h>
 
+#include <Utility/EventManager.h>
 #include <Utility/GStorage.h>
+#include <Utility/Operation.h>
 
 #include <iostream>
 
@@ -80,10 +82,6 @@ void Glfw::Run(Ptr<Operation> op) {
 	}
 }
 
-void Glfw::Run(Operation * op) {
-	Run(ToPtr(op));
-}
-
 int Glfw::GetKey(int key) { return glfwGetKey(window, key); }
 
 void Glfw::CloseWindow() { glfwSetWindowShouldClose(window, true); }
@@ -96,10 +94,6 @@ Glfw* Glfw::GetInstance(){ return instance; }
 
 //------------
 
-void Glfw::CB_FrameBuffSize(GLFWwindow* window, int width, int height){
-	glViewport(0, 0, width, height);
-}
-
 void Glfw::GenWindow(size_t width, size_t height, const string & title) {
 	window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 	if (window == NULL) {
@@ -109,7 +103,9 @@ void Glfw::GenWindow(size_t width, size_t height, const string & title) {
 	}
 	//------------
 	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, CB_FrameBuffSize);
+	glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+		glViewport(0, 0, width, height);
+	});
 }
 
 void Glfw::LoadGL() {

@@ -1,10 +1,12 @@
 #ifndef _RAY_CAMERA_H_
 #define _RAY_CAMERA_H_
 
+#include <Utility/HeapObj.h>
 #include <glm/glm.hpp>
-#include <RayTracing/Ray.h>
 
 namespace RayTracing {
+	class Ray;
+
 	class RayCamera : public CppUtility::Other::HeapObj{
 		HEAP_OBJ_SETUP(RayCamera)
 	public:
@@ -13,7 +15,7 @@ namespace RayTracing {
 			float fov = 45.0f, float lenR = 0.0f, float focus_dist = -1.0f,
 			const glm::vec3 & worldUp = glm::vec3(0, 1, 0));
 
-		virtual Ray::Ptr GenRay(float s, float t) const;
+		virtual CppUtility::Other::Ptr<Ray> GenRay(float s, float t) const;
 		
 		const glm::vec3 GetPos() const { return pos; }
 		const glm::vec3 GetBL_Corner() const { return BL_Corner; }
@@ -24,8 +26,8 @@ namespace RayTracing {
 		const glm::vec3 GetFront() const { return front; }
 		float GetLenR() const { return lenR; }
 	protected:
-		void GenRay(float s, float t, Ray::Ptr ray) const;
-		void Test(const Ray::Ptr & ray) const;
+		void GenRay(float s, float t, CppUtility::Other::Ptr<Ray> ray) const;
+
 		glm::vec3 pos;
 		glm::vec3 BL_Corner;
 		glm::vec3 horizontal;

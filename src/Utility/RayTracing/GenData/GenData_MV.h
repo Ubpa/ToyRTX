@@ -19,17 +19,17 @@ namespace RayTracing {
 		typedef std::map<CppUtility::Other::CPtr<Material>, size_t> MatIdxMap;
 		typedef std::map<CppUtility::Other::CPtr<Texture>, size_t> TexIdxMap;
 
-		void Accept(const CppUtility::Other::Ptr<GenData_TV> & genFS_TV);
+		void Accept(CppUtility::Other::Ptr<GenData_TV> genFS_TV);
 		const MatIdxMap & GetMatIdxMap() const { return mat2idx; }
 		const std::vector<float> & GetMatData() const { return matData; };
 	private:
 		void SetTex(const TexIdxMap & tex2idx);
 
-		virtual void Visit(const CppUtility::Other::CPtr<Lambertian> & lambertian);
-		virtual void Visit(const CppUtility::Other::CPtr<Metal> & metal);
-		virtual void Visit(const CppUtility::Other::CPtr<Dielectric> & dielectric);
-		virtual void Visit(const CppUtility::Other::CPtr<Light> & light);
-		virtual void Visit(const CppUtility::Other::CPtr<Isotropic> & isotropic);
+		virtual void Visit(CppUtility::Other::CPtr<Lambertian> lambertian);
+		virtual void Visit(CppUtility::Other::CPtr<Metal> metal);
+		virtual void Visit(CppUtility::Other::CPtr<Dielectric> dielectric);
+		virtual void Visit(CppUtility::Other::CPtr<Light> light);
+		virtual void Visit(CppUtility::Other::CPtr<Isotropic> isotropic);
 		using MatVisitor::Visit;
 
 		std::vector<float> matData;

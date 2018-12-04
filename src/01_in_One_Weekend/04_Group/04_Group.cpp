@@ -1,6 +1,7 @@
 #include <RayTracing/RayTracer.h>
 #include <RayTracing/ImgWindow.h>
 #include <RayTracing/RayCamera.h>
+#include <RayTracing/Ray.h>
 
 #include <Utility/Image.h>
 #include <Utility/LambdaOp.h>
@@ -59,7 +60,7 @@ int main(int argc, char ** argv){
 			for (int k = 0; k < sampleNum; k++) {
 				float u = (i + randMap(engine)) / (float)val_ImgWidth;
 				float v = (j + randMap(engine)) / (float)val_ImgHeight;
-				Ray::Ptr ray = camera->GenRay(u, v);
+				CppUtility::Other::Ptr<Ray> ray = camera->GenRay(u, v);
 				color += RayTracer::Trace(scene, ray);
 			}
 			color /= sampleNum;

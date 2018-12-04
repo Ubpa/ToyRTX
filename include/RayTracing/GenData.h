@@ -24,7 +24,7 @@ namespace RayTracing {
 		typedef std::map<CppUtility::Other::CPtr<CppUtility::Other::Image>, size_t> ImgIdxMap;
 		typedef std::vector<CppUtility::Other::CPtr<CppUtility::Other::Image> > SkyboxImgs;
 
-		GenData(const CppUtility::Other::CPtr<Hitable> & scene);
+		GenData(CppUtility::Other::CPtr<Hitable> scene);
 		
 		const std::vector<float> GetSceneData() const;
 		const std::vector<float> GetMatData() const;

@@ -8,9 +8,9 @@ namespace RayTracing {
 		HITABLE_SETUP(Transform)
 	public:
 		// 如果 material 不为空, 则覆盖子节点的 material
-		Transform(const glm::mat4 & transform, const Hitable::CPtr & hitable, const Material::CPtr & material = NULL);
+		Transform(const glm::mat4 & transform, Hitable::CPtr hitable, Material::CPtr material = NULL);
 
-		virtual HitRst RayIn(Ray::Ptr & ray) const;
+		virtual HitRst RayIn(CppUtility::Other::Ptr<Ray> & ray) const;
 		virtual const AABB GetBoundingBox() const { return box; }
 		const glm::mat4 GetTransform() const { return transform; }
 		const glm::mat4 GetInvTransform() const { return inverseTransform; }
