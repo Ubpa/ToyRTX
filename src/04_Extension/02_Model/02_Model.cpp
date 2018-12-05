@@ -50,8 +50,9 @@ int main(int argc, char ** argv){
 
 	vector<uvec2> pixels;
 
-	auto scene = CreateScene7((float)val_ImgWidth / (float)val_ImgHeight);
-	RayTracer rayTracer(20);
+	auto scene = CreateScene6((float)val_ImgWidth / (float)val_ImgHeight);
+
+	RayTracer rayTracer;
 	Timer timer;
 	timer.Start();
 	size_t maxSumLoop = 5000;
@@ -59,17 +60,17 @@ int main(int argc, char ** argv){
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
 		//size_t curLoop = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
 		int imgSize = val_ImgWidth * val_ImgHeight;
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, 1024)
 		for (int pixelIdx = 0; pixelIdx < imgSize; pixelIdx++) {
 			const uvec2 pixel(pixelIdx % val_ImgWidth, pixelIdx / val_ImgWidth);
 			float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
 			float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
 			vec3 rst = rayTracer.TraceX(scene->obj, scene->camera->GenRay(u, v));
 
-			auto _color = img.GetPixel_F(pixel.x, val_ImgHeight - 1 - pixel.y);
+			auto _color = img.GetPixel_F(pixel.x, pixel.y);
 			vec3 color(_color.r, _color.g, _color.b);
-			vec3 newColor = sqrt((color*color*(float)curSumLoop + rst) / ((float)curSumLoop+1));
-			img.SetPixel(pixel.x, val_ImgHeight - 1 - pixel.y, newColor);
+			vec3 newColor = (color*(float)curSumLoop + rst) / ((float)curSumLoop + 1);
+			img.SetPixel(pixel.x, pixel.y, newColor);
 		}
 		curSumLoop++;
 		double curStep = curSumLoop / (double)maxSumLoop * 100;

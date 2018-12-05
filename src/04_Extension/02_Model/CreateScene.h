@@ -9,6 +9,7 @@ RayTracing::Scene::CPtr CreateScene2(float ratioWH);
 RayTracing::Scene::CPtr CreateScene3(float ratioWH);
 RayTracing::Scene::CPtr CreateScene4(float ratioWH);
 RayTracing::Scene::CPtr CreateScene5(float ratioWH);
+RayTracing::Scene::CPtr CreateScene6(float ratioWH);
 RayTracing::Scene::CPtr CreateScene7(float ratioWH);
 
 #endif // !_CREATE_SCENE_H_

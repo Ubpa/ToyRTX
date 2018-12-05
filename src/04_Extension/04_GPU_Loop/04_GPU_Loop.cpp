@@ -56,7 +56,7 @@ int main(int argc, char ** argv) {
 
 
 	//------------ Scene
-	Scene::CPtr scene = CreateScene0(ratioWH);
+	Scene::CPtr scene = CreateScene8(ratioWH);
 
 
 	//------------ Fragment Shader Generator

@@ -51,37 +51,37 @@ int main(int argc, char ** argv){
 	vector<uvec2> pixels;
 
 	auto scene = CreateScene3((float)val_ImgWidth / (float)val_ImgHeight);
+
 	RayTracer rayTracer;
 	Timer timer;
 	timer.Start();
+	size_t maxSumLoop = 5000;
+	size_t curSumLoop = 0;
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
-		//size_t loopMax = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
-		size_t loopMax = 1000;
-		pixelSet.RandPick(loopMax, pixels);
+		//size_t curLoop = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
+		int imgSize = val_ImgWidth * val_ImgHeight;
+#pragma omp parallel for schedule(dynamic, 1024)
+		for (int pixelIdx = 0; pixelIdx < imgSize; pixelIdx++) {
+			const uvec2 pixel(pixelIdx % val_ImgWidth, pixelIdx / val_ImgWidth);
+			float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
+			float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
+			vec3 rst = rayTracer.TraceX(scene->obj, scene->camera->GenRay(u, v));
 
-		int pixelsNum = pixels.size();
-#pragma omp parallel for
-		for (int pixelIdx = 0; pixelIdx < pixelsNum; pixelIdx++) {
-			const uvec2 & pixel = pixels[pixelIdx];
-			rgb color(0);
-			for (int k = 0; k < sampleNum; k++) {
-				float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
-				float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
-				color += rayTracer.TraceX(scene->obj, scene->camera->GenRay(u, v));
-			}
-			color /= sampleNum;
-			img.SetPixel(pixel.x, val_ImgHeight - 1 - pixel.y, sqrt(color));
+			auto _color = img.GetPixel_F(pixel.x, pixel.y);
+			vec3 color(_color.r, _color.g, _color.b);
+			vec3 newColor = (color*(float)curSumLoop + rst) / ((float)curSumLoop + 1);
+			img.SetPixel(pixel.x, pixel.y, newColor);
 		}
-
-		double curStep = 100 * (1 - pixelSet.Size() / double(val_ImgWidth * val_ImgHeight));
+		curSumLoop++;
+		double curStep = curSumLoop / (double)maxSumLoop * 100;
 		double wholeTime = timer.GetWholeTime();
-		double speed = (val_ImgWidth * val_ImgHeight - pixelSet.Size()) / wholeTime;
-		double needTime = pixelSet.Size() / speed;
+		double speed = curSumLoop / wholeTime;
+		double needTime = (maxSumLoop - curSumLoop) / speed;
 		double sumTime = wholeTime + needTime;
-		printf("\rINFO: %.2f%%, %.2f sample / s, average depth %.2f, use %.2f s, need %.2f s, sum %.2f s     ",
-			curStep, speed*sampleNum, rayTracer.depth/(speed*sampleNum*wholeTime), wholeTime, needTime, sumTime);
+		printf("\rINFO: %.2f%%, %.2f loop / s, use %.2f s, need %.2f s, sum %.2f s     ",
+			curStep, speed, wholeTime, needTime, sumTime);
 
-		if (pixelSet.Size() == 0) {
+		if (curSumLoop == maxSumLoop) {
 			printf("\n");
 			imgUpdate->SetIsHold(false);
 		}

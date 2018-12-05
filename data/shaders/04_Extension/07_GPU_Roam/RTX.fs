@@ -920,7 +920,7 @@ void Ray_Store(struct Ray ray){
 					c1 = vec4(0);
 				oldColor += c0+c1;
 				if(oldColor.w != 0)
-					oldColor /= oldColor.w / 4;
+					oldColor /= oldColor.w;
 				else
 					oldColor = vec4(0);
 			}

@@ -93,7 +93,7 @@ int rdCnt = 0;
 in vec2 TexCoords;
 //struct Ray ray;
 
-float _Stack[100];
+float _Stack[50];
 int _Stack_mTop = -1;
 bool Stack_Empty();
 void Stack_Clear();

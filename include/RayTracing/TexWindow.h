@@ -35,6 +35,9 @@ namespace RayTracing {
 
 		bool Run(CppUtility::Other::Ptr<CppUtility::Other::Operation> texUpdateOp);
 
+		void Enable(ENUM_OPTION option) { this->option = static_cast<ENUM_OPTION>(this->option | option); }
+		void Disable(ENUM_OPTION option) { this->option = static_cast<ENUM_OPTION>((this->option | option) - option); }
+
 		int GetWidth() const { return width; }
 		int GetHeight() const { return height; }
 		const std::string GetRootPath() const { return rootPath; }

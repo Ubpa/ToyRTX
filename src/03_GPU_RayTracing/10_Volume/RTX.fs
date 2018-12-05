@@ -65,7 +65,7 @@ uniform struct Camera camera;
 uniform float rdSeed[4];
 uniform float RayNumMax;
 //uniform bool enableGammaCorrection;
-#define ENABLE_GAMMA_CORRECTION 1
+#define ENABLE_GAMMA_CORRECTION 0
 
 const float PI = 3.1415926;
 const float tMin = 0.001;

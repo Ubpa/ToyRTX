@@ -52,7 +52,6 @@ namespace CppUtility {
 			bool GenFBO_GBUFFER(size_t width, size_t height);
 			bool GenFBO_RAYTRACING(size_t width, size_t height);
 			bool GenFBO_RTX(size_t width, size_t height);
-			bool GenFBO_RTX_FLAT_DEPTH(size_t width, size_t height);
 
 			bool IsComplete() const;
 			static size_t PassType2GL(ENUM_PASS_TYPE passType);

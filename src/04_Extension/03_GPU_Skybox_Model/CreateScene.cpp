@@ -524,7 +524,7 @@ Scene::CPtr CreateScene8(float ratioWH) {
 	auto rootPath = *config->GetStrPtr("RootPath");
 	vector<string> skyboxImgPath(6);
 	for (size_t i = 0; i < 6; i++)
-		skyboxImgPath[i] = rootPath + str_Vec_Img_Skybox2[i];
+		skyboxImgPath[i] = rootPath + str_Vec_Img_Skybox[i];
 	auto sky = ToPtr(new Sky(ToCPtr(new Light(ToCPtr(new Skybox(skyboxImgPath))))));
 	//auto sky = ToPtr(new Sky(ToCPtr(new Light(ToCPtr(new ImgTexture(rootPath + str_Img_SkySphere))))));
 
@@ -572,7 +572,7 @@ Scene::CPtr CreateScene8(float ratioWH) {
 	//tfmDragonGlass = rotate(tfmDragonGlass, -Math::PI / 2, vec3(0, 1, 0));
 	tfmDragonGlass = scale(tfmDragonGlass, vec3(4));
 	tfmDragonGlass *= fit2Cube;
-	auto dragonGlass = ToCPtr(new Transform(tfmDragonGlass, dragonModel));
+	auto dragonGlass = ToCPtr(new Transform(tfmDragonGlass, dragonModel, ToCPtr(new Dielectric(1.5))));
 
 	mat4 tfmDragonVolumeModel = mat4(1.0);
 	tfmDragonVolumeModel = translate(tfmDragonVolumeModel, vec3(-5, 2, -3));

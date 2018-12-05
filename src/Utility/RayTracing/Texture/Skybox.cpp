@@ -48,12 +48,14 @@ rgb Skybox::Value(float u, float v, const vec3 & p) const {
 
 	size_t uDim[3] = { 2, 0, 0 };
 	size_t vDim[3] = { 1, 2, 1 };
-	bool flip[3][2] = { {true,false},{true,false},{false,true} };
+	bool flip[3][2] = { {true,false},{false,true},{false,true} };
 	bool flipDim[3] = { 0,1,0 };
 
 	vec2 texcoords((leftP[uDim[maxDim]] / abs(leftP[maxDim]) + 1) / 2, (leftP[vDim[maxDim]] / abs(leftP[maxDim]) + 1) / 2);
 	if (flip[maxDim][leftP[maxDim] <= 0])
 		texcoords[flipDim[maxDim]] = 1 - texcoords[flipDim[maxDim]];
+	if (maxDim != 1)
+		texcoords[1] = 1 - texcoords[1];
 	/*
 	if (maxDim == 0) {
 		texcoords.y = (leftP.y / abs(leftP.x) + 1) / 2;

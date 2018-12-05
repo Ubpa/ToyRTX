@@ -2,15 +2,16 @@
 #include <RayTracing/ImgWindow.h>
 #include <RayTracing/RayCamera.h>
 #include <RayTracing/Ray.h>
-
-#include <Utility/Image.h>
-#include <Utility/LambdaOp.h>
-#include <Utility/ImgPixelSet.h>
-
 #include <RayTracing/Sphere.h>
 #include <RayTracing/Group.h>
 #include <RayTracing/OpMaterial.h>
 #include <RayTracing/Sky.h>
+
+#include <Utility/Math.h>
+#include <Utility/Image.h>
+#include <Utility/LambdaOp.h>
+#include <Utility/ImgPixelSet.h>
+#include <Utility/Timer.h>
 
 #include "Defines.h"
 
@@ -45,38 +46,43 @@ int main(int argc, char ** argv){
 
 	auto scene = CreateScene();
 
-	LambdaOp::Ptr imgUpdate = ToPtr(new LambdaOp([&]() {
-		static double loopMax = 100;
-		static uniform_real_distribution<> randMap(0.0f,1.0f);
-		static default_random_engine engine;
-		loopMax = glm::max(100 * imgWindow.GetScale(), 1.0);
-		int cnt = 0;
-		while (pixelSet.Size() > 0) {
-			auto pixel = pixelSet.RandPick();
-			size_t i = pixel.x;
-			size_t j = pixel.y;
-			rgb color(0);
-			const size_t sampleNum = 4;
-			for (int k = 0; k < sampleNum; k++) {
-				float u = (i + randMap(engine)) / (float)val_ImgWidth;
-				float v = (j + randMap(engine)) / (float)val_ImgHeight;
-				CppUtility::Other::Ptr<Ray> ray = camera->GenRay(u, v);
-				color += RayTracer::Trace(scene, ray);
-			}
-			color /= sampleNum;
-			float r = color.r;
-			float g = color.g;
-			float b = color.b;
-			img.SetPixel(i, val_ImgHeight - 1 - j, Image::Pixel<float>(r, g, b));
-			if (++cnt > loopMax)
-				return;
+	RayTracer rayTracer;
+	Timer timer;
+	timer.Start();
+	size_t maxSumLoop = 5000;
+	size_t curSumLoop = 0;
+	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
+		//size_t curLoop = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
+		int imgSize = val_ImgWidth * val_ImgHeight;
+#pragma omp parallel for schedule(dynamic, 1024)
+		for (int pixelIdx = 0; pixelIdx < imgSize; pixelIdx++) {
+			const uvec2 pixel(pixelIdx % val_ImgWidth, pixelIdx / val_ImgWidth);
+			float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
+			float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
+			vec3 rst = rayTracer.TraceX(scene, camera->GenRay(u, v));
+
+			auto _color = img.GetPixel_F(pixel.x, pixel.y);
+			vec3 color(_color.r, _color.g, _color.b);
+			vec3 newColor = (color*(float)curSumLoop + rst) / ((float)curSumLoop + 1);
+			img.SetPixel(pixel.x, pixel.y, newColor);
 		}
-		imgUpdate->SetIsHold(false);
-	}, true));
+		curSumLoop++;
+		double curStep = curSumLoop / (double)maxSumLoop * 100;
+		double wholeTime = timer.GetWholeTime();
+		double speed = curSumLoop / wholeTime;
+		double needTime = (maxSumLoop - curSumLoop) / speed;
+		double sumTime = wholeTime + needTime;
+		printf("\rINFO: %.2f%%, %.2f loop / s, use %.2f s, need %.2f s, sum %.2f s     ",
+			curStep, speed, wholeTime, needTime, sumTime);
 
-	imgWindow.Run(imgUpdate);
+		if (curSumLoop == maxSumLoop) {
+			printf("\n");
+			imgUpdate->SetIsHold(false);
+		}
+	}));
 
-	return 0;
+	bool success = imgWindow.Run(imgUpdate);
+	return success ? 0 : 1;
 }
 
 Hitable::Ptr CreateScene() {

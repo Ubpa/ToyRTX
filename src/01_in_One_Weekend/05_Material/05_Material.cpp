@@ -16,6 +16,7 @@
 #include <Utility/Config.h>
 #include <Utility/LambdaOp.h>
 #include <Utility/GStorage.h>
+#include <Utility/Timer.h>
 
 #include <OpenGL/CommonDefine.h>
 
@@ -62,37 +63,42 @@ int main(int argc, char ** argv){
 
 	auto scene = CreateScene();
 
+	RayTracer rayTracer;
+	Timer timer;
+	timer.Start();
+	size_t maxSumLoop = 5000;
+	size_t curSumLoop = 0;
 	Ptr<Operation> imgUpdate = ToPtr(new LambdaOp([&]() {
-		static double loopMax = 100;
-		static uniform_real_distribution<> randMap(0.0f,1.0f);
-		static default_random_engine engine;
-		loopMax = glm::max(100 * imgWindow.GetScale(), 1.0);
-		int cnt = 0;
+		//size_t curLoop = static_cast<size_t>(glm::max(imgWindow.GetScale(), 1.0));
+		int imgSize = val_ImgWidth * val_ImgHeight;
+#pragma omp parallel for schedule(dynamic, 1024)
+		for (int pixelIdx = 0; pixelIdx < imgSize; pixelIdx++) {
+			const uvec2 pixel(pixelIdx % val_ImgWidth, pixelIdx / val_ImgWidth);
+			float u = (pixel.x + Math::Rand_F()) / (float)val_ImgWidth;
+			float v = (pixel.y + Math::Rand_F()) / (float)val_ImgHeight;
+			vec3 rst = rayTracer.TraceX(scene, camera->GenRay(u, v));
 
-		pixelSet.RandPick(loopMax, pixels);
-		int pixelsNum = pixels.size();
-		#pragma omp parallel for
-		for (int pixelIdx = 0; pixelIdx < pixelsNum; pixelIdx++) {
-			const uvec2 & pixel = pixels[pixelIdx];
-			rgb color(0);
-			for (int k = 0; k < sampleNum; k++) {
-				float u = (pixel.x + randMap(engine)) / (float)val_ImgWidth;
-				float v = (pixel.y + randMap(engine)) / (float)val_ImgHeight;
-				Ray::Ptr ray = camera->GenRay(u, v);
-				color += RayTracer::Trace(scene, ray);
-			}
-			color /= sampleNum;
-			img.SetPixel(pixel.x, val_ImgHeight - 1 - pixel.y, sqrt(color));
+			auto _color = img.GetPixel_F(pixel.x, pixel.y);
+			vec3 color(_color.r, _color.g, _color.b);
+			vec3 newColor = (color*(float)curSumLoop + rst) / ((float)curSumLoop + 1);
+			img.SetPixel(pixel.x, pixel.y, newColor);
 		}
+		curSumLoop++;
+		double curStep = curSumLoop / (double)maxSumLoop * 100;
+		double wholeTime = timer.GetWholeTime();
+		double speed = curSumLoop / wholeTime;
+		double needTime = (maxSumLoop - curSumLoop) / speed;
+		double sumTime = wholeTime + needTime;
+		printf("\rINFO: %.2f%%, %.2f loop / s, use %.2f s, need %.2f s, sum %.2f s     ",
+			curStep, speed, wholeTime, needTime, sumTime);
 
-		printf("\r%.2f%%", 100 * (1 - pixelSet.Size() / float(val_ImgWidth * val_ImgHeight)));
-		if (pixelSet.Size() == 0) {
+		if (curSumLoop == maxSumLoop) {
 			printf("\n");
 			imgUpdate->SetIsHold(false);
 		}
-	}, true));
+	}));
 
-	auto success = imgWindow.Run(imgUpdate);
+	bool success = imgWindow.Run(imgUpdate);
 	return success ? 0 : 1;
 }
 
