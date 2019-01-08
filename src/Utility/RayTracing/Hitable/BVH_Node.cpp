@@ -23,6 +23,9 @@ BVH_Node::BVH_Node(vector<Hitable::CPtr> & hitables, Material::CPtr material)
 	Build(hitables.cbegin(), hitables.cend());
 }
 
+BVH_Node::BVH_Node(const vector<Hitable::CPtr>::const_iterator begin, const vector<Hitable::CPtr>::const_iterator end, Material::CPtr material)
+	: box(AABB::InValid), Hitable(material) { Build(begin, end); }
+
 void BVH_Node::Build(const vector<Hitable::CPtr>::const_iterator begin, const vector<Hitable::CPtr>::const_iterator end){
 	size_t num = end - begin;
 
@@ -114,12 +117,12 @@ void BVH_Node::Build(const vector<Hitable::CPtr>::const_iterator begin, const ve
 	if (bestPartition[0].size() == num || bestPartition[1].size() == num){
 		size_t idx = bestPartition[0].size() == num ? 0 : 1;
 		size_t leftNum = num / 2;
-		left = ToCPtr(new BVH_Node(bestPartition[idx].cbegin(), bestPartition[idx].cbegin() + leftNum, GetMat()));
-		right = ToCPtr(new BVH_Node(bestPartition[idx].cbegin() + leftNum, bestPartition[idx].cend(), GetMat()));
+		left = ToCPtr(new BVH_Node(bestPartition[idx].cbegin(), bestPartition[idx].cbegin() + leftNum));
+		right = ToCPtr(new BVH_Node(bestPartition[idx].cbegin() + leftNum, bestPartition[idx].cend()));
 	}
 	else {
-		left = ToCPtr(new BVH_Node(bestPartition[0].cbegin(), bestPartition[0].cend(), GetMat()));
-		right = ToCPtr(new BVH_Node(bestPartition[1].cbegin(), bestPartition[1].cend(), GetMat()));
+		left = ToCPtr(new BVH_Node(bestPartition[0].cbegin(), bestPartition[0].cend()));
+		right = ToCPtr(new BVH_Node(bestPartition[1].cbegin(), bestPartition[1].cend()));
 	}
 }
 

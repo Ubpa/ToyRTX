@@ -88,7 +88,7 @@ const float TexT_Skybox       = 2.0;
 int rdCnt = 0;
 in vec2 TexCoords;
 
-float _Stack[50];
+float _Stack[100];
 int _Stack_mTop = -1;
 bool Stack_Empty();
 void Stack_Clear();

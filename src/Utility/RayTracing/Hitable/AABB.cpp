@@ -61,17 +61,14 @@ const AABB AABB::operator+(const AABB & aabb) const{
 
 			return { minP, maxP };
 		}
-		else {
+		else
 			return *this;
-		}
 	}
 	else {
-		if (aabb.isValid) {
+		if (aabb.isValid)
 			return aabb;
-		}
-		else {
+		else
 			return AABB::InValid;
-		}
 	}
 }
 
