@@ -19,10 +19,8 @@ using namespace RayTracing;
 using namespace Define;
 using namespace glm;
 using namespace std;
-typedef vec3 rgb;
 
 Hitable::Ptr CreateScene();
-rgb RayTracer(Hitable::Ptr scene, CppUtility::Other::Ptr<Ray> & ray);
 rgb Background(CppUtility::Other::Ptr<Ray> ray);
 
 int main(int argc, char ** argv){

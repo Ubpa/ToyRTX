@@ -5,8 +5,6 @@
 #include <Utility/Image.h>
 #include <Utility/LambdaOp.h>
 
-//#include <glm/glm.hpp>
-
 #include "Defines.h"
 
 using namespace CppUtility::Other;
@@ -14,7 +12,6 @@ using namespace RayTracing;
 using namespace Define;
 using namespace glm;
 using namespace std;
-typedef vec3 rgb;
 
 rgb Background(CppUtility::Other::Ptr<Ray> ray);
 

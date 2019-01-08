@@ -14,20 +14,25 @@ AABB::AABB(){
 AABB::AABB(const vec3 & minP, const vec3 & maxP, bool isValid)
 	: minP(minP), maxP(maxP), isValid(isValid) { }
 
+float AABB::GetSurfaceArea() const {
+	vec3 extent = maxP - minP;
+	return 2 * (extent.x * extent.y + extent.x*extent.z + extent.y*extent.z);
+}
+
 void AABB::SetP(const glm::vec3 & minP, const glm::vec3 & maxP) {
 	this->minP = minP;
 	this->maxP = maxP;
 	isValid = true;
 }
 
-bool AABB::Hit(Ray::Ptr ray) const {
+bool AABB::Hit(Ray::Ptr ray, float & tMin, float &tMax) const {
 	if (!IsValid())
 		return false;
 
 	const vec3 origin = ray->GetOrigin();
 	const vec3 dir = ray->GetDir();
-	float tMin = Ray::tMin;
-	float tMax = ray->GetTMax();
+	tMin = Ray::tMin;
+	tMax = ray->GetTMax();
 	for (size_t i = 0; i < 3; i++) {
 		float invD = 1.0f / dir[i];
 		float t0 = (minP[i] - origin[i]) * invD;
@@ -41,6 +46,11 @@ bool AABB::Hit(Ray::Ptr ray) const {
 			return false;
 	}
 	return true;
+}
+
+bool AABB::Hit(Ray::Ptr ray) const {
+	float tMin, tMax;
+	return Hit(ray, tMin, tMax);
 }
 
 const AABB AABB::operator+(const AABB & aabb) const{
@@ -65,7 +75,7 @@ const AABB AABB::operator+(const AABB & aabb) const{
 	}
 }
 
-AABB & AABB::operator +=(const AABB & aabb) {
+void AABB::Expand(const AABB & aabb) {
 	if (aabb.isValid) {
 		if (isValid) {
 			minP = min(minP, aabb.minP);
@@ -77,6 +87,10 @@ AABB & AABB::operator +=(const AABB & aabb) {
 			isValid = true;
 		}
 	}
+}
+
+AABB & AABB::operator +=(const AABB & aabb) {
+	Expand(aabb);
 
 	return *this;
 }

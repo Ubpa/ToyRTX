@@ -20,16 +20,11 @@ BVH_Node::BVH_Node(vector<Hitable::CPtr> & hitables, Material::CPtr material)
 		return;
 
 	remove_if(hitables.begin(), hitables.end(), [](Hitable::CPtr hitable)->bool { return hitable->GetBoundingBox().IsValid(); });
-	Build(hitables.begin(), hitables.end());
+	Build(hitables.cbegin(), hitables.cend());
 }
 
-void BVH_Node::Build(std::vector<Hitable::CPtr>::iterator begin, std::vector<Hitable::CPtr>::iterator end){
+void BVH_Node::Build(const vector<Hitable::CPtr>::const_iterator begin, const vector<Hitable::CPtr>::const_iterator end){
 	size_t num = end - begin;
-	
-	size_t axis = GetAxis(begin, end);
-	sort(begin, end, [&](Hitable::CPtr a, Hitable::CPtr b)->bool {
-		return a->GetBoundingBox().GetMinP()[axis] < b->GetBoundingBox().GetMinP()[axis];
-	});
 
 	if (num == 1) {
 		left = *begin;
@@ -45,71 +40,118 @@ void BVH_Node::Build(std::vector<Hitable::CPtr>::iterator begin, std::vector<Hit
 		return;
 	}
 	
-	auto nodeLeft = new BVH_Node();
-	nodeLeft->Build(begin, begin + num / 2);
-	left = ToPtr(nodeLeft);
+	constexpr size_t bucketNum = 8;
 
-	auto nodeRight = new BVH_Node();
-	nodeRight->Build(begin + num / 2, end);
-	right = ToPtr(nodeRight);
+	for (auto nd = begin; nd != end; nd++)
+		box.Expand((*nd)->GetBoundingBox());
 
-	box = left->GetBoundingBox() + right->GetBoundingBox();
+	// get best partition
+	vector<Hitable::CPtr> bestPartition[2];
+	double minCost = DBL_MAX;
+	for (size_t dim = 0; dim < 3; dim++) {
+		// 1. compute buckets
+		double bucketLen = box.GetExtent()[dim] / bucketNum;
+		double left = box.GetMinP()[dim];
+		vector<vector<Hitable::CPtr>> buckets(bucketNum);
+		vector<AABB> boxesOfBuckets(bucketNum);
+		for (size_t i = 0; i < num; i++) {
+			Hitable::CPtr hitable = *(begin + i);
+			AABB bb = hitable->GetBoundingBox();
+			double center = bb.GetCenter()[dim];
+			size_t bucketID = (center - left) / bucketLen;
+			buckets[bucketID].push_back(hitable);
+			boxesOfBuckets[bucketID].Expand(bb);
+		}
+
+		// 2. accumulate buckets
+		vector<AABB> leftBox(bucketNum);
+		vector<size_t> leftAccNum(bucketNum);
+		leftAccNum[0] = 0;
+		vector<AABB> rightBox(bucketNum);
+		vector<size_t> rightAccNum(bucketNum);
+		rightAccNum[0] = 0;
+		for (size_t i = 1; i <= bucketNum - 1; i++) {
+			leftBox[i] = leftBox[i - 1];
+			leftBox[i].Expand(boxesOfBuckets[i - 1]);
+			leftAccNum[i] = leftAccNum[i - 1] + buckets[i - 1].size();
+			rightBox[i] = rightBox[i - 1];
+			rightBox[i].Expand(boxesOfBuckets[bucketNum - i]);
+			rightAccNum[i] = rightAccNum[i - 1] + buckets[bucketNum - i].size();
+		}
+
+		// 3. get best partition of dim
+		size_t bestLeftNum = 0;
+		double minCostDim = DBL_MAX;
+		for (size_t leftNum = 1; leftNum <= bucketNum - 1; leftNum++) {
+			size_t rightNum = bucketNum - leftNum;
+			double leftS = leftBox[leftNum].GetSurfaceArea();
+			double rightS = rightBox[rightNum].GetSurfaceArea();
+			double costDim = leftS * leftAccNum[leftNum] + rightS * rightAccNum[rightNum];
+			if (costDim < minCostDim) {
+				bestLeftNum = leftNum;
+				minCostDim = costDim;
+			}
+		}
+
+		// 4. set best partition
+		if (minCostDim < minCost) {
+			bestPartition[0].clear();
+			bestPartition[1].clear();
+
+			minCost = minCostDim;
+			for (size_t i = 0; i < bestLeftNum; i++) {
+				for (auto primitive : buckets[i])
+					bestPartition[0].push_back(primitive);
+			}
+			for (size_t i = bestLeftNum; i < bucketNum; i++) {
+				for (auto primitive : buckets[i])
+					bestPartition[1].push_back(primitive);
+			}
+		}
+	}
+
+	// recursion
+	if (bestPartition[0].size() == num || bestPartition[1].size() == num){
+		size_t idx = bestPartition[0].size() == num ? 0 : 1;
+		size_t leftNum = num / 2;
+		left = ToCPtr(new BVH_Node(bestPartition[idx].cbegin(), bestPartition[idx].cbegin() + leftNum, GetMat()));
+		right = ToCPtr(new BVH_Node(bestPartition[idx].cbegin() + leftNum, bestPartition[idx].cend(), GetMat()));
+	}
+	else {
+		left = ToCPtr(new BVH_Node(bestPartition[0].cbegin(), bestPartition[0].cend(), GetMat()));
+		right = ToCPtr(new BVH_Node(bestPartition[1].cbegin(), bestPartition[1].cend(), GetMat()));
+	}
 }
 
 HitRst BVH_Node::RayIn(Ray::Ptr & ray) const {
-	if (!box.Hit(ray))
-		return false;
+	float t1, t2, t3, t4;
+	bool leftBoxHit = left != NULL ? left->GetBoundingBox().Hit(ray, t1, t2) : false;
+	bool rightBoxHit = right != NULL ? right->GetBoundingBox().Hit(ray, t3, t4) : false;
 
-	HitRst * front;
-	HitRst hitRstLeft = left != NULL ? left->RayIn(ray) : HitRst::InValid;
-	HitRst hitRstRight = right != NULL ? right->RayIn(ray) : HitRst::InValid;
-
-	//先进行左边的测试, 则测试后 ray.tMax 被更新(在有碰撞的情况下)
-	//此时如果 hitRstRight 有效, 则可知其 ray.tMax 更小
-	//故只要 hitRstRight 有效, 则说明 right 更近
-	if (hitRstRight.hit)
-		front = &hitRstRight;
-	else if(hitRstLeft.hit)
-		front = &hitRstLeft;
+	HitRst hitRst;
+	if (leftBoxHit) {
+		if (rightBoxHit) {
+			Hitable::CPtr first = (t1 <= t3) ? left : right;
+			Hitable::CPtr second = (t1 <= t3) ? right : left;
+			hitRst = first->RayIn(ray);
+			if (ray->GetTMax() > t3) {
+				HitRst secondHitRst = second->RayIn(ray);
+				if (secondHitRst.hit)
+					hitRst = secondHitRst;
+			}
+		}
+		else
+			hitRst = left->RayIn(ray);
+	}
+	else if (rightBoxHit)
+		hitRst = right->RayIn(ray);
 	else
 		return HitRst::InValid;
 
-	if (GetMat() != NULL && front->isMatCoverable) {
-		front->material = GetMat();
-		front->isMatCoverable = IsMatCoverable();
+	if (GetMat() != NULL && hitRst.isMatCoverable) {
+		hitRst.material = GetMat();
+		hitRst.isMatCoverable = IsMatCoverable();
 	}
 
-	return *front;
-}
-
-size_t BVH_Node::GetAxis(vector<Hitable::CPtr>::const_iterator begin, const vector<Hitable::CPtr>::const_iterator end) const {
-	size_t num = end - begin;
-	vector<float> X, Y, Z;
-	X.reserve(num);
-	Y.reserve(num);
-	Z.reserve(num);
-	for_each(begin, end, [&](Hitable::CPtr hitable) {
-		auto box = hitable->GetBoundingBox();
-		auto center = box.GetCenter();
-		X.push_back(center.x);
-		Y.push_back(center.y);
-		Z.push_back(center.z);
-	});
-
-	float varianceX = Math::Variance(X);
-	float varianceY = Math::Variance(Y);
-	float varianceZ = Math::Variance(Z);
-
-	if (varianceX > varianceY) {
-		if (varianceX > varianceZ)
-			return 0;
-		else
-			return 2;
-	}
-	else {
-		if (varianceY > varianceZ)
-			return 1;
-		else
-			return 2;
-	}
+	return hitRst;
 }

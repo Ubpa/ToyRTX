@@ -10,14 +10,14 @@ namespace RayTracing {
 	public:
 		BVH_Node(Material::CPtr material = NULL);
 		BVH_Node(std::vector<Hitable::CPtr> & hitables, Material::CPtr material = NULL);
+		BVH_Node(const std::vector<Hitable::CPtr>::const_iterator begin, const std::vector<Hitable::CPtr>::const_iterator end, Material::CPtr material = NULL);
 
 		virtual HitRst RayIn(CppUtility::Other::Ptr<Ray> & ray) const;
 		virtual const AABB GetBoundingBox() const { return box; }
 		const Hitable::CPtr GetLeft() const { return left; }
 		const Hitable::CPtr GetRight() const { return right; }
 	protected:
-		void Build(std::vector<Hitable::CPtr>::iterator begin, std::vector<Hitable::CPtr>::iterator end);
-		size_t GetAxis(std::vector<Hitable::CPtr>::const_iterator begin, const std::vector<Hitable::CPtr>::const_iterator end) const;
+		void Build(const std::vector<Hitable::CPtr>::const_iterator begin, const std::vector<Hitable::CPtr>::const_iterator end);
 
 		Hitable::CPtr left;
 		Hitable::CPtr right;

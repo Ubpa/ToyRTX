@@ -20,7 +20,6 @@ using namespace RayTracing;
 using namespace Define;
 using namespace glm;
 using namespace std;
-typedef vec3 rgb;
 
 Hitable::Ptr CreateScene();
 

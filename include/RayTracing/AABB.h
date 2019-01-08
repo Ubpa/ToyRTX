@@ -15,13 +15,18 @@ namespace RayTracing {
 
 		inline glm::vec3 GetMinP() const { return minP; }
 		inline glm::vec3 GetMaxP() const { return maxP; }
+		inline glm::vec3 GetExtent() const { return maxP - minP; }
 		inline glm::vec3 GetCenter() const { return (minP + maxP) / 2.0f; }
 		inline float GetRadius() const { return length(maxP - minP) / 2.0f; }
+		float GetSurfaceArea() const;
 
 		// 设置后会将 isValid 设置成 true
 		void SetP(const glm::vec3 & minP, const glm::vec3 & maxP);
 		inline bool IsValid() const { return isValid; }
 		bool Hit(CppUtility::Other::Ptr<Ray> ray) const;
+		bool Hit(CppUtility::Other::Ptr<Ray> ray, float & tMin, float &tMax) const;
+
+		void Expand(const AABB & aabb);
 
 		const AABB operator +(const AABB & aabb) const;
 		AABB & operator +=(const AABB & aabb);

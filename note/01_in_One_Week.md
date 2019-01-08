@@ -135,7 +135,7 @@ $$
 &=\frac{n(\mathbf{d}+\mathbf{n}(-\mathbf{d}\cdot\mathbf{n}))}{n_t}-\mathbf{n}\sqrt{1-\frac{n^2(1-(\mathbf{d}\cdot\mathbf{n})^2)}{n_t^2}}\\
 \end{align*}
 $$
-当根号下的值为负数时为**全反射**
+当根号下的值为负数时为**全反射** 
 
 折射的同时会有反射，反射率遵循 Fresnel equations。一个好的近似是 Schlick approximation，公式为
 $$
