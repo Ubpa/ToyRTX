@@ -1,4 +1,4 @@
-#include <OpenGL/Shader.h>
+#include <Utility/OGL/Shader.h>
 
 #include <iostream>
 

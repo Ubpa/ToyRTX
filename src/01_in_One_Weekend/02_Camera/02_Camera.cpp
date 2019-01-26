@@ -1,9 +1,9 @@
-#include <RayTracing/ImgWindow.h>
-#include <RayTracing/RayCamera.h>
-#include <RayTracing/Ray.h>
+#include <Utility/RTX/ImgWindow.h>
+#include <Utility/RTX/RayCamera.h>
+#include <Utility/RTX/Ray.h>
 
-#include <Utility/Image.h>
-#include <Utility/LambdaOp.h>
+#include <Utility/Basic/Image.h>
+#include <Utility/Basic/LambdaOp.h>
 
 #include "Defines.h"
 

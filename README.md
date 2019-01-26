@@ -42,7 +42,7 @@
   -02_07_Volume
   -02_08_All
 /03_GPU_RayTracing
-	(只有3_10 和 3_11可以运行，其余由于后续代码更新后已不再可用，如需使用，需要回退版本)
+	(只有3_9，3_10 和 3_11可以运行，如需运行03_01-03_08，需要回退版本)
   -03_01_Basic
   -03_02_RayTracingBasicSystem
   -03_03_Material
@@ -116,7 +116,7 @@ cd build
 cmake ..
 ```
 
-2. 打开 `/build/RayTracingToy.sln`
+2. 打开 `/build/RayTracingToy.sln` 
 3. 在**解决方案中**的`CMakePredefinedTargets`中，右键`INSTALL`，点击生成
 
 ## 2.4 配置

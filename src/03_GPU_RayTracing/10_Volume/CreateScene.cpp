@@ -1,28 +1,28 @@
 #include "CreateScene.h"
 
-#include <RayTracing/Volume.h>
-#include <RayTracing/Isotropic.h>
-#include <RayTracing/TriMesh.h>
-#include <RayTracing/Light.h>
-#include <RayTracing/BVH_Node.h>
-#include <RayTracing/Group.h>
-#include <RayTracing/Dielectric.h>
-#include <RayTracing/Metal.h>
-#include <RayTracing/Lambertian.h>
-#include <RayTracing/Sphere.h>
-#include <RayTracing/ConstTexture.h>
-#include <RayTracing/ImgTexture.h>
-#include <RayTracing/TRayCamera.h>
-#include <RayTracing/Transform.h>
+#include <Utility/RTX/Volume.h>
+#include <Utility/RTX/Isotropic.h>
+#include <Utility/RTX/TriMesh.h>
+#include <Utility/RTX/Light.h>
+#include <Utility/RTX/BVH_Node.h>
+#include <Utility/RTX/Group.h>
+#include <Utility/RTX/Dielectric.h>
+#include <Utility/RTX/Metal.h>
+#include <Utility/RTX/Lambertian.h>
+#include <Utility/RTX/Sphere.h>
+#include <Utility/RTX/ConstTexture.h>
+#include <Utility/RTX/ImgTexture.h>
+#include <Utility/RTX/TRayCamera.h>
+#include <Utility/RTX/Transform.h>
 
-#include <Utility/Math.h>
-#include <Utility/Config.h>
-#include <Utility/GStorage.h>
+#include <Utility/Basic/Math.h>
+#include <Utility/Basic/Config.h>
+#include <Utility/Basic/GStorage.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Defines.h"
-#include <OpenGL/CommonDefine.h>
+#include <Utility/OGL/CommonDefine.h>
 
 using namespace RayTracing;
 using namespace CppUtility::Other;

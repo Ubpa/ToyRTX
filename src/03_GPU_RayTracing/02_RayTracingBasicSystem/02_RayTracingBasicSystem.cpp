@@ -1,17 +1,17 @@
 #include "Defines.h"
 
-#include <RayTracing/TexWindow.h>
-#include <RayTracing/TRayCamera.h>
+#include <Utility/RTX/TexWindow.h>
+#include <Utility/RTX/TRayCamera.h>
 
-#include <OpenGL/Shader.h>
-#include <OpenGL/VAO.h>
-#include <OpenGL/FBO.h>
-#include <OpenGL/CommonDefine.h>
+#include <Utility/OGL/Shader.h>
+#include <Utility/OGL/VAO.h>
+#include <Utility/OGL/FBO.h>
+#include <Utility/OGL/CommonDefine.h>
 
-#include <Utility/GStorage.h>
-#include <Utility/LambdaOp.h>
-#include <Utility/Timer.h>
-#include <Utility/Math.h>
+#include <Utility/Basic/GStorage.h>
+#include <Utility/Basic/LambdaOp.h>
+#include <Utility/Basic/Timer.h>
+#include <Utility/Basic/Math.h>
 
 #include <glm/glm.hpp>
  
@@ -23,6 +23,9 @@ using namespace glm;
 using namespace std;
 
 int main(int argc, char ** argv) {
+	printf("Need old version code to run this project\n");
+	return 1;
+
 	TexWindow texWindow(str_WindowTitle);
 	if (!texWindow.IsValid()) {
 		printf("ERROR: Texture Window Create Fail.\n");

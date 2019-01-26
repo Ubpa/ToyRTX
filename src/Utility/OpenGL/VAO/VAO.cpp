@@ -1,6 +1,6 @@
-#include <OpenGL/VAO.h>
+#include <Utility/OGL/VAO.h>
 
-#include<OpenGL/Shader.h>
+#include<Utility/OGL/Shader.h>
 
 #include <glad/glad.h>
 

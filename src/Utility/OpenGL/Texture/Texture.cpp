@@ -1,6 +1,6 @@
-#include <OpenGL/Texture.h>
+#include <Utility/OGL/Texture.h>
 
-#include <Utility/Image.h>
+#include <Utility/Basic/Image.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

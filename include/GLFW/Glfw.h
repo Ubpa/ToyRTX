@@ -1,7 +1,7 @@
 #ifndef GLFW_H_
 #define GLFW_H_
 
-#include <Utility/Ptr.h>
+#include <Utility/Basic/Ptr.h>
 
 #include <glad/glad.h>
 

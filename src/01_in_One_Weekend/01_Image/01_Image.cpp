@@ -1,8 +1,8 @@
-#include <RayTracing/ImgWindow.h>
+#include <Utility/RTX/ImgWindow.h>
 
-#include <Utility/Image.h>
-#include <Utility/LambdaOp.h>
-#include <Utility/Math.h>
+#include <Utility/Basic/Image.h>
+#include <Utility/Basic/LambdaOp.h>
+#include <Utility/Basic/Math.h>
 #include "Defines.h"
 
 using namespace CppUtility::Other;

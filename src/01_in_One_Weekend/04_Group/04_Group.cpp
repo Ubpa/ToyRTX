@@ -1,17 +1,17 @@
-#include <RayTracing/RayTracer.h>
-#include <RayTracing/ImgWindow.h>
-#include <RayTracing/RayCamera.h>
-#include <RayTracing/Ray.h>
-#include <RayTracing/Sphere.h>
-#include <RayTracing/Group.h>
-#include <RayTracing/OpMaterial.h>
-#include <RayTracing/Sky.h>
+#include <Utility/RTX/RayTracer.h>
+#include <Utility/RTX/ImgWindow.h>
+#include <Utility/RTX/RayCamera.h>
+#include <Utility/RTX/Ray.h>
+#include <Utility/RTX/Sphere.h>
+#include <Utility/RTX/Group.h>
+#include <Utility/RTX/OpMaterial.h>
+#include <Utility/RTX/Sky.h>
 
-#include <Utility/Math.h>
-#include <Utility/Image.h>
-#include <Utility/LambdaOp.h>
-#include <Utility/ImgPixelSet.h>
-#include <Utility/Timer.h>
+#include <Utility/Basic/Math.h>
+#include <Utility/Basic/Image.h>
+#include <Utility/Basic/LambdaOp.h>
+#include <Utility/Basic/ImgPixelSet.h>
+#include <Utility/Basic/Timer.h>
 
 #include "Defines.h"
 

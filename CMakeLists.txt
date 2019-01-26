@@ -1,6 +1,6 @@
 
 
-set(PROJECT_NAME "RayTracingToy")
+set(PROJECT_NAME "ToyRTX")
 
 
 #---------------------------------------
@@ -29,7 +29,7 @@ macro(SETUP_PROJECT MODE TARGET_NAME STR_TARGET_SOURCES STR_TARGET_LIBS)
 				target_link_libraries( ${TARGET_NAME} ${LIST_TARGET_LIBS} )
 			endif()
 			install (TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR})
-			message(STATUS "Setup Target ${Mode} ${FOLDER_NAME}/[${TARGET_NAME}] success")
+			message(STATUS "Setup Project ${Mode} ${FOLDER_NAME}/[${TARGET_NAME}]")
 		endif()
 	endif()
 endmacro(SETUP_PROJECT TARGET_NAME STR_TARGET_SOURCES STR_TARGET_LIBS)
@@ -95,8 +95,9 @@ include_directories (
 )
 link_directories (
 	${PROJECT_SOURCE_DIR}/lib
-	${PROJECT_SOURCE_DIR}/lib/OpenGL
-	${PROJECT_SOURCE_DIR}/lib/Other
+	${PROJECT_SOURCE_DIR}/lib/Utility/Basic
+	${PROJECT_SOURCE_DIR}/lib/Utility/OpenGL
+	${PROJECT_SOURCE_DIR}/lib/Utility/RTX
 	# $ENV{XXX_LIB_PATH}
 	# ...
 )

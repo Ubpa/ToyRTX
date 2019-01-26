@@ -1,24 +1,24 @@
-#include <RayTracing/RayTracer.h>
-#include <RayTracing/Dielectric.h>
-#include <RayTracing/Metal.h>
-#include <RayTracing/Lambertian.h>
-#include <RayTracing/OpMaterial.h>
-#include <RayTracing/Sky.h>
-#include <RayTracing/Sphere.h>
-#include <RayTracing/Group.h>
-#include <RayTracing/ImgWindow.h>
-#include <RayTracing/Ray.h>
-#include <RayTracing/RayCamera.h>
+#include <Utility/RTX/RayTracer.h>
+#include <Utility/RTX/Dielectric.h>
+#include <Utility/RTX/Metal.h>
+#include <Utility/RTX/Lambertian.h>
+#include <Utility/RTX/OpMaterial.h>
+#include <Utility/RTX/Sky.h>
+#include <Utility/RTX/Sphere.h>
+#include <Utility/RTX/Group.h>
+#include <Utility/RTX/ImgWindow.h>
+#include <Utility/RTX/Ray.h>
+#include <Utility/RTX/RayCamera.h>
 
-#include <Utility/Math.h>
-#include <Utility/ImgPixelSet.h>
-#include <Utility/Image.h>
-#include <Utility/Config.h>
-#include <Utility/LambdaOp.h>
-#include <Utility/GStorage.h>
-#include <Utility/Timer.h>
+#include <Utility/Basic/Math.h>
+#include <Utility/Basic/ImgPixelSet.h>
+#include <Utility/Basic/Image.h>
+#include <Utility/Basic/Config.h>
+#include <Utility/Basic/LambdaOp.h>
+#include <Utility/Basic/GStorage.h>
+#include <Utility/Basic/Timer.h>
 
-#include <OpenGL/CommonDefine.h>
+#include <Utility/OGL/CommonDefine.h>
 
 #include <omp.h>
 

@@ -1,4 +1,4 @@
-#include <OpenGL/Camera.h>
+#include <Utility/OGL/Camera.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 

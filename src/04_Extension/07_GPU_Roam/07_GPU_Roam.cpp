@@ -1,32 +1,32 @@
 #include "Defines.h"
 #include "CreateScene.h"
 
-#include <RayTracing/GenData.h>
-#include <RayTracing/ConstTexture.h>
-#include <RayTracing/Dielectric.h>
-#include <RayTracing/Metal.h>
-#include <RayTracing/Lambertian.h>
-#include <RayTracing/Sphere.h>
-#include <RayTracing/Group.h>
-#include <RayTracing/TexWindow.h>
-#include <RayTracing/TRayCamera.h>
+#include <Utility/RTX/GenData.h>
+#include <Utility/RTX/ConstTexture.h>
+#include <Utility/RTX/Dielectric.h>
+#include <Utility/RTX/Metal.h>
+#include <Utility/RTX/Lambertian.h>
+#include <Utility/RTX/Sphere.h>
+#include <Utility/RTX/Group.h>
+#include <Utility/RTX/TexWindow.h>
+#include <Utility/RTX/TRayCamera.h>
 
-#include <OpenGL/Shader.h>
-#include <OpenGL/Camera.h>
-#include <OpenGL/Texture.h>
-#include <OpenGL/VAO.h>
-#include <OpenGL/FBO.h>
-#include <OpenGL/CommonDefine.h>
+#include <Utility/OGL/Shader.h>
+#include <Utility/OGL/Camera.h>
+#include <Utility/OGL/Texture.h>
+#include <Utility/OGL/VAO.h>
+#include <Utility/OGL/FBO.h>
+#include <Utility/OGL/CommonDefine.h>
 
 #include <GLFW/Glfw.h>
 
-#include <Utility/OpQueue.h>
-#include <Utility/EventManager.h>
-#include <Utility/GStorage.h>
-#include <Utility/LambdaOp.h>
-#include <Utility/Timer.h>
-#include <Utility/Math.h>
-#include <Utility/File.h>
+#include <Utility/Basic/OpQueue.h>
+#include <Utility/Basic/EventManager.h>
+#include <Utility/Basic/GStorage.h>
+#include <Utility/Basic/LambdaOp.h>
+#include <Utility/Basic/Timer.h>
+#include <Utility/Basic/Math.h>
+#include <Utility/Basic/File.h>
 
 #include <glm/glm.hpp>
 

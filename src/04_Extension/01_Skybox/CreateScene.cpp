@@ -1,32 +1,32 @@
 #include "CreateScene.h"
 
-#include <RayTracing/Ray.h>
-#include <RayTracing/Sky.h>
-#include <RayTracing/Skybox.h>
-#include <RayTracing/Isotropic.h>
-#include <RayTracing/Volume.h>
-#include <RayTracing/Transform.h>
-#include <RayTracing/TriMesh.h>
-#include <RayTracing/Light.h>
-#include <RayTracing/Group.h>
-#include <RayTracing/OpTexture.h>
-#include <RayTracing/BVH_Node.h>
-#include <RayTracing/MoveSphere.h>
-#include <RayTracing/Dielectric.h>
-#include <RayTracing/Sky.h>
-#include <RayTracing/OpMaterial.h>
-#include <RayTracing/Metal.h>
-#include <RayTracing/Lambertian.h>
-#include <RayTracing/Sphere.h>
-#include <RayTracing/ImgTexture.h>
-#include <RayTracing/TRayCamera.h>
+#include <Utility/RTX/Ray.h>
+#include <Utility/RTX/Sky.h>
+#include <Utility/RTX/Skybox.h>
+#include <Utility/RTX/Isotropic.h>
+#include <Utility/RTX/Volume.h>
+#include <Utility/RTX/Transform.h>
+#include <Utility/RTX/TriMesh.h>
+#include <Utility/RTX/Light.h>
+#include <Utility/RTX/Group.h>
+#include <Utility/RTX/OpTexture.h>
+#include <Utility/RTX/BVH_Node.h>
+#include <Utility/RTX/MoveSphere.h>
+#include <Utility/RTX/Dielectric.h>
+#include <Utility/RTX/Sky.h>
+#include <Utility/RTX/OpMaterial.h>
+#include <Utility/RTX/Metal.h>
+#include <Utility/RTX/Lambertian.h>
+#include <Utility/RTX/Sphere.h>
+#include <Utility/RTX/ImgTexture.h>
+#include <Utility/RTX/TRayCamera.h>
 
-#include <Utility/Config.h>
-#include <Utility/Math.h>
-#include <Utility/GStorage.h>
+#include <Utility/Basic/Config.h>
+#include <Utility/Basic/Math.h>
+#include <Utility/Basic/GStorage.h>
 
 #include "Defines.h"
-#include <OpenGL/CommonDefine.h>
+#include <Utility/OGL/CommonDefine.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 

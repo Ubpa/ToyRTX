@@ -1,8 +1,8 @@
 #include <GLFW/Glfw.h>
 
-#include <Utility/EventManager.h>
-#include <Utility/GStorage.h>
-#include <Utility/Operation.h>
+#include <Utility/Basic/EventManager.h>
+#include <Utility/Basic/GStorage.h>
+#include <Utility/Basic/Operation.h>
 
 #include <iostream>
 

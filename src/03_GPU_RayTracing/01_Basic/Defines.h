@@ -2,7 +2,7 @@
 #define _DEFINES_H_
 
 #include <string>
-#include <OpenGL/CommonDefine.h>
+#include <Utility/OGL/CommonDefine.h>
 
 namespace Define {
 	const std::string str_Chapter = "03_GPU_RayTracing";

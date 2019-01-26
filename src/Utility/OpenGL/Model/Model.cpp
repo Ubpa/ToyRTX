@@ -1,5 +1,5 @@
-#include <OpenGL/Model.h>
-#include <OpenGL/Texture.h>
+#include <Utility/OGL/Model.h>
+#include <Utility/OGL/Texture.h>
 
 #include <iostream>
 

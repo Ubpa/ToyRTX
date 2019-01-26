@@ -1,19 +1,19 @@
 #include "CreateScene.h"
 
-#include <RayTracing/Triangle.h>
-#include <RayTracing/RayCamera.h>
-#include <RayTracing/RayTracer.h>
-#include <RayTracing/ImgWindow.h>
+#include <Utility/RTX/Triangle.h>
+#include <Utility/RTX/RayCamera.h>
+#include <Utility/RTX/RayTracer.h>
+#include <Utility/RTX/ImgWindow.h>
 
-#include <Utility/Math.h>
-#include <Utility/ImgPixelSet.h>
-#include <Utility/Image.h>
-#include <Utility/Config.h>
-#include <Utility/LambdaOp.h>
-#include <Utility/GStorage.h>
-#include <Utility/Timer.h>
+#include <Utility/Basic/Math.h>
+#include <Utility/Basic/ImgPixelSet.h>
+#include <Utility/Basic/Image.h>
+#include <Utility/Basic/Config.h>
+#include <Utility/Basic/LambdaOp.h>
+#include <Utility/Basic/GStorage.h>
+#include <Utility/Basic/Timer.h>
 
-#include <OpenGL/CommonDefine.h>
+#include <Utility/OGL/CommonDefine.h>
 
 #include <omp.h>
 

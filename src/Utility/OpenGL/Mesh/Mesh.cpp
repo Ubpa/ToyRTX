@@ -1,8 +1,8 @@
-#include <OpenGL/Mesh.h>
+#include <Utility/OGL/Mesh.h>
 
 #include <glad/glad.h> // holds all OpenGL type declarations
 
-#include <OpenGL/Shader.h>
+#include <Utility/OGL/Shader.h>
 
 using namespace CppUtility::OpenGL;
 

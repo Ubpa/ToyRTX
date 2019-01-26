@@ -1,7 +1,7 @@
 #ifndef _CREATE_SCENE_H_
 #define _CREATE_SCENE_H_
 
-#include <RayTracing/Scene.h>
+#include <Utility/RTX/Scene.h>
 
 RayTracing::Scene::Ptr CreateScene0(float ratioWH);
 RayTracing::Scene::Ptr CreateScene1(float ratioWH);
