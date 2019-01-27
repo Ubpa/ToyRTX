@@ -1,27 +1,27 @@
-#include <Utility/RTX/RayTracer.h>
-#include <Utility/RTX/Sky.h>
-#include <Utility/RTX/Group.h>
-#include <Utility/RTX/ImgWindow.h>
-#include <Utility/RTX/RayCamera.h>
-#include <Utility/RTX/Ray.h>
+#include <CppUtil/RTX/RayTracer.h>
+#include <CppUtil/RTX/Sky.h>
+#include <CppUtil/RTX/Group.h>
+#include <CppUtil/RTX/ImgWindow.h>
+#include <CppUtil/RTX/RayCamera.h>
+#include <CppUtil/RTX/Ray.h>
 
-#include <Utility/Basic/Image.h>
-#include <Utility/Basic/LambdaOp.h>
-#include <Utility/Basic/ImgPixelSet.h>
+#include <CppUtil/Basic/Image.h>
+#include <CppUtil/Basic/LambdaOp.h>
+#include <CppUtil/Basic/ImgPixelSet.h>
 
-#include <Utility/RTX/Sphere.h>
-#include <Utility/RTX/OpMaterial.h>
+#include <CppUtil/RTX/Sphere.h>
+#include <CppUtil/RTX/OpMaterial.h>
 
 #include "Defines.h"
 
-using namespace CppUtility::Other;
-using namespace RayTracing;
+using namespace CppUtil::Basic;
+using namespace RTX;
 using namespace Define;
 using namespace glm;
 using namespace std;
 
 Hitable::Ptr CreateScene();
-rgb Background(CppUtility::Other::Ptr<Ray> ray);
+rgb Background(CppUtil::Basic::Ptr<Ray> ray);
 
 int main(int argc, char ** argv){
 	ImgWindow imgWindow(str_WindowTitle);
@@ -54,7 +54,7 @@ int main(int argc, char ** argv){
 			size_t j = pixel.y;
 			float u = i / (float)val_ImgWidth;
 			float v = j / (float)val_ImgHeight;
-			CppUtility::Other::Ptr<Ray> ray = camera->GenRay(u, v);
+			CppUtil::Basic::Ptr<Ray> ray = camera->GenRay(u, v);
 			rgb color = RayTracer::Trace(scene, ray);
 			float r = color.r;
 			float g = color.g;

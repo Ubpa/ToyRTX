@@ -1,46 +1,46 @@
-#include <Utility/RTX/TriMesh.h>
-#include <Utility/RTX/Triangle.h>
-#include <Utility/RTX/Light.h>
-#include <Utility/RTX/ImgTexture.h>
-#include <Utility/RTX/RayTracer.h>
-#include <Utility/RTX/OpTexture.h>
-#include <Utility/RTX/BVH_Node.h>
-#include <Utility/RTX/MoveSphere.h>
-#include <Utility/RTX/Scene.h>
-#include <Utility/RTX/Dielectric.h>
-#include <Utility/RTX/Metal.h>
-#include <Utility/RTX/Lambertian.h>
-#include <Utility/RTX/OpMaterial.h>
-#include <Utility/RTX/Sky.h>
-#include <Utility/RTX/Sphere.h>
-#include <Utility/RTX/Group.h>
-#include <Utility/RTX/ImgWindow.h>
-#include <Utility/RTX/TRayCamera.h>
-#include <Utility/RTX/Ray.h>
+#include <CppUtil/RTX/TriMesh.h>
+#include <CppUtil/RTX/Triangle.h>
+#include <CppUtil/RTX/Light.h>
+#include <CppUtil/RTX/ImgTexture.h>
+#include <CppUtil/RTX/RayTracer.h>
+#include <CppUtil/RTX/OpTexture.h>
+#include <CppUtil/RTX/BVH_Node.h>
+#include <CppUtil/RTX/MoveSphere.h>
+#include <CppUtil/RTX/Scene.h>
+#include <CppUtil/RTX/Dielectric.h>
+#include <CppUtil/RTX/Metal.h>
+#include <CppUtil/RTX/Lambertian.h>
+#include <CppUtil/RTX/OpMaterial.h>
+#include <CppUtil/RTX/Sky.h>
+#include <CppUtil/RTX/Sphere.h>
+#include <CppUtil/RTX/Group.h>
+#include <CppUtil/RTX/ImgWindow.h>
+#include <CppUtil/RTX/TRayCamera.h>
+#include <CppUtil/RTX/Ray.h>
 
-#include <Utility/Basic/Math.h>
-#include <Utility/Basic/ImgPixelSet.h>
-#include <Utility/Basic/Image.h>
-#include <Utility/Basic/Config.h>
-#include <Utility/Basic/LambdaOp.h>
-#include <Utility/Basic/GStorage.h>
-#include <Utility/Basic/Timer.h>
+#include <CppUtil/Basic/Math.h>
+#include <CppUtil/Basic/ImgPixelSet.h>
+#include <CppUtil/Basic/Image.h>
+#include <CppUtil/Basic/Config.h>
+#include <CppUtil/Basic/LambdaOp.h>
+#include <CppUtil/Basic/GStorage.h>
+#include <CppUtil/Basic/Timer.h>
 
-#include <Utility/OGL/CommonDefine.h>
+#include <CppUtil/OpenGL/CommonDefine.h>
 
 #include <omp.h>
 
 #include "Defines.h"
 
-using namespace CppUtility::Other;
-using namespace RayTracing;
+using namespace CppUtil::Basic;
+using namespace RTX;
 using namespace Define;
 using namespace glm;
 using namespace std;
 
 Scene::Ptr CreateScene0(float ratioWH);
 Scene::Ptr CreateScene1(float ratioWH);
-rgb Background(CppUtility::Other::Ptr<Ray> ray);
+rgb Background(CppUtil::Basic::Ptr<Ray> ray);
 
 int main(int argc, char ** argv){
 	ImgWindow imgWindow(str_WindowTitle);

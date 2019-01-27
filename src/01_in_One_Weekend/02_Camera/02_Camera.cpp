@@ -1,19 +1,19 @@
-#include <Utility/RTX/ImgWindow.h>
-#include <Utility/RTX/RayCamera.h>
-#include <Utility/RTX/Ray.h>
+#include <CppUtil/RTX/ImgWindow.h>
+#include <CppUtil/RTX/RayCamera.h>
+#include <CppUtil/RTX/Ray.h>
 
-#include <Utility/Basic/Image.h>
-#include <Utility/Basic/LambdaOp.h>
+#include <CppUtil/Basic/Image.h>
+#include <CppUtil/Basic/LambdaOp.h>
 
 #include "Defines.h"
 
-using namespace CppUtility::Other;
-using namespace RayTracing;
+using namespace CppUtil::Basic;
+using namespace RTX;
 using namespace Define;
 using namespace glm;
 using namespace std;
 
-rgb Background(CppUtility::Other::Ptr<Ray> ray);
+rgb Background(CppUtil::Basic::Ptr<Ray> ray);
 
 int main(int argc, char ** argv){
 	ImgWindow imgWindow(str_WindowTitle);
@@ -38,7 +38,7 @@ int main(int argc, char ** argv){
 			for (size_t j = 0; j < val_ImgHeight; j++) {
 				float u = i / (float)val_ImgWidth;
 				float v = j / (float)val_ImgHeight;
-				CppUtility::Other::Ptr<Ray> ray = camera->GenRay(u, v);
+				CppUtil::Basic::Ptr<Ray> ray = camera->GenRay(u, v);
 				rgb backgroundColor = Background(ray);
 				float r = backgroundColor.r;
 				float g = backgroundColor.g;
@@ -53,7 +53,7 @@ int main(int argc, char ** argv){
 	return 0;
 }
 
-rgb Background(CppUtility::Other::Ptr<Ray> ray) {
+rgb Background(CppUtil::Basic::Ptr<Ray> ray) {
 	float t = 0.5*(normalize(ray->GetDir()).y + 1.0f);
 	rgb white = rgb(1.0f, 1.0f, 1.0f);
 	rgb blue = rgb(0.5f, 0.7f, 1.0f);

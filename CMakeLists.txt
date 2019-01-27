@@ -95,9 +95,9 @@ include_directories (
 )
 link_directories (
 	${PROJECT_SOURCE_DIR}/lib
-	${PROJECT_SOURCE_DIR}/lib/Utility/Basic
-	${PROJECT_SOURCE_DIR}/lib/Utility/OpenGL
-	${PROJECT_SOURCE_DIR}/lib/Utility/RTX
+	${PROJECT_SOURCE_DIR}/lib/CppUtil/Basic
+	${PROJECT_SOURCE_DIR}/lib/CppUtil/OpenGL
+	${PROJECT_SOURCE_DIR}/lib/CppUtil/RTX
 	# $ENV{XXX_LIB_PATH}
 	# ...
 )

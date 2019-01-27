@@ -1,39 +1,39 @@
 #include "Defines.h"
 #include "CreateScene.h"
 
-#include <Utility/RTX/GenData.h>
-#include <Utility/RTX/ConstTexture.h>
-#include <Utility/RTX/Dielectric.h>
-#include <Utility/RTX/Metal.h>
-#include <Utility/RTX/Lambertian.h>
-#include <Utility/RTX/Sphere.h>
-#include <Utility/RTX/Group.h>
-#include <Utility/RTX/TexWindow.h>
-#include <Utility/RTX/TRayCamera.h>
+#include <CppUtil/RTX/GenData.h>
+#include <CppUtil/RTX/ConstTexture.h>
+#include <CppUtil/RTX/Dielectric.h>
+#include <CppUtil/RTX/Metal.h>
+#include <CppUtil/RTX/Lambertian.h>
+#include <CppUtil/RTX/Sphere.h>
+#include <CppUtil/RTX/Group.h>
+#include <CppUtil/RTX/TexWindow.h>
+#include <CppUtil/RTX/TRayCamera.h>
 
-#include <Utility/OGL/Shader.h>
-#include <Utility/OGL/Camera.h>
-#include <Utility/OGL/Texture.h>
-#include <Utility/OGL/VAO.h>
-#include <Utility/OGL/FBO.h>
-#include <Utility/OGL/CommonDefine.h>
+#include <CppUtil/OpenGL/Shader.h>
+#include <CppUtil/OpenGL/Camera.h>
+#include <CppUtil/OpenGL/Texture.h>
+#include <CppUtil/OpenGL/VAO.h>
+#include <CppUtil/OpenGL/FBO.h>
+#include <CppUtil/OpenGL/CommonDefine.h>
 
 #include <GLFW/Glfw.h>
 
-#include <Utility/Basic/OpQueue.h>
-#include <Utility/Basic/EventManager.h>
-#include <Utility/Basic/GStorage.h>
-#include <Utility/Basic/LambdaOp.h>
-#include <Utility/Basic/Timer.h>
-#include <Utility/Basic/Math.h>
-#include <Utility/Basic/File.h>
+#include <CppUtil/Basic/OpQueue.h>
+#include <CppUtil/Basic/EventManager.h>
+#include <CppUtil/Basic/GStorage.h>
+#include <CppUtil/Basic/LambdaOp.h>
+#include <CppUtil/Basic/Timer.h>
+#include <CppUtil/Basic/Math.h>
+#include <CppUtil/Basic/File.h>
 
 #include <glm/glm.hpp>
 
-using namespace RayTracing;
-using namespace CppUtility;
-using namespace CppUtility::OpenGL;
-using namespace CppUtility::Other;
+using namespace RTX;
+using namespace CppUtil;
+using namespace CppUtil::OpenGL;
+using namespace CppUtil::Basic;
 using namespace Define;
 using namespace glm;
 using namespace std;
@@ -145,7 +145,7 @@ int main(int argc, char ** argv) {
 	//return 0;
 
 
-	//------------ RayTracing Basic Shader
+	//------------ RTX Basic Shader
 	string RTX_vs = rootPath + str_RTX_vs;
 	string RTX_fs = rootPath + str_RTX_fs;
 	Shader RTX_Shader(RTX_vs, RTX_fs);
@@ -192,7 +192,7 @@ int main(int argc, char ** argv) {
 	}
 	average_Shader.SetInt("texture0", 0);
 
-	//------------ RayTracing FBO
+	//------------ RTX FBO
 	bool curReadFBO = false;
 	FBO FBO_RayTracing[2] = { FBO(width, height, FBO::ENUM_TYPE_RAYTRACING),FBO(width, height, FBO::ENUM_TYPE_RAYTRACING) };
 	FBO FBO_Average(width, height, FBO::ENUM_TYPE_COLOR);

@@ -43,7 +43,7 @@ struct HitRst{
 uniform sampler2D origin_curRayNum;
 uniform sampler2D dir_tMax;//若tMax为0, 则表示该光线无效
 uniform sampler2D color_time;
-uniform sampler2D rayTracingRst;
+uniform sampler2D RTXRst;
 uniform struct Camera camera;
 uniform float rdSeed[4];
 uniform float RayNumMax;

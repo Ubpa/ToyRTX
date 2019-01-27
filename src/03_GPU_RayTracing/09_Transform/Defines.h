@@ -2,7 +2,7 @@
 #define _DEFINES_H_
 
 #include <string>
-#include <Utility/OGL/CommonDefine.h>
+#include <CppUtil/OpenGL/CommonDefine.h>
 #include <glm/glm.hpp>
 #include <vector>
 

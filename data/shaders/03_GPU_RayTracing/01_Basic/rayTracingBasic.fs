@@ -7,7 +7,7 @@ layout (location = 3) out vec3 out_rayTracingRst;
 uniform sampler2D origin_curRayNum;
 uniform sampler2D dir_tMax;
 uniform sampler2D color_time;
-uniform sampler2D rayTracingRst;
+uniform sampler2D RTXRst;
 uniform float RayNumMax;
 
 in vec2 TexCoords;

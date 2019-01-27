@@ -1,22 +1,22 @@
-#include <Utility/RTX/RayTracer.h>
-#include <Utility/RTX/ImgWindow.h>
-#include <Utility/RTX/RayCamera.h>
-#include <Utility/RTX/Ray.h>
-#include <Utility/RTX/Sphere.h>
-#include <Utility/RTX/Group.h>
-#include <Utility/RTX/OpMaterial.h>
-#include <Utility/RTX/Sky.h>
+#include <CppUtil/RTX/RayTracer.h>
+#include <CppUtil/RTX/ImgWindow.h>
+#include <CppUtil/RTX/RayCamera.h>
+#include <CppUtil/RTX/Ray.h>
+#include <CppUtil/RTX/Sphere.h>
+#include <CppUtil/RTX/Group.h>
+#include <CppUtil/RTX/OpMaterial.h>
+#include <CppUtil/RTX/Sky.h>
 
-#include <Utility/Basic/Math.h>
-#include <Utility/Basic/Image.h>
-#include <Utility/Basic/LambdaOp.h>
-#include <Utility/Basic/ImgPixelSet.h>
-#include <Utility/Basic/Timer.h>
+#include <CppUtil/Basic/Math.h>
+#include <CppUtil/Basic/Image.h>
+#include <CppUtil/Basic/LambdaOp.h>
+#include <CppUtil/Basic/ImgPixelSet.h>
+#include <CppUtil/Basic/Timer.h>
 
 #include "Defines.h"
 
-using namespace CppUtility::Other;
-using namespace RayTracing;
+using namespace CppUtil::Basic;
+using namespace RTX;
 using namespace Define;
 using namespace glm;
 using namespace std;

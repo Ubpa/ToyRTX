@@ -1,26 +1,26 @@
 #include "CreateScene.h"
 
-#include <Utility/RTX/TriMesh.h>
-#include <Utility/RTX/Light.h>
-#include <Utility/RTX/BVH_Node.h>
-#include <Utility/RTX/Group.h>
-#include <Utility/RTX/Dielectric.h>
-#include <Utility/RTX/Metal.h>
-#include <Utility/RTX/Lambertian.h>
-#include <Utility/RTX/Sphere.h>
-#include <Utility/RTX/ConstTexture.h>
-#include <Utility/RTX/ImgTexture.h>
-#include <Utility/RTX/TRayCamera.h>
+#include <CppUtil/RTX/TriMesh.h>
+#include <CppUtil/RTX/Light.h>
+#include <CppUtil/RTX/BVH_Node.h>
+#include <CppUtil/RTX/Group.h>
+#include <CppUtil/RTX/Dielectric.h>
+#include <CppUtil/RTX/Metal.h>
+#include <CppUtil/RTX/Lambertian.h>
+#include <CppUtil/RTX/Sphere.h>
+#include <CppUtil/RTX/ConstTexture.h>
+#include <CppUtil/RTX/ImgTexture.h>
+#include <CppUtil/RTX/TRayCamera.h>
 
-#include <Utility/Basic/Math.h>
-#include <Utility/Basic/Config.h>
-#include <Utility/Basic/GStorage.h>
+#include <CppUtil/Basic/Math.h>
+#include <CppUtil/Basic/Config.h>
+#include <CppUtil/Basic/GStorage.h>
 
 #include "Defines.h"
-#include <Utility/OGL/CommonDefine.h>
+#include <CppUtil/OpenGL/CommonDefine.h>
 
-using namespace RayTracing;
-using namespace CppUtility::Other;
+using namespace RTX;
+using namespace CppUtil::Basic;
 using namespace Define;
 using namespace glm;
 using namespace std;

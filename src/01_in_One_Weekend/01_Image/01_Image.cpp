@@ -1,12 +1,12 @@
-#include <Utility/RTX/ImgWindow.h>
+#include <CppUtil/RTX/ImgWindow.h>
 
-#include <Utility/Basic/Image.h>
-#include <Utility/Basic/LambdaOp.h>
-#include <Utility/Basic/Math.h>
+#include <CppUtil/Basic/Image.h>
+#include <CppUtil/Basic/LambdaOp.h>
+#include <CppUtil/Basic/Math.h>
 #include "Defines.h"
 
-using namespace CppUtility::Other;
-using namespace RayTracing;
+using namespace CppUtil::Basic;
+using namespace RTX;
 using namespace Define;
 using namespace std;
 

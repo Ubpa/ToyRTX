@@ -1,26 +1,26 @@
 #include "CreateScene.h"
 
-#include <Utility/RTX/Triangle.h>
-#include <Utility/RTX/RayTracer.h>
-#include <Utility/RTX/RayCamera.h>
-#include <Utility/RTX/ImgWindow.h>
+#include <CppUtil/RTX/Triangle.h>
+#include <CppUtil/RTX/RayTracer.h>
+#include <CppUtil/RTX/RayCamera.h>
+#include <CppUtil/RTX/ImgWindow.h>
 
-#include <Utility/Basic/Math.h>
-#include <Utility/Basic/ImgPixelSet.h>
-#include <Utility/Basic/Image.h>
-#include <Utility/Basic/Config.h>
-#include <Utility/Basic/LambdaOp.h>
-#include <Utility/Basic/GStorage.h>
-#include <Utility/Basic/Timer.h>
+#include <CppUtil/Basic/Math.h>
+#include <CppUtil/Basic/ImgPixelSet.h>
+#include <CppUtil/Basic/Image.h>
+#include <CppUtil/Basic/Config.h>
+#include <CppUtil/Basic/LambdaOp.h>
+#include <CppUtil/Basic/GStorage.h>
+#include <CppUtil/Basic/Timer.h>
 
-#include <Utility/OGL/CommonDefine.h>
+#include <CppUtil/OpenGL/CommonDefine.h>
 
 #include <omp.h>
 
 #include "Defines.h"
 
-using namespace CppUtility::Other;
-using namespace RayTracing;
+using namespace CppUtil::Basic;
+using namespace RTX;
 using namespace Define;
 using namespace glm;
 using namespace std;

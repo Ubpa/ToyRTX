@@ -1,23 +1,23 @@
 #include "Defines.h"
 
-#include <Utility/RTX/TexWindow.h>
-#include <Utility/RTX/TRayCamera.h>
+#include <CppUtil/RTX/TexWindow.h>
+#include <CppUtil/RTX/TRayCamera.h>
 
-#include <Utility/OGL/Shader.h>
-#include <Utility/OGL/VAO.h>
-#include <Utility/OGL/FBO.h>
-#include <Utility/OGL/CommonDefine.h>
+#include <CppUtil/OpenGL/Shader.h>
+#include <CppUtil/OpenGL/VAO.h>
+#include <CppUtil/OpenGL/FBO.h>
+#include <CppUtil/OpenGL/CommonDefine.h>
 
-#include <Utility/Basic/GStorage.h>
-#include <Utility/Basic/LambdaOp.h>
-#include <Utility/Basic/Timer.h>
-#include <Utility/Basic/Math.h>
+#include <CppUtil/Basic/GStorage.h>
+#include <CppUtil/Basic/LambdaOp.h>
+#include <CppUtil/Basic/Timer.h>
+#include <CppUtil/Basic/Math.h>
 
 #include <glm/glm.hpp>
 
-using namespace RayTracing;
-using namespace CppUtility::OpenGL;
-using namespace CppUtility::Other;
+using namespace RTX;
+using namespace CppUtil::OpenGL;
+using namespace CppUtil::Basic;
 using namespace Define;
 using namespace glm;
 using namespace std;
@@ -38,7 +38,7 @@ int main(int argc, char ** argv) {
 	//------------ Ä£ÐÍ . Screen
 	VAO VAO_Screen(&(data_ScreenVertices[0]), sizeof(data_ScreenVertices), { 2,2 });
 	 
-	//------------ RayTracing Basic Shader
+	//------------ RTX Basic Shader
 	string material_vs = rootPath + str_Material_vs;
 	string material_fs = rootPath + str_Material_fs;
 	Shader materialShader(material_vs, material_fs);
@@ -68,7 +68,7 @@ int main(int argc, char ** argv) {
 	materialShader.SetFloat("camera.t0", camera->GetT1());
 	materialShader.SetFloat("camera.t1", camera->GetT0());
 
-	//------------ RayTracing FBO 
+	//------------ RTX FBO 
 	bool curReadFBO = false;
 	bool curWriteFBO = !curReadFBO;
 	FBO FBO_RayTracing[2] = {
@@ -79,7 +79,7 @@ int main(int argc, char ** argv) {
 	//------------ ²Ù×÷
 	Timer timer;
 	timer.Start();
-	auto rayTracingOp = ToPtr(new LambdaOp([&]() {
+	auto RTXOp = ToPtr(new LambdaOp([&]() {
 		size_t loopNum = static_cast<size_t>(glm::max(texWindow.GetScale(),1.0));
 		for (size_t i = 0; i < loopNum; i++) {
 			FBO_RayTracing[curWriteFBO].Use();
@@ -106,6 +106,6 @@ int main(int argc, char ** argv) {
 			loopNum, allLoopNum, speed, wholeTime);
 	}));
 	
-	bool success = texWindow.Run(rayTracingOp);
+	bool success = texWindow.Run(RTXOp);
 	return success ? 0 : 1;
 }

@@ -51,7 +51,7 @@ struct HitRst HitRst_InValid = struct HitRst(false, Vertex_InValid, -1, 0);
 uniform sampler2D origin_curRayNum;
 uniform sampler2D dir_tMax;//若tMax为0, 则表示该光线无效
 uniform sampler2D color_time;
-uniform sampler2D rayTracingRst;
+uniform sampler2D RTXRst;
 
 uniform sampler2D SceneData;
 uniform sampler2D MatData;
