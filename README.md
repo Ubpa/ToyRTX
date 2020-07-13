@@ -93,9 +93,10 @@
 
 # 2. 使用方法
 
-## 2.1 需求软件
+## 2.1 环境
 
-- Visual Studio 2017（其他版本没有测试）
+- Visual Studio 2017+
+- Windows10
 - Git
 - CMake（版本2.8以上）
 
@@ -113,7 +114,7 @@ git clone https://github.com/Ubpa/RayTracingToy
 # 在 cmd 中运行如下命令
 mkdir build
 cd build
-cmake ..
+cmake .. -A Win32
 ```
 
 2. 打开 `/build/RayTracingToy.sln` 

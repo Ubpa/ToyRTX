@@ -2,6 +2,7 @@
 #define _MODEL_H_
 
 #include <CppUtil/RTX/TriMesh.h>
+#include <string>
 
 struct aiNode;
 struct aiMesh;
